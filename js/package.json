@@ -1,0 +1,44 @@
+{
+  "name": "root",
+  "description": "Polywrap Reimagined Monorepo",
+  "license": "MIT",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/polywrap/polywrap-reimagined.git"
+  },
+  "workspaces": {
+    "packages": [
+      "./packages/**"
+    ]
+  },
+  "scripts": {
+    "reset": "yarn clean && yarn && yarn build",
+    "clean": "npx rimraf ./**/node_modules ./**/yarn.lock ./**/build ./**/coverage ./**/.polywrap",
+    "build": "yarn build:result && yarn build:wrap && yarn build:wasm && yarn build:loader && yarn build:app",
+    "build:result": "lerna run build --scope @polywrap/result",
+    "build:wrap": "lerna run build --scope @polywrap/reim-wrap",
+    "build:wasm": "lerna run build --scope @polywrap/reim-wasm",
+    "build:loader": "lerna run build --scope @polywrap/reim-loader",
+    "build:app": "lerna run build --scope @polywrap/reim-app",
+    "test": "lerna run test"
+  },
+  "devDependencies": {
+    "@types/prettier": "2.6.0",
+    "@typescript-eslint/eslint-plugin": "4.11.1",
+    "@typescript-eslint/parser": "4.11.1",
+    "eslint": "7.16.0",
+    "eslint-config-prettier": "7.1.0",
+    "eslint-plugin-import": "2.22.1",
+    "eslint-plugin-json": "3.0.0",
+    "eslint-plugin-prettier": "3.4.0",
+    "graphql": "15.5.0",
+    "lerna": "4.0.0",
+    "prettier": "2.2.1",
+    "rimraf": "3.0.2"
+  },
+  "resolutions": {
+    "@types/react": "16.9.0",
+    "@types/react-dom": "16.9.0"
+  }
+}

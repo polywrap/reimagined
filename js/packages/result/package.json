@@ -1,0 +1,30 @@
+{
+  "name": "@polywrap/result",
+  "version": "0.1.0",
+  "main": "bin/index.js",
+  "types": "bin/index.d.ts",
+  "author": "nerfZael",
+  "license": "MIT",
+  "private": false,
+  "files": [
+    "/bin"
+  ],
+  "keywords": [
+    "polywrap",
+    "node-js"
+  ],
+  "scripts": {
+    "build": "tsc --project tsconfig.build.json",
+    "test": "jest --passWithNoTests --runInBand --verbose=true --detectOpenHandles --forceExit"
+  },
+  "dependencies": {
+    "typescript": "4.4.2"
+  },
+  "devDependencies": {
+    "@types/node": "16.11.11",
+    "ts-node": "10.3.0",
+    "jest": "26.6.3",
+    "ts-jest": "26.5.4",
+    "@types/jest": "26.0.8"
+  }
+}

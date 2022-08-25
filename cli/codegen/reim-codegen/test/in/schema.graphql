@@ -1,0 +1,11 @@
+type Calc {
+  count: u32
+}
+
+type Dog {
+  name: String
+}
+
+type Animal {
+  name: String
+}

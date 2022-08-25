@@ -1,0 +1,16 @@
+{
+  "name": "@polywrap/reim-wrapper",
+  "private": true,
+  "scripts": {
+    "prebuild": "rimraf ./build && mkdir ./build",
+    "build": "docker container prune -f && docker build -f Dockerfile -t ethereum-wrapper . && docker run --rm ethereum-wrapper /bin/bash -c \"ls /project/build\" && docker create -ti --name root-ethereum-wrapper ethereum-wrapper && docker cp root-ethereum-wrapper:/project/build/wrap.wasm build/wrap.wasm"
+  },
+  "dependencies": {
+    "@polywrap/wasm-as": "0.3.0",
+    "assemblyscript": "0.19.1"
+  },
+  "devDependencies": {
+    "polywrap": "0.3.0",
+    "rimraf": "3.0.2"
+  }
+}

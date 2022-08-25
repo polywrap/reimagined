@@ -1,0 +1,36 @@
+import {
+  wrap_debug_log
+} from "@polywrap/wasm-as";
+import { deserializeString } from "./deserializeString";
+import { __wrap_invoke_instance, __wrap_invoke_instance_result, __wrap_invoke_instance_result_len } from "./imports";
+
+export function {{name}}Wrapped(
+  {{#args}}
+  {{name}}: {{typeName}},
+  {{/args}}
+): {{returnType}} {
+  const methodBuf = String.UTF8.encode("{{name}}");
+    wrap_debug_log("sub {{name}}");
+    
+    const success = __wrap_invoke_instance(
+      this.__wrapInstancePtr, 
+      this.__classInstancePtr,
+      changetype<u32>(methodBuf), methodBuf.byteLength,
+      0, 0
+    );
+    wrap_debug_log("sub __wrap_invoke_instance");
+  
+    if (!success) {
+      wrap_debug_log("Failed to invoke method: {{name}}");
+      throw new Error("Failed to invoke method: {{name}}");
+    }
+    wrap_debug_log("sub success");
+  
+    const resultLen = __wrap_invoke_instance_result_len();
+    wrap_debug_log("sub __wrap_invoke_instance_result_len");
+    const resultBuffer = new ArrayBuffer(resultLen);
+    __wrap_invoke_instance_result(changetype<u32>(resultBuffer));
+    wrap_debug_log("sub __wrap_invoke_instance_result");
+  
+    return deserializeString(resultBuffer);
+}

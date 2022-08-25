@@ -1,0 +1,19 @@
+node_modules
+bin
+build
+dist
+coverage
+
+debug
+out
+target
+
+#Polywrap
+w3
+.w3
+
+# Environment
+.env
+
+# Logging
+*.log
