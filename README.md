@@ -9,6 +9,8 @@
       - Passing references
           - Between wrappers
           - From app to wrapper
+          - From wrapper to app
+          - Function object and function references
       - State (optional)
       - Multiple classes per module
       - Class instantiation
