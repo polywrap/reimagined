@@ -1,11 +1,24 @@
-type Calc {
-  count: u32
+type Module {
+  internalFunction(arg: String): String
 }
 
-type Dog {
-  name: String
-}
+type InternalType {
+  constructor(ctorArg: String): bool
+  # Example of an instance method and instance state
+  instanceMethod(arg: string): string
+  # Example of returning a new class instance
+  instanceReturningReference(): InternalReferenceType 
+  # Example of receiving an external class instance with a field (state)
+  instanceReceivingReference(ext: IExternalType): string 
+} 
 
-type Animal {
-  name: String
+type InternalReferenceType {
+  constructor(arg: String): bool
+  getAddress(): String
+} 
+
+# Example of an external type to instantiate
+type IExternalType {
+  constructor(arg: String): bool
+  instanceMethod(arg: String): String
 }
