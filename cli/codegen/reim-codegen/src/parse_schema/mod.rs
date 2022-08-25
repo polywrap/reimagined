@@ -17,6 +17,7 @@ pub fn parse_schema(source: String) -> WrapAbi {
                   let mut schema_type: Option<SchemaType> = None;
 
                   walk(&mut type_def_node.walk(), "ObjectTypeDefinition", &mut |obj_def_node| {
+                      let mut methods: Vec<FunctionType> = vec![];
                       let mut fields: Vec<FieldInfo> = vec![];
                       
                       walk(&mut obj_def_node.walk(), "FieldDefinition", &mut |field_def_node| {
@@ -29,11 +30,29 @@ pub fn parse_schema(source: String) -> WrapAbi {
                               }
                               true
                           });
-                          
-                          fields.push(FieldInfo {
+
+                          let mut is_method = false;
+
+                          match field_def_node.utf8_text(source.as_bytes()) {
+                            Ok(name) =>  if name.contains("(") && name.contains(")") {
+                              is_method = true;
+                            },
+                            Err(e) => println!("{:?}", e)
+                          }
+
+                          if is_method {
+                            methods.push(FunctionType {
+                              name: field_name.to_string(),
+                              args: vec![],
+                              return_type: "String".to_string()
+                            });
+                          } else {
+                            fields.push(FieldInfo {
                               name: field_name.to_string(),
                               type_name: "String".to_string()
-                          });
+                            });
+                          }
+                          
                           false
                       });
 
@@ -41,7 +60,7 @@ pub fn parse_schema(source: String) -> WrapAbi {
                           name: name.to_string(),
                           fields: fields,
                           properties: vec![],
-                          methods: vec![]
+                          methods: methods
                       }));
 
                       true
@@ -71,7 +90,7 @@ pub fn walk<F: FnMut(Node) -> bool>(cursor: &mut TreeCursor, node_kind: &str, on
   loop {
       let node = cursor.node();
       let kind = node.kind();
-      println!("field name {:?}", kind);
+      println!("Kind {:?}", kind);
       println!("type {:?}", cursor.node());
 
       let node = cursor.node();
