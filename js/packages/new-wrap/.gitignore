@@ -1,0 +1,14 @@
+node_modules
+bin
+build
+dist
+
+#Polywrap
+w3
+.w3
+
+# Environment
+.env
+
+# Logging
+*.log
