@@ -82,9 +82,11 @@ fn main() -> Result<(), std::io::Error> {
             last: if i == x.args.len() - 1 { true } else { false },
             required: false,
             object: false,
+            scalar: true,
             name: if let Some(name) = &arg.name { name.to_string() } else { "".to_string() },
             as_type_name: if let Some(name) = &arg.type_name { name.to_string() } else { "".to_string() },
-            as_type_init: "\"\"".to_string()
+            as_type_init: "\"\"".to_string(),
+            msg_pack_type_name: "String".to_string(),
           }
         }).collect()
       }
@@ -113,10 +115,12 @@ pub struct SerializationArgInfo {
   pub name: String,
   pub as_type_name: String,
   pub as_type_init: String,
+  pub msg_pack_type_name: String,
   pub object: bool,
   pub first: bool,
   pub last: bool,
   pub required: bool,
+  pub scalar: bool,
 }
 
 pub fn render_class(class_type: &ClassType) {
