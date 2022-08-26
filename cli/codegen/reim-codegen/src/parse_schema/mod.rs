@@ -21,15 +21,7 @@ pub fn parse_schema(source: String) -> WrapAbi {
                       let mut fields: Vec<FieldInfo> = vec![];
                       
                       walk(&mut obj_def_node.walk(), "FieldDefinition", &mut |field_def_node| {
-                          let mut field_name = "";
-
-                          walk(&mut field_def_node.walk(), "Name", &mut |name_node| {
-                              match name_node.utf8_text(source.as_bytes()) {
-                                  Ok(name) => field_name = name,
-                                  Err(e) => println!("{:?}", e)
-                              }
-                              true
-                          });
+                          let field_name = get_name_from_node(&field_def_node, &source);
 
                           let mut is_method = false;
 
@@ -41,14 +33,23 @@ pub fn parse_schema(source: String) -> WrapAbi {
                           }
 
                           if is_method {
+                            let mut args: Vec<ArgInfo> = vec![];
+                            walk(&mut field_def_node.walk(), "InputValueDefinition", &mut |node| {
+                              args.push(ArgInfo {
+                                name: get_name_from_node(&node, &source),
+                                type_name: get_named_type(&node, &source)
+                              });
+                              false
+                            });
+
                             methods.push(FunctionType {
-                              name: field_name.to_string(),
-                              args: vec![],
-                              return_type: "String".to_string()
+                              name: field_name,
+                              args: args,
+                              return_type: get_named_type(&field_def_node, &source)
                             });
                           } else {
                             fields.push(FieldInfo {
-                              name: field_name.to_string(),
+                              name: field_name,
                               type_name: "String".to_string()
                             });
                           }
@@ -79,6 +80,31 @@ pub fn parse_schema(source: String) -> WrapAbi {
   });
 
   typeInfo
+}
+
+pub fn get_name_from_node(node: &Node, source: &str) -> Option<String> {
+  let mut name: Option<String> = None;
+
+  walk(&mut node.walk(), "Name", &mut |name_node| {
+    match name_node.utf8_text(source.as_bytes()) {
+        Ok(name_str) => name = Some(name_str.to_string()),
+        Err(e) => println!("{:?}", e)
+    }
+    true
+  });
+
+  name
+}
+
+pub fn get_named_type(node: &Node, source: &str) -> Option<String> {
+  let mut name: Option<String> = None;
+
+  walk(&mut node.walk(), "NamedType", &mut |name_node| {
+    name = get_name_from_node(&name_node, source);
+    true
+  });
+
+  name
 }
 
 pub fn walk<F: FnMut(Node) -> bool>(cursor: &mut TreeCursor, node_kind: &str, on_node_kind: &mut F) {

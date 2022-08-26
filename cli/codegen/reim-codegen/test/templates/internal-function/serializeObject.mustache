@@ -1,0 +1,100 @@
+import {
+  Read,
+  ReadDecoder,
+  Write,
+  WriteSizer,
+  WriteEncoder,
+  Option,
+  BigInt,
+  BigNumber,
+  JSON,
+  Context
+} from "@polywrap/wasm-as";
+
+export function deserializeObject(buffer: ArrayBuffer): {{name}} {
+  const context: Context = new Context("Deserializing {{name}}");
+  const reader = new ReadDecoder(buffer, context);
+  return readArgs(reader);
+}
+
+export function readArgs(reader: Read): Args {
+  let numFields = reader.readMapLength();
+
+  {{#properties}}
+  {{^object}}
+  let _{{name}}: {{asTypeName}} = {{#toWasmInit}}{{toGraphQLType}}{{/toWasmInit}};
+  {{/object}}
+  {{#object}}
+  {{#required}}
+  let _{{name}}: {{#toWasm}}{{toGraphQLType}}{{/toWasm}} | null = null;
+  {{/required}}
+  {{^required}}
+  let _{{name}}: {{#toWasm}}{{toGraphQLType}}{{/toWasm}} = {{#toWasmInit}}{{toGraphQLType}}{{/toWasmInit}};
+  {{/required}}
+  {{/object}}
+  {{#required}}
+  let _{{name}}Set: bool = false;
+  {{/required}}
+  {{/properties}}
+
+  while (numFields > 0) {
+    numFields--;
+    const field = reader.readString();
+
+    reader.context().push(field, "unknown", "searching for property type");
+    {{#properties}}
+    {{^first}}else {{/first}}if (field == "{{name}}") {
+      reader.context().push(field, "{{#toWasm}}{{toGraphQLType}}{{/toWasm}}", "type found, reading property");
+      {{#scalar}}
+      _{{name}} = reader.read{{#toMsgPack}}{{toGraphQLType}}{{/toMsgPack}}();
+      {{/scalar}}
+      {{#array}}
+      _{{name}} = reader.read{{#toMsgPack}}{{toGraphQLType}}{{/toMsgPack}}((reader: Read): {{#item}}{{#toWasm}}{{toGraphQLType}}{{/toWasm}}{{/item}} => {
+        {{> deserialize_array}}
+      });
+      {{/array}}
+      {{#map}}
+      _{{name}} = reader.read{{#toMsgPack}}{{toGraphQLType}}{{/toMsgPack}}((reader: Read): {{#key}}{{#toWasm}}{{toGraphQLType}}{{/toWasm}}{{/key}} => {
+        return reader.read{{#key}}{{#toMsgPack}}{{toGraphQLType}}{{/toMsgPack}}{{/key}}();
+      }, (reader: Read): {{#value}}{{#toWasm}}{{toGraphQLType}}{{/toWasm}}{{/value}} => {
+        {{#value}}
+        {{> deserialize_map_value}}
+        {{/value}}
+      });
+      {{/map}}
+      {{#enum}}
+      {{> deserialize_enum}}
+      _{{name}} = value;
+      {{/enum}}
+      {{#object}}
+      {{> deserialize_object }}
+      _{{name}} = object;
+      {{/object}}
+      {{#required}}
+      _{{name}}Set = true;
+      {{/required}}
+      reader.context().pop();
+    }
+    {{/properties}}
+    reader.context().pop();
+  }
+
+  {{#properties}}
+  {{#required}}
+  {{^object}}
+  if (!_{{name}}Set) {
+  {{/object}}
+  {{#object}}
+  if (!_{{name}} || !_{{name}}Set) {
+  {{/object}}
+    throw new Error(reader.context().printWithContext("Missing required property: '{{name}}: {{type}}'"));
+  }
+  {{/required}}
+  {{/properties}}
+
+  return {
+    {{#properties}}
+    {{name}}: _{{name}}{{^last}},{{/last}}
+    {{/properties}}
+  };
+}

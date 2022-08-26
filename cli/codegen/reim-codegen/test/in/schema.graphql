@@ -1,11 +1,13 @@
 type Module {
-  internalFunction(arg: String): String
+  internalFunction(arg1: string, arg2: string): String
 }
 
 type InternalType {
   constructor(ctorArg: String): void
   # Example of an instance method and instance state
   instanceMethod(arg: string): string
+  # Example of an instance method and instance state
+  instanceMethodMultiArgs(arg1: string, arg2: string): string
   # Example of returning a new class instance
   instanceReturningReference(): InternalReferenceType
   # Example of receiving an external class instance with a field (state)

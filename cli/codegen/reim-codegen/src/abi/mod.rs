@@ -3,21 +3,21 @@ use serde_derive::*;
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct FieldInfo {
-    pub name: String,
+    pub name: Option<String>,
     pub type_name: String,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct ArgInfo {
-    pub name: String,
-    pub type_name: String
+    pub name: Option<String>,
+    pub type_name: Option<String>
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct PropertyInfo {
-    pub name: String,
+    pub name: Option<String>,
     pub type_name: String,
     pub get: bool,
     pub set: bool
@@ -26,9 +26,9 @@ pub struct PropertyInfo {
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct FunctionType {
-    pub name: String,
+    pub name: Option<String>,
     pub args: Vec<ArgInfo>,
-    pub return_type: String
+    pub return_type: Option<String>
 }
 
 #[derive(Serialize, Deserialize, Debug)]
