@@ -1,0 +1,33 @@
+type Module {
+  internalFunction(arg1: string, arg2: string): String
+}
+
+type InternalType {
+  constructor(ctorArg: String): void
+  # Example of an instance method and instance state
+  instanceMethod(arg: string): string
+  # Example of an instance method and instance state
+  instanceMethodMultiArgs(arg1: string, arg2: string): string
+  # Example of returning a new class instance
+  instanceReturningReference(): InternalReferenceType
+  # Example of receiving an external class instance with a field (state)
+  instanceReceivingReference(ext: IExternalInterface): string
+} 
+
+type InternalReferenceType {
+  constructor(arg: String): void
+  getAddress(): String
+} 
+
+# Example of an external interface to receive
+type IExternalInterface {
+  count: u32
+  instanceMethod(arg: String): String
+}
+
+# Example of an external type to instantiate
+type ExternalType {
+  count: u32
+  constructor(arg: String): void
+  instanceMethod(arg: String): String
+}
