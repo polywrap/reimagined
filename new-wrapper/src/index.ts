@@ -1,4 +1,4 @@
-import { ICalc } from "./wrap/ICalc";
+import { IExternalInterface } from "./wrap/wrapped/IExternalInterface/IExternalInterface";
 
 export function internalFunction(arg: string): string {
   return arg;
@@ -21,8 +21,8 @@ export class EthereumProvider {
   }
 
   // Example of receiving an external class instance with a field (state)
-  increment(calc: ICalc): string {
-    return calc.increment();
+  increment(ext: IExternalInterface): string {
+    return ext.instanceMethod("sds");
   }
 }
 

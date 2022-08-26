@@ -6,7 +6,7 @@ export function incrementWrapped(instance: EthereumProvider, dataBuffer: ArrayBu
     const args = deserializeArgs(dataBuffer);
 
     const result = instance.increment(
-        args
+        args.calc
     );
 
     return serializeResult(result);

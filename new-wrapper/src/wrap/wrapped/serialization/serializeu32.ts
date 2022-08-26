@@ -1,15 +1,13 @@
 import { Context, Write, WriteEncoder, WriteSizer } from "@polywrap/wasm-as";
 
-export function serializeReferencePtr(result: u64): ArrayBuffer {
-    const u32Result = changetype<u32>(result);
-
+export function serializeu32(result: u32): ArrayBuffer {
     const sizerContext: Context = new Context("Serializing (sizing) module-type: u32Method");
     const sizer = new WriteSizer(sizerContext);
-    writeu32MethodResult(sizer, u32Result);
+    writeu32MethodResult(sizer, result);
     const buffer = new ArrayBuffer(sizer.length);
     const encoderContext: Context = new Context("Serializing (encoding) module-type: u32Method");
     const encoder = new WriteEncoder(buffer, sizer, encoderContext);
-    writeu32MethodResult(encoder, u32Result);
+    writeu32MethodResult(encoder, result);
     return buffer;
 }
 

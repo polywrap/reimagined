@@ -8,6 +8,6 @@ export function getSignerWrapped(instance: EthereumProvider, dataBuffer: ArrayBu
   const ptr = changetype<u32>(result);
   
   return EthereumSignerWrapped.toBuffer({
-    __classInstancePtr: ptr
+  __classInstancePtr: ptr
   });
 }

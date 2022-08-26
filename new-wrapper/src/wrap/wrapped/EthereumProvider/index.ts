@@ -1,9 +1,10 @@
 import { EthereumProvider } from "../../..";
 import { Context } from "../../Context";
 import { DataView } from "../../DataView";
-import { serializeReferencePtr } from "../../serialization/serializeReferencePtr";
+import { serializeu32 } from "../serialization/serializeu32";
 import { deserializeCtorArgs } from "./deserializeCtorArgs";
 import { getSignerWrapped } from "./instance/getSigner";
+import { incrementWrapped } from "./instance/increment";
 import { instanceMethodWrapped } from "./instance/instanceMethod";
 
 export function ethereumProvider_Ctor_Wrapped(dataBuffer: ArrayBuffer): ArrayBuffer {
@@ -15,16 +16,16 @@ export function ethereumProvider_Ctor_Wrapped(dataBuffer: ArrayBuffer): ArrayBuf
         args.arg
     );
 
-    const result = changetype<u64>(instance);
+    const result = changetype<u32>(instance);
 
-    return serializeReferencePtr(result);
+    return serializeu32(result);
 }
 
 export function ethereumProvider_instanceMethod_Wrapped(dataBuffer: ArrayBuffer): ArrayBuffer {
-    const instancePtrView = new DataView(dataBuffer, 0, 8, new Context());
-    const instancePtr = instancePtrView.getUint64();
+    const instancePtrView = new DataView(dataBuffer, 0, 4, new Context());
+    const instancePtr = instancePtrView.getUint32();
     
-    const argsBuffer = dataBuffer.slice(8);
+    const argsBuffer = dataBuffer.slice(4);
 
     const instance: EthereumProvider = changetype<EthereumProvider>(instancePtr);
 
@@ -32,10 +33,10 @@ export function ethereumProvider_instanceMethod_Wrapped(dataBuffer: ArrayBuffer)
 }
 
 export function ethereumProvider_getSigner_Wrapped(dataBuffer: ArrayBuffer): ArrayBuffer {
-    const instancePtrView = new DataView(dataBuffer, 0, 8, new Context());
-    const instancePtr = instancePtrView.getUint64();
+    const instancePtrView = new DataView(dataBuffer, 0, 4, new Context());
+    const instancePtr = instancePtrView.getUint32();
     
-    const argsBuffer = dataBuffer.slice(8);
+    const argsBuffer = dataBuffer.slice(4);
 
     const instance: EthereumProvider = changetype<EthereumProvider>(instancePtr);
 
@@ -43,10 +44,10 @@ export function ethereumProvider_getSigner_Wrapped(dataBuffer: ArrayBuffer): Arr
 }
 
 export function ethereumProvider_increment_Wrapped(dataBuffer: ArrayBuffer): ArrayBuffer {
-    const instancePtrView = new DataView(dataBuffer, 0, 8, new Context());
-    const instancePtr = instancePtrView.getUint64();
+    const instancePtrView = new DataView(dataBuffer, 0, 4, new Context());
+    const instancePtr = instancePtrView.getUint32();
     
-    const argsBuffer = dataBuffer.slice(8);
+    const argsBuffer = dataBuffer.slice(4);
 
     const instance: EthereumProvider = changetype<EthereumProvider>(instancePtr);
 

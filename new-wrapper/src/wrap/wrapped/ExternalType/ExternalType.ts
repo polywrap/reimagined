@@ -4,20 +4,24 @@ import {
   Write,
   WriteSizer,
   WriteEncoder,
-  Option,
-  BigInt,
-  BigNumber,
-  JSON,
   Context,
-  Result,
   wrap_debug_log
 } from "@polywrap/wasm-as";
-import { ICalc } from "./ICalc";
+import { wrap_invoke_host_resource } from "../../main";
+import { deserializeString } from "../serialization/deserializeString";
+import { serializeString } from "../serialization/serializeString";
 
-export class ICalcWrapped implements ICalc {
-  constructor(public __wrapInstancePtr: u32, public __classInstancePtr: u32, count: u32) {
-    this._count = count;
+const externalResourceId = 0;
+
+export class ExternalType {
+  constructor(arg: string) {
+    const buffer = serializeString(arg);
+    const resultBuffer = wrap_invoke_host_resource(externalResourceId, buffer);
+    const obj = ExternalType.fromBuffer(resultBuffer);
+
+    this.__classInstancePtr = obj.__classInstancePtr;
   }
+  __classInstancePtr: u64;
 
   _count: u32;
   get count(): u32 {
@@ -28,51 +32,35 @@ export class ICalcWrapped implements ICalc {
     this._count = value;
   }
 
-  increment(): string {
-    const methodBuf = String.UTF8.encode("increment");
-    wrap_debug_log("sub increment");
+  instanceMethod(arg: string): string {
+    wrap_debug_log("sub instanceMethod");
     
-    const success = wrap_invoke_host(
-      this.__wrapInstancePtr, 
-      this.__classInstancePtr,
-      changetype<u32>(methodBuf), methodBuf.byteLength,
-      0, 0
-    );
+    const buffer = serializeString(arg);
+    const resultBuffer = wrap_invoke_host_resource(externalResourceId, buffer);
+
     wrap_debug_log("sub __wrap_invoke_instance");
-  
-    if (!success) {
-      wrap_debug_log("Failed to invoke method: increment");
-      throw new Error("Failed to invoke method: increment");
-    }
-    wrap_debug_log("sub success");
-  
-    const resultLen = __wrap_invoke_instance_result_len();
-    wrap_debug_log("sub __wrap_invoke_instance_result_len");
-    const resultBuffer = new ArrayBuffer(resultLen);
-    __wrap_invoke_instance_result(changetype<u32>(resultBuffer));
-    wrap_debug_log("sub __wrap_invoke_instance_result");
   
     return deserializeString(resultBuffer);
   }
 
-  static toBuffer(type: ICalcWrapped): ArrayBuffer {
+  static toBuffer(type: ExternalType): ArrayBuffer {
     return serializeType(type);
   }
 
-  static fromBuffer(buffer: ArrayBuffer): ICalcWrapped {
+  static fromBuffer(buffer: ArrayBuffer): ExternalType {
     return deserializeType(buffer);
   }
 
-  static write(writer: Write, type: ICalcWrapped): void {
+  static write(writer: Write, type: ExternalType): void {
     writeType(writer, type);
   }
 
-  static read(reader: Read): ICalcWrapped {
+  static read(reader: Read): ExternalType {
     return readType(reader);
   }
 }
 
-function serializeType(type: ICalcWrapped): ArrayBuffer {
+function serializeType(type: ExternalType): ArrayBuffer {
   const sizerContext: Context = new Context("Serializing (sizing) object-type: ICalcWrapped");
   const sizer = new WriteSizer(sizerContext);
   writeType(sizer, type);
@@ -83,7 +71,7 @@ function serializeType(type: ICalcWrapped): ArrayBuffer {
   return buffer;
 }
 
-export function writeType(writer: Write, type: ICalcWrapped): void {
+export function writeType(writer: Write, type: ExternalType): void {
   writer.writeMapLength(3);
   writer.context().push("__wrapInstancePtr", "u32", "writing property");
   writer.writeString("__wrapInstancePtr");
@@ -99,13 +87,13 @@ export function writeType(writer: Write, type: ICalcWrapped): void {
   writer.context().pop();
 }
 
-export function deserializeType(buffer: ArrayBuffer): ICalcWrapped {
+export function deserializeType(buffer: ArrayBuffer): ExternalType {
   const context: Context = new Context("Deserializing object-type IICalcWrapped");
   const reader = new ReadDecoder(buffer, context);
   return readType(reader);
 }
 
-export function readType(reader: Read): ICalcWrapped {
+export function readType(reader: Read): ExternalType {
   let numFields = reader.readMapLength();
 
   let ___wrapInstancePtr: u32 = 0;

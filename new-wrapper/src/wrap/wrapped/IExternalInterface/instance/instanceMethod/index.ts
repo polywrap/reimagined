@@ -2,11 +2,11 @@ import { EthereumProvider } from "../../../../..";
 import { deserializeArgs } from "./deserializeArgs";
 import { serializeResult } from "./serializeResult";
 
-export function incrementWrapped(instance: EthereumProvider, dataBuffer: ArrayBuffer): ArrayBuffer {
+export function instanceMethodWrapped(instance: EthereumProvider, dataBuffer: ArrayBuffer): ArrayBuffer {
     const args = deserializeArgs(dataBuffer);
 
-    const result = instance.increment(
-        args
+    const result = instance.instanceMethod(
+        args.arg
     );
 
     return serializeResult(result);

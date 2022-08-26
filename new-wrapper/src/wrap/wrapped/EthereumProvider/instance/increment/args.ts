@@ -1,3 +1,5 @@
-export class Args_increment {
-  calc: ICalc;
+import { IExternalInterface } from "../../../IExternalInterface/IExternalInterface";
+
+export class Args {
+  ext: IExternalInterface;
 }
