@@ -27,6 +27,7 @@ export function writeType(writer: Write, type: Args): void {
     
   writer.context().push("arg", "string", "writing property");
   writer.writeString("arg");
+  writer.writeString(type.arg);
   writer.context().pop();
 }
 
@@ -50,6 +51,7 @@ export function readType(reader: Read): Args {
     reader.context().push(field, "unknown", "searching for property type");
     if (field == "arg") {
       reader.context().push(field, "string", "type found, reading property");
+      _arg = reader.readString();
             reader.context().pop();
     }
     reader.context().pop();
