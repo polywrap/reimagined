@@ -1,0 +1,10 @@
+[package]
+name = "reim_schema"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+serde = "1.0.144"
+serde_derive = "1.0.144"
+tree_sitter_wrap = { path = "../../wrap-schema/tree-sitter-wrap" }
+tree-sitter = "0.20"
