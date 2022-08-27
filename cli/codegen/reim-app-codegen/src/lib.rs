@@ -53,6 +53,7 @@ pub fn generate_app_codegen(input_path: String, output_path: String) -> Result<(
       }
     });
 
+    let func_len = abi_functions.len();
     let wrapp_info = SerializationWrapperInfo {
       wrapper_name: "MyWrapper".to_string(),
       global_functions: abi_functions.enumerate().map(|(i, x)| {
@@ -60,7 +61,7 @@ pub fn generate_app_codegen(input_path: String, output_path: String) -> Result<(
           name: x.name,
           return_type: x.return_type,
           first: if i == 0 { true } else { false },
-          last: if i == x.args.len() - 1 { true } else { false },
+          last: if i == func_len - 1 { true } else { false },
           args: x.args.iter().map(|arg| {
             SerializationArgInfo {
               first: arg.first,
