@@ -15,6 +15,7 @@
   ],
   "scripts": {
     "build": "tsc --project tsconfig.build.json",
+    "codegen": "reim_cli app",
     "start": "ts-node src/main.ts",
     "execute": "node bin/main.js",
     "test": "jest --passWithNoTests --runInBand --verbose=true --detectOpenHandles --forceExit"
@@ -22,7 +23,7 @@
   "dependencies": {
     "typescript": "4.4.2",
     "@polywrap/result": "0.1.0",
-    "@polywrap/reim-wrap": "0.1.0",
+    "@polywrap/reim-new-wrap": "0.1.0",
     "@polywrap/reim-new-wasm": "0.1.0",
     "@polywrap/reim-loader": "0.1.0"
   },

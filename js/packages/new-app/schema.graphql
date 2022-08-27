@@ -1,0 +1,4 @@
+type Module {
+  simpleMethod(arg: string): string!
+  anotherMethod(arg: string): string!
+}
