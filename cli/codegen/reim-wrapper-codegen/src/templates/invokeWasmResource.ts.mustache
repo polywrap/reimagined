@@ -1,0 +1,16 @@
+import { wrap_debug_log } from "@polywrap/wasm-as";
+import { return_result_to_host } from "../main";
+{{#globalFunctions}}
+import { {{name}}Wrapped } from "./{{name}}";
+{{/globalFunctions}}
+
+export function invokeWasmResource(resourceId: u32, dataBuffer: ArrayBuffer): bool {
+  switch(resourceId) {
+    {{#globalFunctions}}
+    case {{index}}: 
+        return return_result_to_host({{name}}Wrapped(dataBuffer));
+    {{/globalFunctions}}
+    default: 
+      return false;
+  }
+}
