@@ -3,7 +3,7 @@ import { Context } from "./Context";
 import { wrap_abort, wrap_debug_log, __wrap_invoke_error } from "@polywrap/wasm-as";
 import { __wrap_fill_invoke_host_result, __wrap_invoke_host, __wrap_return_invoke_wasm_result } from "./imports";
 import { serializeu32 } from "./serialization/serializeu32";
-import { wrap_invoke_wasm_resource } from "./wrap_invoke_wasm_resource";
+import { invokeWasmResource } from "./wrapped/invokeWasmResource";
 
 export function wrap_invoke_wasm(inputBuffer: ArrayBuffer): bool {
   wrap_debug_log("wrap_invoke_wasm " + inputBuffer.byteLength.toString());
@@ -13,7 +13,7 @@ export function wrap_invoke_wasm(inputBuffer: ArrayBuffer): bool {
   const dataBuffer = inputBuffer.slice(4);
   wrap_debug_log("wrap_invoke_wasm resourceId: " + resourceId.toString());
 
-  return wrap_invoke_wasm_resource(resourceId, dataBuffer);
+  return invokeWasmResource(resourceId, dataBuffer);
 }
 
 export function return_result_to_host(resultBuffer: ArrayBuffer): bool {
