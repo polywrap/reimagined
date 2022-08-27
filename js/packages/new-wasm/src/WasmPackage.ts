@@ -8,13 +8,9 @@ export class WasmPackage implements IWasmPackage {
 
   async getManifest(): Promise<IWrapManifest> {
     const manifestBytes = await this.reader.getFile("wrap.info");
-    console.log("aaaaaaaa", manifestBytes);
-    console.log("bbbbbbb", new TextDecoder().decode(manifestBytes));
     const manifest = JSON.parse(new TextDecoder().decode(manifestBytes));
-    console.log("cccc",manifest);
 
     return {
-      name: "test",
       abi: manifest
     } as IWrapManifest;
   }
