@@ -1,6 +1,6 @@
 import { IPackageLoader } from "@polywrap/reim-loader";
 import { IWrapPackage, IWrapInstance} from "@polywrap/reim-new-wrap";
-import { FileSystemLoader } from "../FileSystemLoader";
+import { FileSystemLoader } from "../loader/FileSystemLoader";
 import { MyWrapper__factory } from "../wrap/MyWrapper/wrapper";
 
 jest.setTimeout(200000);

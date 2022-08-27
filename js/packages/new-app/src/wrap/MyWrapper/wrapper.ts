@@ -10,15 +10,14 @@ export type anotherMethodFn = (
 export class MyWrapper__factory {
   static async fromWrapper(wrapper: IWrapInstance): Promise<
   {
-    simpleMethod: simpleMethodFn
-    anotherMethod: anotherMethodFn,
+    simpleMethod: simpleMethodFn,
+    anotherMethod: anotherMethodFn
   }> {
     return {
       simpleMethod: async (
         arg: string
       ): Promise<string> => {
         const result = await wrapper.invokeGlobalFunction<unknown, string>(
-          MyWrapper.__className,
           "simpleMethod",
           {
             arg
@@ -30,12 +29,11 @@ export class MyWrapper__factory {
         }
 
         return result.value;
-      }
+      },
       anotherMethod: async (
         arg: string
       ): Promise<string> => {
         const result = await wrapper.invokeGlobalFunction<unknown, string>(
-          MyWrapper.__className,
           "anotherMethod",
           {
             arg
@@ -47,7 +45,7 @@ export class MyWrapper__factory {
         }
 
         return result.value;
-      },
+      }
     };
   }
 }
