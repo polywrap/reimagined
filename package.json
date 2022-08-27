@@ -1,0 +1,15 @@
+{
+  "name": "root",
+  "description": "Polywrap Reimagined Monorepo",
+  "license": "MIT",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/polywrap/polywrap-reimagined.git"
+  },
+  "scripts": {
+    "build": "yarn build:schema && yarn build:js",
+    "build:js": "cd ./js && yarn build",
+    "build:schema": "cd ./cli/reim-cli && cargo build"
+  }
+}
