@@ -4,18 +4,18 @@ import { ResultErr, ResultOk, Result } from "@polywrap/result";
 import { State } from "./State";
 import { WrapExports } from "./WrapExports";
 import { createImports } from "./createImports";
-import { IWrapInstance } from "@polywrap/reim-wrap";
+import { IWrapInstance, IWrapManifest } from "@polywrap/reim-new-wrap";
 
 export class WasmInstance implements IWrapInstance {
   public static requiredExports: readonly string[] = ["_wrap_invoke_wasm"];
 
   private classInstanceCount: number = 0;
 
-  constructor(private readonly state: State, private readonly wasmInstance: AsyncWasmInstance) {
+  constructor(public readonly manifest: IWrapManifest, private readonly state: State, private readonly wasmInstance: AsyncWasmInstance) {
     state.wasmInstance = this;
   }
 
-  static async create<TEnv>(wasmModule: Uint8Array, env: TEnv): Promise<IWrapInstance> {
+  static async create<TEnv>(manifest: IWrapManifest, wasmModule: Uint8Array, env: TEnv): Promise<IWrapInstance> {
     const state: State = {
       wrapInstances: new Map(),
       classInstances: new Map(),
@@ -50,7 +50,7 @@ export class WasmInstance implements IWrapInstance {
       requiredExports: WasmInstance.requiredExports,
     });
 
-    return new WasmInstance(state, instance);
+    return new WasmInstance(manifest, state, instance);
   }
 
   async invokeStatic<TArgs, TData>(className: string, methodName: string, args: TArgs): Promise<Result<TData, string>> {
@@ -59,6 +59,46 @@ export class WasmInstance implements IWrapInstance {
     const exports = this.wasmInstance.exports as WrapExports;
 
     const resourceIdBuffer = Buffer.from([0, 0, 0, 0]);
+
+    var tmp = new Uint8Array(resourceIdBuffer.byteLength + argsBuffer.byteLength);
+    tmp.set(new Uint8Array(resourceIdBuffer), 0);
+    tmp.set(new Uint8Array(argsBuffer), resourceIdBuffer.byteLength);
+
+    this.state.inputBuffer = tmp;
+
+    const result = await exports._wrap_invoke_wasm(
+      this.state.inputBuffer.byteLength,
+    );
+
+    console.log("ACTUAL result " + result);
+
+    if (result) {
+      const resultBuffer = this.state.invoke.result;
+      if (!resultBuffer) {
+        return ResultErr("instantiate Response is undefined");
+      }
+
+      return ResultOk(msgpackDecode(resultBuffer) as TData);
+    } else {
+      return ResultErr(this.state.invoke.error);
+    }
+  }
+
+  async invokeGlobalFunction<TArgs, TData>(funcName: string, args: TArgs): Promise<Result<TData, string>> {
+    const argsBuffer = this.parseArgsAndExtractReferences(args);
+
+    const exports = this.wasmInstance.exports as WrapExports;
+
+    const module = this.manifest.abi.find((abi: any) => abi.name === "Module");
+
+    if (!module) {
+      throw "WasmWrapper: Module not found in manifest";
+    }
+    
+    const resourceId = module.methods.map(x => x.name).indexOf(funcName);
+    let resourceBuffer = new ArrayBuffer(4);
+    new DataView(resourceBuffer).setUint32(0, resourceId);
+    const resourceIdBuffer = new Uint8Array(resourceBuffer);
 
     var tmp = new Uint8Array(resourceIdBuffer.byteLength + argsBuffer.byteLength);
     tmp.set(new Uint8Array(resourceIdBuffer), 0);

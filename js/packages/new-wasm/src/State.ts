@@ -1,5 +1,5 @@
 import { Result } from "@polywrap/result";
-import { IWrapInstance } from "@polywrap/reim-wrap";
+import { IWrapInstance } from "@polywrap/reim-new-wrap";
 import { WasmInstance } from "./WasmInstance";
 
 export interface State {

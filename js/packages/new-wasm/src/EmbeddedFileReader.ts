@@ -1,4 +1,4 @@
-import { IFileReader } from "@polywrap/reim-wrap";
+import { IFileReader } from "@polywrap/reim-new-wrap";
 
 export class EmbeddedFileReader implements IFileReader{
   constructor(private readonly manifest: Uint8Array, private readonly module: Uint8Array) {
