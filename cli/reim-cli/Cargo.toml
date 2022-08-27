@@ -1,0 +1,8 @@
+[package]
+name = "reim_cli"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+reim_app_codegen = { path = "../codegen/reim-app-codegen" }
+reim_wrapper_codegen = { path = "../codegen/reim-wrapper-codegen" }
