@@ -1,0 +1,4 @@
+type Module {
+  internalFunction(arg1: string, arg2: string): string
+  anotherFunction(arg1: string, arg2: string): string
+}
