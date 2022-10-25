@@ -23,8 +23,9 @@
   "dependencies": {
     "typescript": "4.4.2",
     "@polywrap/result": "0.1.0",
-    "@polywrap/reim-new-wrap": "0.1.0",
-    "@polywrap/reim-new-wasm": "0.1.0",
+    "@polywrap/reim-dt": "0.1.0",
+    "@polywrap/reim-dt-wasm": "0.1.0",
+    "@polywrap/reim-wrap": "0.1.0",
     "@polywrap/reim-loader": "0.1.0"
   },
   "devDependencies": {

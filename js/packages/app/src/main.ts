@@ -12,7 +12,7 @@ import { FileSystemLoader } from "./FileSystemLoader";
 const loader: IPackageLoader = new FileSystemLoader();
 
 const wrapPackage: IWrapPackage = await loader.load("ens/uniswap.eth");
-const wrapper: IWrapInstance = await wrapPackage.createWrapper();
+const wrapper: IWrapInstance = await wrapPackage.createInstance();
 
 await invokeStatic(wrapper);
 
@@ -39,7 +39,6 @@ async function invokeStatic(wrapper: IWrapInstance): Promise<void> {
     console.log("Result ok:", result.value);
   }
 }
-
 
 async function invokeInstance(wrapper: IWrapInstance): Promise<void> {
   console.error("invokeInstance start");

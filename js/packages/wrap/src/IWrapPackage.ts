@@ -1,7 +1,7 @@
-import { IWrapInstance } from "./IWrapInstance";
-import { IWrapManifest } from "./IWrapManifest";
+import { IWrapper } from "./IWrapper";
+import { IWrapManifest } from "./manifest";
 
 export interface IWrapPackage {
   getManifest(): Promise<IWrapManifest>;
-  createWrapper(): Promise<IWrapInstance>;
+  createWrapper(): Promise<IWrapper>;
 }

@@ -1,5 +1,5 @@
 import { IPackageLoader } from "@polywrap/reim-loader";
-import { IWrapPackage, IWrapInstance} from "@polywrap/reim-new-wrap";
+import { IWrapPackage, IWrapInstance} from "@polywrap/reim-wrap";
 import { FileSystemLoader } from "../loader/FileSystemLoader";
 import { MyWrapper__factory } from "../wrap/MyWrapper/wrapper";
 
@@ -10,7 +10,7 @@ describe("sanity", () => {
     const loader: IPackageLoader = new FileSystemLoader();
     
     const wrapPackage: IWrapPackage = await loader.load(`${__dirname}/../../../../../codegen-wrapper/build`) as IWrapPackage;
-    const wrapper: IWrapInstance = await wrapPackage.createWrapper();
+    const wrapper: IWrapInstance = await wrapPackage.createInstance();
 
     const { simpleMethod, anotherMethod } = await MyWrapper__factory.fromWrapper(wrapper);
 

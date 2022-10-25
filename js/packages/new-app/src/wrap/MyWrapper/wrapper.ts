@@ -1,4 +1,4 @@
-import { IWrapInstance} from "@polywrap/reim-new-wrap";
+import { IWrapInstance} from "@polywrap/reim-wrap";
 
 export type simpleMethodFn = (
   arg: string

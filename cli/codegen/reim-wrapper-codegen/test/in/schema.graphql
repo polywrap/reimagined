@@ -1,5 +1,5 @@
 type Module {
-  internalFunction(arg1: string, arg2: string): String
+  internalFunction(arg1: string, arg2: string): string
 }
 
 type InternalType {

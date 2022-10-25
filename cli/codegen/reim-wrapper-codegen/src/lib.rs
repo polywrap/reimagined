@@ -1,4 +1,5 @@
 use std::fs::{read_to_string, write, self};
+use inflector::Inflector;
 use serde_derive::*;
 
 extern crate mustache;
@@ -30,42 +31,11 @@ pub fn generate_bindings(input_path: String, output_path: String) -> Result<(), 
       None => panic!("Module type not found")
     };
 
-    // for schema_type in &abi {
-    //   match schema_type {
-    //       SchemaType::Function(x) => render_function(x),
-    //       SchemaType::Class(x) => render_class(x),
-    //   };
-    // }
-
-    // let abi_functions = vec![
-    //   SerializationFunction {
-    //     name: "internalFunction".to_string(),
-    //     args: vec![
-    //       SerializationArgInfo {
-    //         first: true,
-    //         required: true,
-    //         object: false,
-    //         name: "arg1".to_string(),
-    //         as_type_name: "String".to_string(),
-    //         as_type_init: "\"\"".to_string()
-    //       },
-    //       SerializationArgInfo {
-    //         first: false,
-    //         required: false,
-    //         object: false,
-    //         name: "arg2".to_string(),
-    //         as_type_name: "String".to_string(),
-    //         as_type_init: "\"\"".to_string()
-    //       },
-    //     ],
-    //     return_type: "String".to_string()
-    //   }
-    // ];
-
     let abi_functions: Vec<SerializationFunction> = abi_functions.iter().enumerate().map(|(i, x)| {
       SerializationFunction {
         index: i,
         name: if let Some(name) = &x.name { name.to_string() } else { "".to_string() },
+        name_pascal_case: if let Some(name) = &x.name { name.to_pascal_case() } else { "".to_string() },
         return_type: if let Some(return_type) = &x.return_type { return_type.to_string() } else { "".to_string() },
         first: false,
         last: false,
@@ -94,6 +64,7 @@ pub fn generate_bindings(input_path: String, output_path: String) -> Result<(), 
           SerializationFunction {
             index: i,
             name: x.name.to_string(),
+            name_pascal_case: x.name.to_pascal_case(),
             return_type: x.return_type.to_string(),
             first: if i == 0 { true } else { false },
             last: if i == x.args.len() - 1 { true } else { false },
@@ -114,8 +85,12 @@ pub fn generate_bindings(input_path: String, output_path: String) -> Result<(), 
         }).collect()
     };
 
-    render_invoke_wasm_resource(&wrapp_info, output_path.clone())?;
-
+    render_index(&wrapp_info, output_path.clone())?;
+    render_global_functions_index(&wrapp_info, output_path.clone())?;
+    render_invoke_global_function(&wrapp_info, output_path.clone())?;
+    render_global_function(&wrapp_info, output_path.clone())?;
+    render_functions_index(&wrapp_info, output_path.clone())?;
+    
     Ok(())
 }
 
@@ -134,6 +109,7 @@ pub fn generate_wrap_manifest(input_path: String, output_path: String) -> Result
 #[serde(rename_all = "camelCase")]
 pub struct SerializationFunction {
   pub name: String,
+  pub name_pascal_case: String,
   pub index: usize,
   pub args: Vec<SerializationArgInfo>,
   pub return_type: String,
@@ -176,7 +152,7 @@ pub fn render_class(class_type: &ClassType) {
 }
 
 pub fn render_function(function_type: &SerializationFunction, output_path: String) -> Result<(), std::io::Error> {
-    let function_dir_path = output_path + "/wrap/wrapped/" + &function_type.name;
+    let function_dir_path = output_path + "/polywrap/wrapped/global-functions/functions/" + &function_type.name;
     fs::create_dir_all(&function_dir_path)?;
 
     let template_str =  String::from_utf8_lossy(include_bytes!("templates/internal-function/args.ts.mustache"));
@@ -226,17 +202,78 @@ pub fn render_function(function_type: &SerializationFunction, output_path: Strin
     Ok(())
 }
 
-pub fn render_invoke_wasm_resource(wrapper: &SerializationWrapperInfo, output_path: String) -> Result<(), std::io::Error> {
-    let base_dir_path = output_path + "/wrap/wrapped";
+pub fn render_index(_: &SerializationWrapperInfo, output_path: String) -> Result<(), std::io::Error> {
+    let base_dir_path = output_path + "/polywrap/wrapped";
     fs::create_dir_all(&base_dir_path)?;
 
-    let template_str =  String::from_utf8_lossy(include_bytes!("templates/invokeWasmResource.ts.mustache"));
+    write(base_dir_path.clone() + "/index.ts", include_bytes!("templates/index.ts.mustache"))
+}
+
+pub fn render_global_functions_index(wrapper: &SerializationWrapperInfo, output_path: String) -> Result<(), std::io::Error> {
+    let base_dir_path = output_path + "/polywrap/wrapped/global-functions";
+    fs::create_dir_all(&base_dir_path)?;
+
+    let template_str =  String::from_utf8_lossy(include_bytes!("templates/global-functions/index.ts.mustache"));
 
     let template = mustache::compile_str(&template_str).unwrap();
 
     match template.render_to_string(&wrapper) {
         Ok(str) => {
-            write(base_dir_path.clone() + "/invokeWasmResource.ts", str.as_bytes()).unwrap()
+            write(base_dir_path.clone() + "/index.ts", str.as_bytes()).unwrap()
+        },
+        _ => {}
+    };
+
+    Ok(())
+}
+
+pub fn render_invoke_global_function(wrapper: &SerializationWrapperInfo, output_path: String) -> Result<(), std::io::Error> {
+    let base_dir_path = output_path + "/polywrap/wrapped/global-functions";
+    fs::create_dir_all(&base_dir_path)?;
+
+    let template_str =  String::from_utf8_lossy(include_bytes!("templates/global-functions/invokeGlobalFunction.ts.mustache"));
+
+    let template = mustache::compile_str(&template_str).unwrap();
+
+    match template.render_to_string(&wrapper) {
+        Ok(str) => {
+            write(base_dir_path.clone() + "/invokeGlobalFunction.ts", str.as_bytes()).unwrap()
+        },
+        _ => {}
+    };
+
+    Ok(())
+}
+
+pub fn render_global_function(wrapper: &SerializationWrapperInfo, output_path: String) -> Result<(), std::io::Error> {
+    let base_dir_path = output_path + "/polywrap/wrapped/global-functions";
+    fs::create_dir_all(&base_dir_path)?;
+
+    let template_str =  String::from_utf8_lossy(include_bytes!("templates/global-functions/GlobalFunction.ts.mustache"));
+
+    let template = mustache::compile_str(&template_str).unwrap();
+
+    match template.render_to_string(&wrapper) {
+        Ok(str) => {
+            write(base_dir_path.clone() + "/GlobalFunction.ts", str.as_bytes()).unwrap()
+        },
+        _ => {}
+    };
+
+    Ok(())
+}
+
+pub fn render_functions_index(wrapper: &SerializationWrapperInfo, output_path: String) -> Result<(), std::io::Error> {
+    let base_dir_path = output_path + "/polywrap/wrapped/global-functions/functions";
+    fs::create_dir_all(&base_dir_path)?;
+
+    let template_str =  String::from_utf8_lossy(include_bytes!("templates/global-functions/functions/index.ts.mustache"));
+
+    let template = mustache::compile_str(&template_str).unwrap();
+
+    match template.render_to_string(&wrapper) {
+        Ok(str) => {
+            write(base_dir_path.clone() + "/index.ts", str.as_bytes()).unwrap()
         },
         _ => {}
     };

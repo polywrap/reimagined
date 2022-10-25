@@ -13,7 +13,7 @@ export class Uniswap__factory {
   }
 
   static async fromPackage(wrapPackage: IWrapPackage): Promise<IUniswapModule> {
-    const wrapper: IWrapInstance = await wrapPackage.createWrapper();
+    const wrapper: IWrapInstance = await wrapPackage.createInstance();
 
     return Uniswap__factory.fromWrapper(wrapper);
   }

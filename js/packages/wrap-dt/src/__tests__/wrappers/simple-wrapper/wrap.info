@@ -1,0 +1,23 @@
+{ "abi": [
+  {
+    "type": "function",
+  "name": "simpleMethod",
+  "args": [
+    {
+      "name": "arg",
+      "typeName": "string"
+    }
+  ],
+  "returnType": "string"
+},
+{
+  "name": "anotherMethod",
+  "args": [
+    {
+      "name": "arg",
+      "typeName": "string"
+    }
+  ],
+  "returnType": "string"
+}
+] }
