@@ -34,4 +34,5 @@ RUN ./node_modules/.bin/asc src/polywrap/dt/exports.ts \
     --use abort=src/polywrap/dt/main/wrapAbort \
     --optimize --debug --importMemory \
     --runtime stub \
+    --transform @serial-as/transform \
     --runPasses asyncify

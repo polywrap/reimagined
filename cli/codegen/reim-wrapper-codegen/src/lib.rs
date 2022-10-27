@@ -37,6 +37,7 @@ pub fn generate_bindings(input_path: String, output_path: String) -> Result<(), 
         name: if let Some(name) = &x.name { name.to_string() } else { "".to_string() },
         name_pascal_case: if let Some(name) = &x.name { name.to_pascal_case() } else { "".to_string() },
         return_type: if let Some(return_type) = &x.return_type { return_type.to_string() } else { "".to_string() },
+        as_return_type: if let Some(return_type) = &x.return_type { return_type.to_string() } else { "".to_string() },
         first: false,
         last: false,
         args: x.args.iter().enumerate().map(|(i, arg)| {
@@ -66,6 +67,7 @@ pub fn generate_bindings(input_path: String, output_path: String) -> Result<(), 
             name: x.name.to_string(),
             name_pascal_case: x.name.to_pascal_case(),
             return_type: x.return_type.to_string(),
+            as_return_type: x.as_return_type.to_string(),
             first: if i == 0 { true } else { false },
             last: if i == x.args.len() - 1 { true } else { false },
             args: x.args.iter().map(|arg| {
@@ -99,10 +101,20 @@ pub fn generate_wrap_manifest(input_path: String, output_path: String) -> Result
 
     let abi = parse_schema(schema);
 
-    let json_abi = serde_json::to_string_pretty(&abi).unwrap();
+    let json_abi = serde_json::to_string_pretty(&WrapManifest {
+      version: "0.1.0".to_string(),
+      abi
+    }).unwrap();
     write(output_path + "/wrap.info", &json_abi).unwrap();
 
     Ok(())
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct WrapManifest {
+  pub version: String,
+  pub abi: WrapAbi
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -113,6 +125,7 @@ pub struct SerializationFunction {
   pub index: usize,
   pub args: Vec<SerializationArgInfo>,
   pub return_type: String,
+  pub as_return_type: String,
   pub first: bool,
   pub last: bool,
 }
@@ -155,7 +168,7 @@ pub fn render_function(function_type: &SerializationFunction, output_path: Strin
     let function_dir_path = output_path + "/polywrap/wrapped/global-functions/functions/" + &function_type.name;
     fs::create_dir_all(&function_dir_path)?;
 
-    let template_str =  String::from_utf8_lossy(include_bytes!("templates/internal-function/args.ts.mustache"));
+    let template_str =  String::from_utf8_lossy(include_bytes!("templates/global-function/args.ts.mustache"));
 
     let template = mustache::compile_str(&template_str).unwrap();
 
@@ -166,7 +179,7 @@ pub fn render_function(function_type: &SerializationFunction, output_path: Strin
         _ => {}
     };
 
-    let template_str =  String::from_utf8_lossy(include_bytes!("templates/internal-function/args-serialization.ts.mustache"));
+    let template_str =  String::from_utf8_lossy(include_bytes!("templates/global-function/args-serialization.ts.mustache"));
 
     let template = mustache::compile_str(&template_str).unwrap();
 
@@ -177,7 +190,7 @@ pub fn render_function(function_type: &SerializationFunction, output_path: Strin
         _ => {}
     };
 
-    let template_str =  String::from_utf8_lossy(include_bytes!("templates/internal-function/index.ts.mustache"));
+    let template_str =  String::from_utf8_lossy(include_bytes!("templates/global-function/index.ts.mustache"));
 
     let template = mustache::compile_str(&template_str).unwrap();
 
@@ -188,7 +201,7 @@ pub fn render_function(function_type: &SerializationFunction, output_path: Strin
         _ => {}
     };
 
-    let template_str =  String::from_utf8_lossy(include_bytes!("templates/internal-function/serializeResult.ts.mustache"));
+    let template_str =  String::from_utf8_lossy(include_bytes!("templates/global-function/serializeResult.ts.mustache"));
 
     let template = mustache::compile_str(&template_str).unwrap();
 

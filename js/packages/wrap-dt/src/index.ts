@@ -1,4 +1,3 @@
-export * from './DtInstanceBuilder';
 export * from './IDataTranslator';
 export * from './IDtInstanceBuilder';
 export * from './IDtReceiver';

@@ -1,0 +1,5 @@
+import { stringify } from "@serial-as/json";
+
+export function serializeResult(result: {{asReturnType}}): ArrayBuffer {
+  return String.UTF8.encode(stringify<{{asReturnType}}>(result));
+}

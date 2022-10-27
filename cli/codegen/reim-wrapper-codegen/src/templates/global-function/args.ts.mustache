@@ -1,0 +1,8 @@
+@serializable
+export class Args {
+  constructor(
+  {{#args}}
+    public {{name}}: {{asTypeName}},
+  {{/args}}
+  ) {}
+}

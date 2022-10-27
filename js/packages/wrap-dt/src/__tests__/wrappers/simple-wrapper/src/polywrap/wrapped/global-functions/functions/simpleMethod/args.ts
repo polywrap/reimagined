@@ -1,34 +1,6 @@
-import {
-  Read,
-  Write,
-  Option,
-  BigInt,
-  BigNumber,
-  JSON
-} from "@polywrap/wasm-as";
-import {
-  serializeType,
-  deserializeType,
-  writeType,
-  readType
-} from "./args-serialization";
-
+@serializable
 export class Args {
-  arg: string;
-
-  static toBuffer(type: Args): ArrayBuffer {
-    return serializeType(type);
-  }
-
-  static fromBuffer(buffer: ArrayBuffer): Args {
-    return deserializeType(buffer);
-  }
-
-  static write(writer: Write, type: Args): void {
-    writeType(writer, type);
-  }
-
-  static read(reader: Read): Args {
-    return readType(reader);
-  }
+  constructor(
+    public arg: string,
+  ) {}
 }

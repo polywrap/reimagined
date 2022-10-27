@@ -3,7 +3,7 @@ import { msgpackEncode, msgpackDecode } from "@polywrap/msgpack-js";
 import { IDataTranslator } from "./IDataTranslator";
 import { IDtReceiver } from "./IDtReceiver";
 import { IManifestFeatureManager } from "./IManifestFeatureManager";
-import { HostFunction } from "./HostFunction";
+import { HostFunctionV_0_2 } from "./host-functions/HostFunctionV_0_2";
 import { bufferToU32 } from "./WasmWrapper";
 
 export class MsgpackDataTranslator implements IDataTranslator {
@@ -16,13 +16,28 @@ export class MsgpackDataTranslator implements IDataTranslator {
   }
 }
 
+export class JsonDataTranslator implements IDataTranslator {
+  encode<T>(data: T): Uint8Array {
+    return new TextEncoder().encode(JSON.stringify(data));
+  }
+
+  decode<T>(buffer: Uint8Array): T {
+    return JSON.parse(new TextDecoder().decode(buffer)) as T;
+  }
+}
+
 export class DtReceiver implements IDtReceiver {
   async onReceive(buffer: Uint8Array): Promise<Uint8Array> {
-    const func: HostFunction = bufferToU32(buffer);
+    const func: HostFunctionV_0_2 = bufferToU32(buffer);
+    const dataBuffer = buffer.slice(4, buffer.length);
+
     switch (func) {
-      case HostFunction.Log:
-        console.log("aAAAAAAAaaaaAAAAAAAAa");
-        console.log(buffer.slice(4, buffer.length), new TextDecoder().decode(buffer.slice(4, buffer.length)));
+      case HostFunctionV_0_2.Log:
+        console.log(
+          "onReceive",
+          dataBuffer,
+          new TextDecoder().decode(dataBuffer)
+        );
 
         return new Uint8Array();
     }
@@ -35,7 +50,7 @@ export class ManifestFeatureManager implements IManifestFeatureManager {
   getDataTranslator(manifest: IWrapManifest): IDataTranslator {
     switch (manifest.version) {
       default:
-        return new MsgpackDataTranslator();
+        return new JsonDataTranslator();
     }
   }
 
