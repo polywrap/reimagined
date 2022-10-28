@@ -1,4 +1,4 @@
-import { IWrapInstance} from "@polywrap/reim-wrap";
+import { IWrapper} from "@polywrap/reim-wrap";
 import { IReceipt } from "./Receipt";
 
 export interface ITransaction {
@@ -7,7 +7,7 @@ export interface ITransaction {
 }
 
 class Transaction implements ITransaction {
-  constructor(private readonly __wrapper: IWrapInstance) {
+  constructor(private readonly __wrapper: IWrapper) {
     this.id = "";
   }
 

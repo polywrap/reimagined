@@ -9,3 +9,4 @@ export * from './WasmPackage';
 export * from './WasmPackageBuilder';
 export * from './WasmWrapper';
 export * from './constants';
+export * from './helpers/composeFileReader';
