@@ -3,32 +3,32 @@ use serde_derive::*;
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct FieldInfo {
-    pub name: Option<String>,
+    pub name: String,
     pub type_name: String,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct ArgInfo {
-    pub name: Option<String>,
-    pub type_name: Option<String>
+    pub name: String,
+    pub type_name: String
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct PropertyInfo {
-    pub name: Option<String>,
+    pub name: String,
     pub type_name: String,
     pub get: bool,
     pub set: bool
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct FunctionType {
-    pub name: Option<String>,
+    pub name: String,
     pub args: Vec<ArgInfo>,
-    pub return_type: Option<String>
+    pub return_type: String
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -41,7 +41,7 @@ pub struct ClassType {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-#[serde(tag = "typeName")]
+#[serde(tag = "type")]
 #[serde(rename_all = "camelCase")]
 pub enum SchemaType {
     Function(FunctionType),

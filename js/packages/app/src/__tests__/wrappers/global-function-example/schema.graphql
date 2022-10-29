@@ -1,3 +1,0 @@
-type Module {
-  simpleFunction(arg: string): string!
-}

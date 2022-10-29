@@ -5,6 +5,8 @@ extern crate mustache;
 
 use reim_schema::*;
 
+const SCALAR_TYPE_NAMES : [&str; 5] = ["String", "Uint32", "Int32", "Boolean", "Bytes"];
+
 pub fn generate_app_codegen(input_path: String, output_path: String) -> Result<(), std::io::Error> { 
     let schema = read_to_string(input_path + "/schema.graphql")?;
 
@@ -30,22 +32,22 @@ pub fn generate_app_codegen(input_path: String, output_path: String) -> Result<(
       None => panic!("Module type not found")
     };
 
-    let abi_functions = abi_functions.iter().map(|x| {
+    let abi_functions = abi_functions.iter().enumerate().map(|(i, x)| {
       SerializationFunction {
-        name: if let Some(name) = &x.name { name.to_string() } else { "".to_string() },
-        return_type: if let Some(return_type) = &x.return_type { return_type.to_string() } else { "".to_string() },
-        first: false,
-        last: false,
+        name: x.name.to_string(),
+        return_type: x.return_type.to_string(),
+        first: if i == 0 { true } else { false },
+        last: if i == x.args.len() - 1 { true } else { false },
         args: x.args.iter().enumerate().map(|(i, arg)| {
           SerializationArgInfo {
             first: if i == 0 { true } else { false },
             last: if i == x.args.len() - 1 { true } else { false },
             required: false,
             object: false,
-            scalar: true,
-            name: if let Some(name) = &arg.name { name.to_string() } else { "".to_string() },
-            as_type_name: if let Some(name) = &arg.type_name { name.to_string() } else { "".to_string() },
-            ts_type_name: "".to_string(),
+            scalar: SCALAR_TYPE_NAMES.contains(&arg.type_name.as_str()),
+            name: arg.name.clone(),
+            as_type_name: arg.type_name.clone(),
+            ts_type_name: arg.type_name.clone(),
             as_type_init: "\"\"".to_string(),
             msg_pack_type_name: "String".to_string(),
           }

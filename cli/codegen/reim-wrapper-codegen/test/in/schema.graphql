@@ -1,5 +1,5 @@
 type Module {
-  internalFunction(arg1: string, arg2: string): string
+  internalFunction(arg1: string, arg2: string): ExternalType
 }
 
 type InternalType {
@@ -21,13 +21,14 @@ type InternalReferenceType {
 
 # Example of an external interface to receive
 type IExternalInterface {
-  count: u32
+  count: Uint23
   instanceMethod(arg: String): String
 }
 
 # Example of an external type to instantiate
 type ExternalType {
-  count: u32
+  count: Uint23
+  test: IExternalInterface
   constructor(arg: String): void
   instanceMethod(arg: String): String
 }

@@ -3,6 +3,8 @@ pub use abi::*;
 
 use tree_sitter::{TreeCursor, Node};
 
+pub const SCALAR_TYPE_NAMES : [&str; 5] = ["String", "Uint32", "Int32", "Boolean", "Bytes"];
+
 pub fn parse_schema(source: String) -> WrapAbi {
   let mut parser = tree_sitter::Parser::new();
   parser.set_language(tree_sitter_wrap::language()).unwrap();
@@ -52,7 +54,7 @@ pub fn parse_schema(source: String) -> WrapAbi {
                           } else {
                             fields.push(FieldInfo {
                               name: field_name,
-                              type_name: "String".to_string()
+                              type_name: get_named_type(&field_def_node, &source)
                             });
                           }
                           
@@ -81,32 +83,83 @@ pub fn parse_schema(source: String) -> WrapAbi {
       true
   });
 
-  type_info
+  let global_functions = type_info
+    .iter()
+    .find(|x| {
+        match x {
+            SchemaType::Class(class) => {
+                class.name == "Module"
+            },
+            _ => false
+        }
+    })
+    .map(|x| {
+        match x {
+            SchemaType::Class(class) => {
+                class.methods
+                    .iter()
+                    .map(|x| {
+                        SchemaType::Function(x.clone())
+                    })
+                    .collect()
+            },
+            _ => vec![]
+        }
+    });
+
+  let mut abi: Vec<SchemaType> = type_info
+    .into_iter()
+    .filter(|x| {
+        match x {
+            SchemaType::Class(class) => {
+                class.name != "Module"
+            },
+            _ => true
+        }
+    })
+    .collect();
+
+  if let Some(global_functions) = global_functions {
+    abi.extend(global_functions); 
+  }
+
+  abi
 }
 
-fn get_name_from_node(node: &Node, source: &str) -> Option<String> {
-  let mut name: Option<String> = None;
+fn get_name_from_node(node: &Node, source: &str) -> String {
+    let mut name: Option<String> = None;
 
-  walk(&mut node.walk(), "Name", &mut |name_node| {
+    walk(&mut node.walk(), "Name", &mut |name_node| {
     match name_node.utf8_text(source.as_bytes()) {
         Ok(name_str) => name = Some(name_str.to_string()),
-        Err(e) => println!("{:?}", e)
+        Err(e) => {
+            println!("{:?}", e);
+            panic!("Name of node is not defined");
+        }
     }
     true
-  });
+    });
 
-  name
+    if name.is_none() {
+        panic!("Name of node not found");
+    }
+
+    name.unwrap()
 }
 
-fn get_named_type(node: &Node, source: &str) -> Option<String> {
-  let mut name: Option<String> = None;
+fn get_named_type(node: &Node, source: &str) -> String {
+    let mut name: Option<String> = None;
 
-  walk(&mut node.walk(), "NamedType", &mut |name_node| {
-    name = get_name_from_node(&name_node, source);
+    walk(&mut node.walk(), "NamedType", &mut |name_node| {
+    name = Some(get_name_from_node(&name_node, source));
     true
-  });
+    });
 
-  name
+    if name.is_none() {
+    panic!("NamedType of node not found");
+    }
+
+    name.unwrap()
 }
 
 fn walk<F: FnMut(Node) -> bool>(cursor: &mut TreeCursor, node_kind: &str, on_node_kind: &mut F) {

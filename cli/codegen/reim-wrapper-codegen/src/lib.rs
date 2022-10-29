@@ -6,85 +6,160 @@ extern crate mustache;
 
 use reim_schema::*;
 
+const SCALAR_TYPE_NAMES : [&str; 7] = ["string", "String", "u32", "Uint32", "Int32", "Boolean", "Bytes"];
+
 pub fn generate_bindings(input_path: String, output_path: String) -> Result<(), std::io::Error> { 
     let schema = read_to_string(input_path.to_string() + "/schema.graphql")?;
 
     let abi = parse_schema(schema);
 
-    println!("{:?}", abi);
-    let module_type = abi.iter().find(|x| {
-      if let SchemaType::Class(x) = x {
-          if x.name == "Module" {
-              return true;
-          }
-      }
-      return false;
-    });
+    // let empty: Vec<FunctionType> = vec![];
+    let global_functions: Vec<FunctionType> = abi
+        .iter()
+        .filter_map(|x| {
+            match x {
+                SchemaType::Function(func) => Some(func.clone()),
+                _ => None
+            }
+        })
+        .collect();
 
-    let empty: Vec<FunctionType> = vec![];
-    let abi_functions = match module_type {
-      Some(x) => if let SchemaType::Class(x) = x {
-        &x.methods
-      } else {
-        &empty
-      },
-      None => panic!("Module type not found")
-    };
+    let types: Vec<ClassType> = abi
+        .into_iter()
+        .filter_map(|x| {
+            if let SchemaType::Class(x) = x {
+                if x.name != "Module" {
+                    return Some(x);
+                }
+            }
+            return None;
+        })
+        .collect();
 
-    let abi_functions: Vec<SerializationFunction> = abi_functions.iter().enumerate().map(|(i, x)| {
-      SerializationFunction {
-        index: i,
-        name: if let Some(name) = &x.name { name.to_string() } else { "".to_string() },
-        name_pascal_case: if let Some(name) = &x.name { name.to_pascal_case() } else { "".to_string() },
-        return_type: if let Some(return_type) = &x.return_type { return_type.to_string() } else { "".to_string() },
-        as_return_type: if let Some(return_type) = &x.return_type { return_type.to_string() } else { "".to_string() },
-        first: false,
-        last: false,
-        args: x.args.iter().enumerate().map(|(i, arg)| {
-          SerializationArgInfo {
-            first: if i == 0 { true } else { false },
-            last: if i == x.args.len() - 1 { true } else { false },
-            required: false,
-            object: false,
-            scalar: true,
-            name: if let Some(name) = &arg.name { name.to_string() } else { "".to_string() },
-            as_type_name: if let Some(name) = &arg.type_name { name.to_string() } else { "".to_string() },
-            as_type_init: "\"\"".to_string(),
-            msg_pack_type_name: "String".to_string(),
-          }
-        }).collect()
-      }
-    }).collect();
-    for x in &abi_functions {
+    let global_functions: Vec<SerializationFunction> = global_functions
+        .into_iter()
+        .enumerate()
+        .map(|(i, x)| {
+            SerializationFunction {
+                index: i,
+                name: x.name.clone(),
+                name_pascal_case: x.name.to_pascal_case(),
+                return_type: x.return_type.clone(),
+                as_return_type: x.return_type.clone(),
+                is_return_scalar: SCALAR_TYPE_NAMES.contains(&x.return_type.as_str()),
+                first: false,
+                last: false,
+                args: x.args.iter().enumerate().map(|(i, arg)| {
+                    SerializationArgInfo {
+                        first: if i == 0 { true } else { false },
+                        last: if i == x.args.len() - 1 { true } else { false },
+                        required: false,
+                        object: false,
+                        scalar: SCALAR_TYPE_NAMES.contains(&arg.type_name.as_str()),
+                        name: arg.name.clone(),
+                        as_type_name: arg.type_name.clone(),
+                        as_type_init: "\"\"".to_string(),
+                        msg_pack_type_name: "String".to_string(),
+                    }
+                }).collect(),
+                non_scalar_args: x.args
+                    .iter()
+                    .enumerate()
+                    .map(|(i, arg)| {
+                        SerializationArgInfo {
+                            first: if i == 0 { true } else { false },
+                            last: if i == x.args.len() - 1 { true } else { false },
+                            required: false,
+                            object: false,
+                            scalar: SCALAR_TYPE_NAMES.contains(&arg.type_name.as_str()),
+                            name: arg.name.clone(),
+                            as_type_name: arg.type_name.clone(),
+                            as_type_init: "\"\"".to_string(),
+                            msg_pack_type_name: "String".to_string(),
+                        }
+                    })
+                    .filter(|arg| !arg.scalar)
+                    .collect(),
+            }
+        }).collect();
+
+    for x in &global_functions {
       render_function(x, output_path.clone())?;
     }
 
     let wrapp_info = SerializationWrapperInfo {
         wrapper_name: "MyWrapper".to_string(),
-        global_functions: abi_functions.iter().enumerate().map(|(i, x)| {
-          SerializationFunction {
-            index: i,
-            name: x.name.to_string(),
-            name_pascal_case: x.name.to_pascal_case(),
-            return_type: x.return_type.to_string(),
-            as_return_type: x.as_return_type.to_string(),
-            first: if i == 0 { true } else { false },
-            last: if i == x.args.len() - 1 { true } else { false },
-            args: x.args.iter().map(|arg| {
-              SerializationArgInfo {
-                first: arg.first,
-                last: arg.last,
-                required: arg.required,
-                object: arg.object,
-                scalar: arg.scalar,
-                name: arg.name.to_string(),
-                as_type_name: arg.as_type_name.to_string(),
-                as_type_init: arg.as_type_init.to_string(),
-                msg_pack_type_name: arg.msg_pack_type_name.to_string()
-              }
-            }).collect()
-          }
-        }).collect()
+        global_functions: global_functions
+            .iter()
+            .enumerate()
+            .map(|(i, x)| {
+                SerializationFunction {
+                    index: i,
+                    name: x.name.to_string(),
+                    name_pascal_case: x.name.to_pascal_case(),
+                    return_type: x.return_type.to_string(),
+                    as_return_type: x.as_return_type.to_string(),
+                    is_return_scalar: SCALAR_TYPE_NAMES.contains(&x.return_type.as_str()),
+                    first: if i == 0 { true } else { false },
+                    last: if i == x.args.len() - 1 { true } else { false },
+                    args: x.args
+                        .iter()
+                        .map(|arg| {
+                            SerializationArgInfo {
+                                first: arg.first,
+                                last: arg.last,
+                                required: arg.required,
+                                object: arg.object,
+                                scalar: arg.scalar,
+                                name: arg.name.to_string(),
+                                as_type_name: arg.as_type_name.to_string(),
+                                as_type_init: arg.as_type_init.to_string(),
+                                msg_pack_type_name: arg.msg_pack_type_name.to_string()
+                            }
+                        }).collect(),
+                    non_scalar_args: x.args
+                        .iter()
+                        .map(|arg| {
+                            SerializationArgInfo {
+                                first: arg.first,
+                                last: arg.last,
+                                required: arg.required,
+                                object: arg.object,
+                                scalar: arg.scalar,
+                                name: arg.name.to_string(),
+                                as_type_name: arg.as_type_name.to_string(),
+                                as_type_init: arg.as_type_init.to_string(),
+                                msg_pack_type_name: arg.msg_pack_type_name.to_string()
+                            }
+                        })
+                        .filter(|arg| !arg.scalar)
+                        .collect(),
+                }
+            }).collect(),
+        types: types
+            .iter()
+            .map(|x| {
+                SerializationType {
+                    name: x.name.to_string(),
+                    fields: x.fields
+                        .iter()
+                        .enumerate()
+                        .map(|(i, arg)| {
+                            SerializationArgInfo {
+                                first: if i == 0 { true } else { false },
+                                last: if i == x.fields.len() - 1 { true } else { false },
+                                required: false,
+                                object: false,
+                                scalar: SCALAR_TYPE_NAMES.contains(&arg.type_name.as_str()),
+                                name: arg.name.to_string(),
+                                as_type_name: arg.type_name.to_string(),
+                                as_type_init: "\"\"".to_string(),
+                                msg_pack_type_name: "String".to_string(),
+                            }
+                        }).collect() 
+                }
+            })
+            .collect()
     };
 
     render_index(&wrapp_info, output_path.clone())?;
@@ -92,6 +167,7 @@ pub fn generate_bindings(input_path: String, output_path: String) -> Result<(), 
     render_invoke_global_function(&wrapp_info, output_path.clone())?;
     render_global_function(&wrapp_info, output_path.clone())?;
     render_functions_index(&wrapp_info, output_path.clone())?;
+    render_types(&wrapp_info, output_path.clone())?;
     
     Ok(())
 }
@@ -124,7 +200,9 @@ pub struct SerializationFunction {
   pub name_pascal_case: String,
   pub index: usize,
   pub args: Vec<SerializationArgInfo>,
+  pub non_scalar_args: Vec<SerializationArgInfo>,
   pub return_type: String,
+  pub is_return_scalar: bool,
   pub as_return_type: String,
   pub first: bool,
   pub last: bool,
@@ -146,9 +224,17 @@ pub struct SerializationArgInfo {
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
+pub struct SerializationType {
+  pub name: String,
+  pub fields: Vec<SerializationArgInfo>,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
 pub struct SerializationWrapperInfo {
   pub wrapper_name: String,
   pub global_functions: Vec<SerializationFunction>,
+  pub types: Vec<SerializationType>,
 }
 
 pub fn render_class(class_type: &ClassType) {
@@ -294,14 +380,34 @@ pub fn render_functions_index(wrapper: &SerializationWrapperInfo, output_path: S
     Ok(())
 }
 
+pub fn render_types(wrapper: &SerializationWrapperInfo, output_path: String) -> Result<(), std::io::Error> {
+  let base_dir_path = output_path + "/polywrap/wrapped/types";
+  fs::create_dir_all(&base_dir_path)?;
+
+  let template_str =  String::from_utf8_lossy(include_bytes!("templates/type.ts.mustache"));
+
+  let template = mustache::compile_str(&template_str).unwrap();
+
+  for type_info in wrapper.types.iter() {
+    match template.render_to_string(type_info) {
+        Ok(str) => {
+            write(base_dir_path.clone() + "/" + &type_info.name + ".ts", str.as_bytes()).unwrap();
+        },
+        _ => {}
+    };
+  }
+
+  Ok(())
+}
+
 #[cfg(test)]
 mod tests {
-    use crate::generate_bindings;
+    use crate::{generate_bindings, generate_wrap_manifest};
 
     #[test]
     fn internal_function() -> Result<(), std::io::Error> {
+        generate_wrap_manifest("./test/in".to_string(), "./test/out".to_string())?;
         generate_bindings("./test/in".to_string(), "./test/out".to_string())?;
-
         Ok(())
     }
 }
