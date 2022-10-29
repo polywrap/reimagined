@@ -1,3 +1,7 @@
+{{#nonScalarFields}}
+import { {{asTypeName}} } from "./{{asTypeName}}";
+{{/nonScalarFields}}
+
 @serializable
 export class {{name}} {
   {{#fields}}

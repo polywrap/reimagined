@@ -1,5 +1,7 @@
 export enum GlobalFunction {
-  StringArgFunction = 1,
-  ObjectArgFunction = 2,
-  ObjectResultFunction = 3,
+  StringArgFunction = 0,
+  ObjectArgFunction = 1,
+  ObjectResultFunction = 2,
+  NestedObjectArgFunction = 3,
+  NestedObjectResultFunction = 4,
 }

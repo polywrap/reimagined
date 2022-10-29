@@ -156,7 +156,26 @@ pub fn generate_bindings(input_path: String, output_path: String) -> Result<(), 
                                 as_type_init: "\"\"".to_string(),
                                 msg_pack_type_name: "String".to_string(),
                             }
-                        }).collect() 
+                        })
+                        .collect(),
+                    non_scalar_fields: x.fields
+                        .iter()
+                        .enumerate()
+                        .map(|(i, arg)| {
+                            SerializationArgInfo {
+                                first: if i == 0 { true } else { false },
+                                last: if i == x.fields.len() - 1 { true } else { false },
+                                required: false,
+                                object: false,
+                                scalar: SCALAR_TYPE_NAMES.contains(&arg.type_name.as_str()),
+                                name: arg.name.to_string(),
+                                as_type_name: arg.type_name.to_string(),
+                                as_type_init: "\"\"".to_string(),
+                                msg_pack_type_name: "String".to_string(),
+                            }
+                        })
+                        .filter(|arg| !arg.scalar)
+                        .collect() 
                 }
             })
             .collect()
@@ -227,6 +246,7 @@ pub struct SerializationArgInfo {
 pub struct SerializationType {
   pub name: String,
   pub fields: Vec<SerializationArgInfo>,
+  pub non_scalar_fields: Vec<SerializationArgInfo>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]

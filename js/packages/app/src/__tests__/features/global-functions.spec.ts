@@ -1,46 +1,8 @@
-import { IWrapPackage, IWrapper} from "@polywrap/reim-wrap";
+import { IWrapper} from "@polywrap/reim-wrap";
 import { FileSystemLoader } from "../FileSystemLoader";
+import { GlobalFunctionExample } from "./polywrap/global-function-example";
 
 jest.setTimeout(200000);
-
-export interface StringArgFunctionArgs {
-  arg: string
-};
-
-export interface ObjectArgFunctionArgs {
-  arg: TestObject
-};
-
-export interface ObjectResultFunctionArgs {
-  arg: TestObject
-};
-
-export interface TestObject {
-  str: string,
-  num: number
-}
-
-export class GlobalFunctionExample {
-  constructor(private readonly __wrapper: IWrapper) {}
-
-  static from(wrapper: IWrapper) {
-    return new GlobalFunctionExample(wrapper);
-  }
-
-  functions() {
-    return {
-      stringArgFunction: async (arg: string): Promise<string> => {
-        return await this.__wrapper.invokeGlobalFunction<StringArgFunctionArgs, string>("stringArgFunction", { arg });
-      },
-      objectArgFunction: async (arg: { str: string, num: number }): Promise<string> => {
-        return await this.__wrapper.invokeGlobalFunction<ObjectArgFunctionArgs, string>("objectArgFunction", { arg });
-      },
-      objectResultFunction: async (arg: TestObject): Promise<TestObject> => {
-        return await this.__wrapper.invokeGlobalFunction<ObjectResultFunctionArgs, TestObject>("objectResultFunction", { arg });
-      },
-    };
-  }
-}
 
 describe("Global functions", () => {
   it("can invoke a global function with string arg", async () => {
@@ -109,6 +71,73 @@ describe("Global functions", () => {
     expect(result).toEqual({
       str: "test",
       num: 1
+    });
+  });
+
+  it("can invoke a global function with nested object arg", async () => {
+    const loader = new FileSystemLoader();
+    
+    const loadResult = await loader.load(`${__dirname}/wrappers/global-function-example/build`);
+
+    if (!loadResult.ok) {
+      throw loadResult.error;
+    }
+
+    const wrapPackage = loadResult.value;
+    const wrapper: IWrapper = await wrapPackage.createWrapper();
+    const exampleWrapper = GlobalFunctionExample.from(wrapper);
+
+    const { nestedObjectArgFunction } = exampleWrapper.functions();
+
+    const result = await nestedObjectArgFunction({
+      obj1: {
+        str: "test1",
+        num: 1
+      },
+      obj2: {
+        str2: "test2",
+        num2: 2
+      }
+    });
+
+    expect(result).toEqual("test1 1 test2 2");
+  });
+
+  it("can invoke a global function with nested object result", async () => {
+    const loader = new FileSystemLoader();
+    
+    const loadResult = await loader.load(`${__dirname}/wrappers/global-function-example/build`);
+
+    if (!loadResult.ok) {
+      throw loadResult.error;
+    }
+
+    const wrapPackage = loadResult.value;
+    const wrapper: IWrapper = await wrapPackage.createWrapper();
+    const exampleWrapper = GlobalFunctionExample.from(wrapper);
+
+    const { nestedObjectResultFunction } = exampleWrapper.functions();
+
+    const result = await nestedObjectResultFunction({
+      obj1: {
+        str: "test1",
+        num: 1
+      },
+      obj2: {
+        str2: "test2",
+        num2: 2
+      }
+    });
+
+    expect(result).toEqual({
+      obj1: {
+        str: "test1",
+        num: 1
+      },
+      obj2: {
+        str2: "test2",
+        num2: 2
+      }
     });
   });
 });

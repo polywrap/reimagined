@@ -2,7 +2,7 @@
   "name": "@polywrap/global-function-example",
   "private": true,
   "scripts": {
-    "prebuild": "rimraf ./build && mkdir ./build",
+    "prebuild": "rimraf ./build && yarn codegen && mkdir ./build",
     "build": "docker container prune -f && docker build -f Dockerfile -t reim-new-wrapper . && docker run --rm reim-new-wrapper /bin/bash -c \"ls /project/build\" && docker create -ti --name root-reim-new-wrapper reim-new-wrapper && docker cp root-reim-new-wrapper:/project/build/wrap.wasm build/wrap.wasm",
     "postbuild": "reim_cli manifest",
     "codegen": "reim_cli wrapper"

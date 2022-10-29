@@ -4,6 +4,8 @@ import {
   stringArgFunctionWrapped,
   objectArgFunctionWrapped,
   objectResultFunctionWrapped,
+  nestedObjectArgFunctionWrapped,
+  nestedObjectResultFunctionWrapped,
 } from "./functions";
 
 export function invokeGlobalFunction(buffer: ArrayBuffer): ArrayBuffer {
@@ -17,6 +19,10 @@ export function invokeGlobalFunction(buffer: ArrayBuffer): ArrayBuffer {
       return objectArgFunctionWrapped(dataBuffer);
     case GlobalFunction.ObjectResultFunction:
       return objectResultFunctionWrapped(dataBuffer);
+    case GlobalFunction.NestedObjectArgFunction:
+      return nestedObjectArgFunctionWrapped(dataBuffer);
+    case GlobalFunction.NestedObjectResultFunction:
+      return nestedObjectResultFunctionWrapped(dataBuffer);
     default:
       throw new Error("Unknown function");
   }

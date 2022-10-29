@@ -1,3 +1,4 @@
+
 @serializable
 export class TestObject {
   str: string;

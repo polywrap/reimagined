@@ -23,7 +23,7 @@ export class WasmWrapper implements IWrapper {
   async invokeGlobalFunction<TArgs, TData>(funcName: string, args: TArgs): Promise<TData> {
     const argsBuffer = this.parseArgsAndExtractReferences(args);
 
-    const funcInfo = getFuncInfo(funcName, this.manifest);
+    const funcInfo = getGlobalFunctionInfo(funcName, this.manifest);
     const inputBuffer = concat([
       u32ToBuffer(WrapperFunctionV_0_1.InvokeGlobalFunction),
       u32ToBuffer(funcInfo.id),
@@ -144,17 +144,18 @@ export const bufferToU32 = (buffer: Uint8Array): number => {
   return new DataView(buffer.buffer).getUint32(0);
 };
 
-export const getFuncInfo = (funcName: string, manifest: IWrapManifest): {
+export const getGlobalFunctionInfo = (funcName: string, manifest: IWrapManifest): {
   id: number;
   func: IFunction
 } => {
-  const func = manifest.abi.find((func) => func.type === "function" && func.name === funcName);
+  const globalFunctions = manifest.abi.filter(x => x.type === "function");
+  const func = globalFunctions.find(x => x.name === funcName);
   if (!func) {
     throw new Error(`Function ${funcName} not found`);
   }
 
   return {
-    id: manifest.abi.indexOf(func),
+    id: globalFunctions.indexOf(func),
     func: func as IFunction,
   };
 };
