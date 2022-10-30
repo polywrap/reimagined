@@ -10,20 +10,20 @@ import { ObjectWithChildren } from "./ObjectWithChildren";
 export class GlobalFunctionExample {
   static from(wrapper: IWrapper) {
     return {
-      stringArgFunction: async (arg: string): Promise<string> => {
-        return await wrapper.invokeGlobalFunction<StringArgFunctionArgs, string>("stringArgFunction", { arg });
+      stringArgFunction: (arg: string): Promise<string> => {
+        return wrapper.invokeGlobalFunction<StringArgFunctionArgs, string>("stringArgFunction", { arg });
       },
-      objectArgFunction: async (arg: TestObject): Promise<string> => {
-        return await wrapper.invokeGlobalFunction<ObjectArgFunctionArgs, string>("objectArgFunction", { arg });
+      objectArgFunction: (arg: TestObject): Promise<string> => {
+        return wrapper.invokeGlobalFunction<ObjectArgFunctionArgs, string>("objectArgFunction", { arg });
       },
-      objectResultFunction: async (arg: TestObject): Promise<TestObject> => {
-        return await wrapper.invokeGlobalFunction<ObjectResultFunctionArgs, TestObject>("objectResultFunction", { arg });
+      objectResultFunction: (arg: TestObject): Promise<TestObject> => {
+        return wrapper.invokeGlobalFunction<ObjectResultFunctionArgs, TestObject>("objectResultFunction", { arg });
       },
-      nestedObjectArgFunction: async (arg: ObjectWithChildren): Promise<string> => {
-        return await wrapper.invokeGlobalFunction<NestedObjectArgFunctionArgs, string>("nestedObjectArgFunction", { arg });
+      nestedObjectArgFunction: (arg: ObjectWithChildren): Promise<string> => {
+        return wrapper.invokeGlobalFunction<NestedObjectArgFunctionArgs, string>("nestedObjectArgFunction", { arg });
       },
-      nestedObjectResultFunction: async (arg: ObjectWithChildren): Promise<ObjectWithChildren> => {
-        return await wrapper.invokeGlobalFunction<NestedObjectResultFunctionArgs, ObjectWithChildren>("nestedObjectResultFunction", { arg });
+      nestedObjectResultFunction: (arg: ObjectWithChildren): Promise<ObjectWithChildren> => {
+        return wrapper.invokeGlobalFunction<NestedObjectResultFunctionArgs, ObjectWithChildren>("nestedObjectResultFunction", { arg });
       },
     };
   }
