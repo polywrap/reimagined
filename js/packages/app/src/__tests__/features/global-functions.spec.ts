@@ -16,9 +16,9 @@ describe("Global functions", () => {
 
     const wrapPackage = loadResult.value;
     const wrapper: IWrapper = await wrapPackage.createWrapper();
-    const exampleWrapper = GlobalFunctionExample.from(wrapper);
+    const typedWrapper = GlobalFunctionExample.from(wrapper);
 
-    const { stringArgFunction } = exampleWrapper.functions();
+    const { stringArgFunction } = typedWrapper.functions();
 
     const result = await stringArgFunction("test");
 
@@ -36,9 +36,9 @@ describe("Global functions", () => {
 
     const wrapPackage = loadResult.value;
     const wrapper: IWrapper = await wrapPackage.createWrapper();
-    const exampleWrapper = GlobalFunctionExample.from(wrapper);
+    const typedWrapper = GlobalFunctionExample.from(wrapper);
 
-    const { objectArgFunction } = exampleWrapper.functions();
+    const { objectArgFunction } = typedWrapper.functions();
 
     const result = await objectArgFunction({
       str: "test",
@@ -59,9 +59,9 @@ describe("Global functions", () => {
 
     const wrapPackage = loadResult.value;
     const wrapper: IWrapper = await wrapPackage.createWrapper();
-    const exampleWrapper = GlobalFunctionExample.from(wrapper);
+    const typedWrapper = GlobalFunctionExample.from(wrapper);
 
-    const { objectResultFunction } = exampleWrapper.functions();
+    const { objectResultFunction } = typedWrapper.functions();
 
     const result = await objectResultFunction({
       str: "test",
@@ -85,9 +85,9 @@ describe("Global functions", () => {
 
     const wrapPackage = loadResult.value;
     const wrapper: IWrapper = await wrapPackage.createWrapper();
-    const exampleWrapper = GlobalFunctionExample.from(wrapper);
+    const typedWrapper = GlobalFunctionExample.from(wrapper);
 
-    const { nestedObjectArgFunction } = exampleWrapper.functions();
+    const { nestedObjectArgFunction } = typedWrapper.functions();
 
     const result = await nestedObjectArgFunction({
       obj1: {
@@ -114,9 +114,9 @@ describe("Global functions", () => {
 
     const wrapPackage = loadResult.value;
     const wrapper: IWrapper = await wrapPackage.createWrapper();
-    const exampleWrapper = GlobalFunctionExample.from(wrapper);
+    const typedWrapper = GlobalFunctionExample.from(wrapper);
 
-    const { nestedObjectResultFunction } = exampleWrapper.functions();
+    const { nestedObjectResultFunction } = typedWrapper.functions();
 
     const result = await nestedObjectResultFunction({
       obj1: {
