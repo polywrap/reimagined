@@ -1,4 +1,4 @@
-import { IWrapper} from "@polywrap/reim-wrap";
+import { IWrapPackage, IWrapper} from "@polywrap/reim-wrap";
 import { FileSystemLoader } from "../FileSystemLoader";
 import { GlobalFunctionExample } from "./polywrap/global-function-example";
 
@@ -17,7 +17,7 @@ describe("Global functions", () => {
       throw loadResult.error;
     }
 
-    const wrapPackage = loadResult.value;
+    const wrapPackage: IWrapPackage = loadResult.value;
     const wrapper: IWrapper = await wrapPackage.createWrapper();
 
     const { stringArgFunction } = GlobalFunctionExample.from(wrapper);
@@ -36,7 +36,7 @@ describe("Global functions", () => {
       throw loadResult.error;
     }
 
-    const wrapPackage = loadResult.value;
+    const wrapPackage: IWrapPackage = loadResult.value;
     const wrapper: IWrapper = await wrapPackage.createWrapper();
 
     const { objectArgFunction } = GlobalFunctionExample.from(wrapper);
@@ -58,7 +58,7 @@ describe("Global functions", () => {
       throw loadResult.error;
     }
 
-    const wrapPackage = loadResult.value;
+    const wrapPackage: IWrapPackage = loadResult.value;
     const wrapper: IWrapper = await wrapPackage.createWrapper();
 
     const { objectResultFunction } = GlobalFunctionExample.from(wrapper);
@@ -83,7 +83,7 @@ describe("Global functions", () => {
       throw loadResult.error;
     }
 
-    const wrapPackage = loadResult.value;
+    const wrapPackage: IWrapPackage = loadResult.value;
     const wrapper: IWrapper = await wrapPackage.createWrapper();
 
     const { nestedObjectArgFunction } = GlobalFunctionExample.from(wrapper);
@@ -111,7 +111,7 @@ describe("Global functions", () => {
       throw loadResult.error;
     }
 
-    const wrapPackage = loadResult.value;
+    const wrapPackage: IWrapPackage = loadResult.value;
     const wrapper: IWrapper = await wrapPackage.createWrapper();
 
     const { nestedObjectResultFunction } = GlobalFunctionExample.from(wrapper);
