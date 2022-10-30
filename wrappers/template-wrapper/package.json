@@ -7,7 +7,8 @@
   },
   "dependencies": {
     "@polywrap/wasm-as": "0.3.0",
-    "assemblyscript": "0.19.1"
+    "assemblyscript": "0.19.1",
+    "@serial-as/json": "1.0.2"
   },
   "devDependencies": {
     "polywrap": "0.3.0",

@@ -1,4 +1,3 @@
-
 @external("wrap", "__dt_fill_input_buffer")
 export declare function __dt_fill_input_buffer(buffer_ptr: u32): void; 
 

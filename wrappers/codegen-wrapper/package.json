@@ -2,14 +2,15 @@
   "name": "@polywrap/reim-new-wrapper",
   "private": true,
   "scripts": {
-    "prebuild": "rimraf ./build && mkdir ./build && yarn codegen",
+    "prebuild": "rimraf ./build && yarn codegen && mkdir ./build",
     "build": "docker container prune -f && docker build -f Dockerfile -t reim-new-wrapper . && docker run --rm reim-new-wrapper /bin/bash -c \"ls /project/build\" && docker create -ti --name root-reim-new-wrapper reim-new-wrapper && docker cp root-reim-new-wrapper:/project/build/wrap.wasm build/wrap.wasm",
     "postbuild": "reim_cli manifest",
     "codegen": "reim_cli wrapper"
   },
   "dependencies": {
     "@polywrap/wasm-as": "0.3.0",
-    "assemblyscript": "0.19.1"
+    "assemblyscript": "0.19.1",
+    "@serial-as/json": "1.0.2"
   },
   "devDependencies": {
     "polywrap": "0.3.0",

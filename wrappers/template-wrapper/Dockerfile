@@ -31,7 +31,8 @@ COPY ./package.json ./package.json
 RUN ./node_modules/.bin/asc src/polywrap/dt/exports.ts \
     --path ./node_modules \
     --outFile ./build/wrap.wasm \
-    # --use abort=src/wrap/main/wrapAbort \
+    --use abort=src/polywrap/dt/main/wrapAbort \
+    --transform @serial-as/transform \
     --optimize --debug --importMemory \
     --runtime stub \
     --runPasses asyncify

@@ -6,7 +6,7 @@ export function concat(dataBuffer1: ArrayBuffer, dataBuffer2: ArrayBuffer): Arra
     // tmp.set<ArrayBuffer>(dataBuffer2, dataBuffer1.byteLength);
   
     const buffer = new ArrayBuffer(dataBuffer1.byteLength + dataBuffer2.byteLength);
-    const encoder = new DataView(buffer, dataBuffer1.byteLength + dataBuffer2.byteLength);
+    const encoder = new DataView(buffer, 0, dataBuffer1.byteLength + dataBuffer2.byteLength);
     encoder.setBytes(dataBuffer1);
     encoder.setBytes(dataBuffer2);
   
