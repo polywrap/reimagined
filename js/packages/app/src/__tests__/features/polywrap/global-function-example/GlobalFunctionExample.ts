@@ -8,28 +8,22 @@ import { TestObject } from "./TestObject";
 import { ObjectWithChildren } from "./ObjectWithChildren";
 
 export class GlobalFunctionExample {
-  constructor(private readonly __wrapper: IWrapper) { }
-
   static from(wrapper: IWrapper) {
-    return new GlobalFunctionExample(wrapper);
-  }
-
-  functions() {
     return {
       stringArgFunction: async (arg: string): Promise<string> => {
-        return await this.__wrapper.invokeGlobalFunction<StringArgFunctionArgs, string>("stringArgFunction", { arg });
+        return await wrapper.invokeGlobalFunction<StringArgFunctionArgs, string>("stringArgFunction", { arg });
       },
       objectArgFunction: async (arg: TestObject): Promise<string> => {
-        return await this.__wrapper.invokeGlobalFunction<ObjectArgFunctionArgs, string>("objectArgFunction", { arg });
+        return await wrapper.invokeGlobalFunction<ObjectArgFunctionArgs, string>("objectArgFunction", { arg });
       },
       objectResultFunction: async (arg: TestObject): Promise<TestObject> => {
-        return await this.__wrapper.invokeGlobalFunction<ObjectResultFunctionArgs, TestObject>("objectResultFunction", { arg });
+        return await wrapper.invokeGlobalFunction<ObjectResultFunctionArgs, TestObject>("objectResultFunction", { arg });
       },
       nestedObjectArgFunction: async (arg: ObjectWithChildren): Promise<string> => {
-        return await this.__wrapper.invokeGlobalFunction<NestedObjectArgFunctionArgs, string>("nestedObjectArgFunction", { arg });
+        return await wrapper.invokeGlobalFunction<NestedObjectArgFunctionArgs, string>("nestedObjectArgFunction", { arg });
       },
       nestedObjectResultFunction: async (arg: ObjectWithChildren): Promise<ObjectWithChildren> => {
-        return await this.__wrapper.invokeGlobalFunction<NestedObjectResultFunctionArgs, ObjectWithChildren>("nestedObjectResultFunction", { arg });
+        return await wrapper.invokeGlobalFunction<NestedObjectResultFunctionArgs, ObjectWithChildren>("nestedObjectResultFunction", { arg });
       },
     };
   }

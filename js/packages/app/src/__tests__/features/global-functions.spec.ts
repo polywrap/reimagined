@@ -19,9 +19,8 @@ describe("Global functions", () => {
 
     const wrapPackage = loadResult.value;
     const wrapper: IWrapper = await wrapPackage.createWrapper();
-    const typedWrapper = GlobalFunctionExample.from(wrapper);
 
-    const { stringArgFunction } = typedWrapper.functions();
+    const { stringArgFunction } = GlobalFunctionExample.from(wrapper);
 
     const result = await stringArgFunction("test");
 
@@ -39,9 +38,8 @@ describe("Global functions", () => {
 
     const wrapPackage = loadResult.value;
     const wrapper: IWrapper = await wrapPackage.createWrapper();
-    const typedWrapper = GlobalFunctionExample.from(wrapper);
 
-    const { objectArgFunction } = typedWrapper.functions();
+    const { objectArgFunction } = GlobalFunctionExample.from(wrapper);
 
     const result = await objectArgFunction({
       str: "test",
@@ -62,9 +60,8 @@ describe("Global functions", () => {
 
     const wrapPackage = loadResult.value;
     const wrapper: IWrapper = await wrapPackage.createWrapper();
-    const typedWrapper = GlobalFunctionExample.from(wrapper);
 
-    const { objectResultFunction } = typedWrapper.functions();
+    const { objectResultFunction } = GlobalFunctionExample.from(wrapper);
 
     const result = await objectResultFunction({
       str: "test",
@@ -88,9 +85,8 @@ describe("Global functions", () => {
 
     const wrapPackage = loadResult.value;
     const wrapper: IWrapper = await wrapPackage.createWrapper();
-    const typedWrapper = GlobalFunctionExample.from(wrapper);
 
-    const { nestedObjectArgFunction } = typedWrapper.functions();
+    const { nestedObjectArgFunction } = GlobalFunctionExample.from(wrapper);
 
     const result = await nestedObjectArgFunction({
       obj1: {
@@ -117,9 +113,8 @@ describe("Global functions", () => {
 
     const wrapPackage = loadResult.value;
     const wrapper: IWrapper = await wrapPackage.createWrapper();
-    const typedWrapper = GlobalFunctionExample.from(wrapper);
 
-    const { nestedObjectResultFunction } = typedWrapper.functions();
+    const { nestedObjectResultFunction } = GlobalFunctionExample.from(wrapper);
 
     const result = await nestedObjectResultFunction({
       obj1: {
