@@ -3,7 +3,7 @@ import { IFunction, IWrapper, IWrapManifest } from "@polywrap/reim-wrap";
 import { IDataTranslator } from "./IDataTranslator";
 import { IDtInstance } from "@polywrap/reim-dt";
 import { IDtReceiver } from "./IDtReceiver";
-import { WrapperFunctionV_0_1 } from "./wrapper-functions/WrapperFunctionV_0_1";
+import { WrapperResourceV_0_1 } from "./wrapper-resources/WrapperResourceV_0_1";
 
 export class WasmWrapper implements IWrapper {
   private classInstanceCount: number = 0;
@@ -25,7 +25,7 @@ export class WasmWrapper implements IWrapper {
 
     const funcInfo = getGlobalFunctionInfo(funcName, this.manifest);
     const inputBuffer = concat([
-      u32ToBuffer(WrapperFunctionV_0_1.InvokeGlobalFunction),
+      u32ToBuffer(WrapperResourceV_0_1.InvokeGlobalFunction),
       u32ToBuffer(funcInfo.id),
       argsBuffer,
     ]);

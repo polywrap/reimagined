@@ -1,7 +1,5 @@
 
-import { HostFunction } from "../wrap/host-functions/HostFunction";
-import { invoke_host_function } from "../wrap/host-functions/invoke_host_function";
-import { wrap_log } from "../wrap/host-functions/wrap_log";
+import { wrap_log } from "../wrap/host-resources/wrap_log";
 import { __dt_fill_input_buffer } from "./imports";
 import { receive } from "./main";
 

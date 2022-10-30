@@ -1,4 +1,4 @@
 // eslint-disable-next-line @typescript-eslint/naming-convention
-export enum WrapperFunctionV_0_1 {
-  InvokeGlobalFunction = 0,
+export enum HostResourceV_0_1 {
+  Log = 0,
 }

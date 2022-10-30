@@ -1,3 +1,3 @@
-export enum WrapperFunction {
+export enum WrapperResource {
   InvokeGlobalFunction = 0,
 }

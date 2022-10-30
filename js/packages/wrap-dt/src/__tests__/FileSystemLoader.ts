@@ -1,29 +1,12 @@
 import { IPackageLoader } from "@polywrap/reim-loader";
-import { IWrapPackage, IWrapManifest } from "@polywrap/reim-wrap";
-
+import { IWrapPackage } from "@polywrap/reim-wrap";
+import { Result } from "@polywrap/result";
 import fs from "fs";
+
 import { WasmPackageBuilder } from "../WasmPackageBuilder";
-import { DtInstanceBuilder } from "../DtInstanceBuilder";
 import { ManifestFeatureManager } from "../ManifestFeatureManager";
 import { composeFileReader } from "../helpers/composeFileReader";
-import { Result } from "@polywrap/result";
-
-const hardCodedManifest: IWrapManifest = {
-  version: "0.1.0",
-  abi: [
-    {
-      type: "function",
-      name: "simpleMethod",
-      args: [
-        {
-          name: "arg",
-          typeName: "string"
-        }
-      ],
-      returnType: "string"
-    }
-  ]
-};
+import { DtInstanceBuilder } from "./DtInstanceBuilder";
 
 export class FileSystemLoader implements IPackageLoader {
   async load(packagePath: string): Promise<Result<IWrapPackage, Error>> {

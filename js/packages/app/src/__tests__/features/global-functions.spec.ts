@@ -4,11 +4,14 @@ import { GlobalFunctionExample } from "./polywrap/global-function-example";
 
 jest.setTimeout(200000);
 
+//TODO: build this before the tests (currently needs to be manually built)
+const wrapperPath = `${__dirname}/wrappers/global-function-example/build`;
+
 describe("Global functions", () => {
   it("can invoke a global function with string arg", async () => {
     const loader = new FileSystemLoader();
     
-    const loadResult = await loader.load(`${__dirname}/wrappers/global-function-example/build`);
+    const loadResult = await loader.load(wrapperPath);
 
     if (!loadResult.ok) {
       throw loadResult.error;
@@ -28,7 +31,7 @@ describe("Global functions", () => {
   it("can invoke a global function with object arg", async () => {
     const loader = new FileSystemLoader();
     
-    const loadResult = await loader.load(`${__dirname}/wrappers/global-function-example/build`);
+    const loadResult = await loader.load(wrapperPath);
 
     if (!loadResult.ok) {
       throw loadResult.error;
@@ -51,7 +54,7 @@ describe("Global functions", () => {
   it("can invoke a global function with object result", async () => {
     const loader = new FileSystemLoader();
     
-    const loadResult = await loader.load(`${__dirname}/wrappers/global-function-example/build`);
+    const loadResult = await loader.load(wrapperPath);
 
     if (!loadResult.ok) {
       throw loadResult.error;
@@ -77,7 +80,7 @@ describe("Global functions", () => {
   it("can invoke a global function with nested object arg", async () => {
     const loader = new FileSystemLoader();
     
-    const loadResult = await loader.load(`${__dirname}/wrappers/global-function-example/build`);
+    const loadResult = await loader.load(wrapperPath);
 
     if (!loadResult.ok) {
       throw loadResult.error;
@@ -106,7 +109,7 @@ describe("Global functions", () => {
   it("can invoke a global function with nested object result", async () => {
     const loader = new FileSystemLoader();
     
-    const loadResult = await loader.load(`${__dirname}/wrappers/global-function-example/build`);
+    const loadResult = await loader.load(wrapperPath);
 
     if (!loadResult.ok) {
       throw loadResult.error;

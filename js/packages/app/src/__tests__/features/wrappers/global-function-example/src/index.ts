@@ -1,4 +1,4 @@
-import { wrap_log } from "./polywrap/wrap/host-functions/wrap_log";
+import { wrap_log } from "./polywrap/wrap/host-resources/wrap_log";
 import { ObjectWithChildren } from "./polywrap/wrapped/types/ObjectWithChildren";
 import { TestObject } from "./polywrap/wrapped/types/TestObject";
 

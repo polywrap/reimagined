@@ -3,6 +3,7 @@ import { IWrapPackage } from "@polywrap/reim-wrap";
 
 jest.setTimeout(200000);
 
+//TODO: build this before the tests (currently needs to be manually built)
 const wrapperPath = `${__dirname}/wrappers/simple-wrapper/build`;
 
 describe("Sanity", () => {
