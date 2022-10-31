@@ -49,7 +49,8 @@ pub fn parse_schema(source: String) -> WrapAbi {
                             methods.push(FunctionType {
                               name: field_name,
                               args: args,
-                              return_type: get_named_type(&field_def_node, &source)
+                              return_type: get_named_type(&field_def_node, &source),
+                              is_instance: if let Some(x) = get_directive(&field_def_node, &source) && x == "instance" { true } else { false },
                             });
                           } else {
                             fields.push(FieldInfo {
@@ -159,7 +160,19 @@ fn get_named_type(node: &Node, source: &str) -> String {
     panic!("NamedType of node not found");
     }
 
-    name.unwrap()
+  name.unwrap()
+}
+
+
+fn get_directive(node: &Node, source: &str) -> Option<String> {
+  let mut name: Option<String> = None;
+
+  walk(&mut node.walk(), "Directive", &mut |name_node| {
+  name = Some(get_name_from_node(&name_node, source));
+  true
+  });
+
+  name
 }
 
 fn walk<F: FnMut(Node) -> bool>(cursor: &mut TreeCursor, node_kind: &str, on_node_kind: &mut F) {
@@ -194,4 +207,21 @@ fn walk<F: FnMut(Node) -> bool>(cursor: &mut TreeCursor, node_kind: &str, on_nod
 
       println!("next");
   }
+}
+#[cfg(test)]
+mod tests {
+    use crate::{parse_schema};
+
+    #[test]
+    fn internal_function() -> Result<(), std::io::Error> {
+        let schema = "type TestClass {
+          constructor(arg: string): void
+          instanceMethod(arg: string): string @instance
+          staticMethod(arg: string): string
+        }".to_string(); 
+      
+        println!("{:?}", parse_schema(schema));
+
+        Ok(())
+    }
 }

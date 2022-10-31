@@ -1,8 +1,8 @@
-import { IFunction } from "./IFunction";
+import { IMethod } from "./IMethod";
 
 export interface IClass {
   type: "class",
   typeName: string,
   name: string,
-  methods: IFunction[]
+  methods: IMethod[]
 }

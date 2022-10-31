@@ -7,8 +7,6 @@ export function stringArgFunction(arg: string): string {
 }
 
 export function objectArgFunction(arg: TestObject): string {
-  wrap_log("objectArgFunction inside");
-  wrap_log(arg.str + " " + arg.num.toString());
   return arg.str + " " + arg.num.toString();
 }
 
@@ -20,8 +18,6 @@ export function objectResultFunction(arg: TestObject): TestObject {
 }
 
 export function nestedObjectArgFunction(arg: ObjectWithChildren): string {
-  wrap_log("objectArgFunction inside");
-  wrap_log(arg.obj1.str + " " + arg.obj1.num.toString() + " " + arg.obj2.str2 + " " + arg.obj2.num2.toString());
   return arg.obj1.str + " " + arg.obj1.num.toString() + " " + arg.obj2.str2 + " " + arg.obj2.num2.toString();
 }
 

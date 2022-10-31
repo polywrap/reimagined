@@ -28,7 +28,8 @@ pub struct PropertyInfo {
 pub struct FunctionType {
     pub name: String,
     pub args: Vec<ArgInfo>,
-    pub return_type: String
+    pub return_type: String,
+    pub is_instance: bool
 }
 
 #[derive(Serialize, Deserialize, Debug)]

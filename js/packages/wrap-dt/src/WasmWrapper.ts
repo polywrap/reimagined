@@ -1,15 +1,16 @@
 import { ResultOk, Result } from "@polywrap/result";
-import { IFunction, IWrapper, IWrapManifest } from "@polywrap/reim-wrap";
+import { IFunction, IWrapper, IWrapManifest, IClass, IMethod } from "@polywrap/reim-wrap";
 import { IDataTranslator } from "./IDataTranslator";
 import { IDtInstance } from "@polywrap/reim-dt";
 import { IDtReceiver } from "./IDtReceiver";
 import { WrapperResourceV_0_1 } from "./wrapper-resources/WrapperResourceV_0_1";
+import { WrapperResourceV_0_2 } from "./wrapper-resources/WrapperResourceV_0_2";
 
 export class WasmWrapper implements IWrapper {
-  private classInstanceCount: number = 0;
-  private classInstances: Map<number, {
+  private objectReferenceCount: number = 0;
+  private objectReferences: Map<number, {
     className: string;
-    classInstance: any
+    objectReference: any
   }> = new Map();
 
   constructor(
@@ -36,12 +37,41 @@ export class WasmWrapper implements IWrapper {
       this.dtReceiver.onReceive
     );
 
-    if (funcInfo.func.returnType === "void") {
+    if (funcInfo.funcInfo.returnType === "void") {
       return (undefined as unknown) as TData;
     }
 
     console.log("invokeGlobalFunction", resultBuffer);
     console.log("invokeGlobalFunction", new TextDecoder().decode(resultBuffer));
+
+    return this.dataTranslator.decode(resultBuffer) as TData;
+  }
+
+  async invokeClassMethod<TArgs, TData>(className: string, methodName: string, args: TArgs): Promise<TData> {
+    const argsBuffer = this.parseArgsAndExtractReferences(args);
+
+    const classInfo = getClassInfo(className, this.manifest);
+    const methodInfo = getMethodInfo(classInfo.classInfo, methodName, this.manifest);
+    const inputBuffer = concat([
+      u32ToBuffer(WrapperResourceV_0_2.InvokeClassMethod),
+      u32ToBuffer(classInfo.id),
+      u32ToBuffer(methodInfo.id),
+      argsBuffer,
+    ]);
+
+    console.log("invokeClassMethod", {
+      classInfo,
+      methodInfo,
+    });
+
+    const resultBuffer = await this.dtInstance.send(
+      inputBuffer,
+      this.dtReceiver.onReceive
+    );
+
+    if (methodInfo.methodInfo.returnType === "void" && methodName !== "constructor") {
+      return (undefined as unknown) as TData;
+    }
 
     return this.dataTranslator.decode(resultBuffer) as TData;
   }
@@ -63,11 +93,11 @@ export class WasmWrapper implements IWrapper {
 
       if (isReference || getMethods(args).length) {
         newObj.__wrapInstancePtr = 0; 
-        const count = ++this.classInstanceCount;
-        newObj.__classInstancePtr = count; 
-        this.classInstances.set(count, {
+        const count = ++this.objectReferenceCount;
+        newObj.__objectReferencePtr = count; 
+        this.objectReferences.set(count, {
           className: "",
-          classInstance: args
+          objectReference: args
         });
       }
 
@@ -88,7 +118,7 @@ export class WasmWrapper implements IWrapper {
       let isReference = false;
 
       for (const key of Object.keys(resultObj)) {
-        if (resultObj[key] === "__classInstancePtr") {
+        if (resultObj[key] === "__objectReferencePtr") {
           isReference = true;
         }
 
@@ -146,16 +176,50 @@ export const bufferToU32 = (buffer: Uint8Array): number => {
 
 export const getGlobalFunctionInfo = (funcName: string, manifest: IWrapManifest): {
   id: number;
-  func: IFunction
+  funcInfo: IFunction
 } => {
-  const globalFunctions = manifest.abi.filter(x => x.type === "function");
-  const func = globalFunctions.find(x => x.name === funcName);
-  if (!func) {
+  const items = manifest.abi.filter(x => x.type === "function");
+  const item = items.find(x => x.name === funcName);
+
+  if (!item) {
     throw new Error(`Function ${funcName} not found`);
   }
 
   return {
-    id: globalFunctions.indexOf(func),
-    func: func as IFunction,
+    id: items.indexOf(item),
+    funcInfo: item as IFunction,
+  };
+};
+
+export const getClassInfo = (className: string, manifest: IWrapManifest): {
+  id: number;
+  classInfo: IClass
+} => {
+  const items = manifest.abi.filter(x => x.type === "class");
+  const item = items.find(x => x.name === className);
+
+  if (!item) {
+    throw new Error(`Class ${className} not found`);
+  }
+
+  return {
+    id: items.indexOf(item),
+    classInfo: item as IClass,
+  };
+};
+
+export const getMethodInfo = (classInfo: IClass, methodName: string, manifest: IWrapManifest): {
+  id: number;
+  methodInfo: IMethod
+} => {
+  const index = classInfo.methods.findIndex(x => x.name === methodName);
+
+  if (index === -1) {
+    throw new Error(`Method ${methodName} not found on class ${classInfo.name}`);
+  }
+
+  return {
+    id: index,
+    methodInfo: classInfo.methods[index] as IMethod,
   };
 };
