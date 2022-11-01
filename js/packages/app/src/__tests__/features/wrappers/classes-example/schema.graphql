@@ -1,11 +1,3 @@
-type Module {
-  stringArgFunction(arg: string): string!
-  objectArgFunction(arg: TestObject): string!
-  objectResultFunction(arg: TestObject): TestObject!
-  nestedObjectArgFunction(arg: ObjectWithChildren): string!
-  nestedObjectResultFunction(arg: ObjectWithChildren): ObjectWithChildren!
-}
-
 type TestObject {
   str: string!
   num: u32!

@@ -1,0 +1,14 @@
+type Module {
+  testReturnReference(arg: string): TestInternalClass!
+}
+
+type TestInternalClass {
+  constructor(arg: string!): void
+  testInstanceMethod(arg: string!): string! @instance
+}
+
+type TestObjectGetter {
+  constructor(arg: string!): void
+  testInstanceMethod(arg: string!): TestInternalClass! @instance
+  testStaticMethod(arg: string!): TestInternalClass!
+}

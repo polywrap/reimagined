@@ -28,7 +28,7 @@ describe("Object references", () => {
       expect(object).toBeTruthy();
     });
 
-    it("can return an object reference from a static method", async () => {
+    it("can invoke an instance method on a returned object reference from a global function", async () => {
       const loader = new FileSystemLoader();
       
       const loadResult = await loader.load(wrapperPath);
@@ -40,14 +40,16 @@ describe("Object references", () => {
       const wrapPackage: IWrapPackage = loadResult.value;
       const wrapper: IWrapper = await wrapPackage.createWrapper();
 
-      const { TestObjectGetter } = ObjectReferencesExample.from(wrapper);
+      const { testGlobalFunction } = ObjectReferencesExample.from(wrapper);
 
-      const object = await TestObjectGetter.testStaticMethod("test");
+      const object = await testGlobalFunction("test 1");
 
-      expect(object).toBeTruthy();
+      const result = await object.testInstanceMethod("test 2");
+
+      expect(result).toEqual("test 1 test 2");
     });
 
-    it("can return an object reference from an instance method", async () => {
+    it("can invoke an instance method on a returned object reference from a static method", async () => {
       const loader = new FileSystemLoader();
       
       const loadResult = await loader.load(wrapperPath);
@@ -61,11 +63,34 @@ describe("Object references", () => {
 
       const { TestObjectGetter } = ObjectReferencesExample.from(wrapper);
 
-      const objectGetter = await TestObjectGetter.constructor("test");
+      const object = await TestObjectGetter.testStaticMethod("test 1");
 
-      const object = await objectGetter.testInstanceMethod("test");
+      const result = await object.testInstanceMethod("test 2");
 
-      expect(object).toBeTruthy();
+      expect(result).toEqual("test 1 test 2");
+    });
+
+    it("can invoke an instance method on a returned object reference from an instance method", async () => {
+      const loader = new FileSystemLoader();
+      
+      const loadResult = await loader.load(wrapperPath);
+
+      if (!loadResult.ok) {
+        throw loadResult.error;
+      }
+
+      const wrapPackage: IWrapPackage = loadResult.value;
+      const wrapper: IWrapper = await wrapPackage.createWrapper();
+
+      const { TestObjectGetter } = ObjectReferencesExample.from(wrapper);
+
+      const objectGetter = await TestObjectGetter.constructor("test 1");
+
+      const object = await objectGetter.testInstanceMethod("test 2");
+
+      const result = await object.testInstanceMethod("test 3");
+
+      expect(result).toEqual("test 1 test 2 test 3");
     });
   });
 
