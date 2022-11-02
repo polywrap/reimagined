@@ -1,10 +1,11 @@
-import { IWrapManifest, IWrapper, IFileReader } from "@polywrap/reim-wrap";
+import { IWrapManifest, IWrapper, IFileReader, IHost } from "@polywrap/reim-wrap";
 import { IWasmPackage } from "./IWasmPackage";
 import { WasmWrapper } from "./WasmWrapper";
 import { IDtInstanceBuilder } from "./IDtInstanceBuilder";
 import { IDataTranslator } from "./IDataTranslator";
 import { IDtReceiver } from "./IDtReceiver";
 import { Result } from "@polywrap/result";
+import { IDtInstance } from "@polywrap/reim-dt";
 
 export class WasmPackage implements IWasmPackage {
   constructor(
@@ -24,7 +25,7 @@ export class WasmPackage implements IWasmPackage {
     return await this.reader.readFile("wrap.wasm");
   }
 
-  async createWrapper(): Promise<IWrapper> {
+  async createWrapper(host?: IHost): Promise<IWrapper> {
     const moduleResult = await this.getWasmModule();
 
     if (!moduleResult.ok) {
@@ -37,7 +38,20 @@ export class WasmPackage implements IWasmPackage {
       this.manifest,
       dtInstance,
       this.dataTranslator,
-      this.dtReceiver
+      this.dtReceiver,
+      host
     );
+  }
+
+  async createInstance(): Promise<IDtInstance> {
+    const moduleResult = await this.getWasmModule();
+
+    if (!moduleResult.ok) {
+      throw moduleResult.error;
+    }
+    
+    const dtInstance = await this.dtInstanceBuilder.build(moduleResult.value);
+
+    return dtInstance;
   }
 }

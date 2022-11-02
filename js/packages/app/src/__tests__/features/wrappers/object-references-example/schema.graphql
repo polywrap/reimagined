@@ -1,8 +1,9 @@
 type Module {
   testReturnReference(arg: string): TestInternalClass!
+  testReceiveReference(arg: TestExternalClass): string!
 }
 
-type TestInternalClass {
+type TestInternalClass @reference {
   constructor(arg: string!): void
   testInstanceMethod(arg: string!): string! @instance
 }
@@ -11,4 +12,12 @@ type TestObjectGetter {
   constructor(arg: string!): void
   testInstanceMethod(arg: string!): TestInternalClass! @instance
   testStaticMethod(arg: string!): TestInternalClass!
+  testInstanceReceiveReference(arg: TestExternalClass): string! @instance
+  testStaticReceiveReference(arg: TestExternalClass): string!
+}
+
+type TestExternalClass @reference {
+  constructor(arg: string!): void
+  testInstanceMethod(arg: string!): string! @instance
+  testStaticMethod(arg: string!): string!
 }

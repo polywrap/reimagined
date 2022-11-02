@@ -1,5 +1,5 @@
 {
-  "name": "@polywrap/global-function-example",
+  "name": "@polywrap/classes-example",
   "private": true,
   "scripts": {
     "prebuild": "rimraf ./build && mkdir ./build",

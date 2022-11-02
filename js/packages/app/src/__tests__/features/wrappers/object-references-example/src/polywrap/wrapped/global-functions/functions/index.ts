@@ -1,1 +1,1 @@
-export * from "./testGlobalFunction";
+export * from "./testReturnReference";

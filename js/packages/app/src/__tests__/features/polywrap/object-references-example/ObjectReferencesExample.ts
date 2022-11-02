@@ -1,13 +1,24 @@
 import { IWrapper } from "@polywrap/reim-wrap";
+import { testStaticReceiveReferenceWrapped } from "../../wrappers/object-references-example/src/polywrap/wrapped/classes/list/TestObjectGetter/methods/testStaticReceiveReference";
+import { IObjectReference } from "./IObjectReference";
+import { ITestExternalClass } from "./ITestExternalClass";
 import { TestInstanceMethodArgs } from "./TestInstanceMethodArgs";
+import { TestInternalClass } from "./TestInternalClass";
+import { TestObjectGetter } from "./TestObjectGetter";
 
 export class ObjectReferencesExample {
   static from(wrapper: IWrapper) {
     return {
-      testGlobalFunction: async (arg: string): Promise<TestInternalClass> => {
-        const object = await wrapper.invokeGlobalFunction<TestInstanceMethodArgs, IObjectReference>("testGlobalFunction", { arg });
+      testReturnReference: async (arg: string): Promise<TestInternalClass> => {
+        const object = await wrapper.invokeGlobalFunction<TestInstanceMethodArgs, IObjectReference>("testReturnReference", { arg });
 
         return new TestInternalClass(wrapper, object.__objectReferencePtr);
+      },
+      testReceiveReference: async (arg: ITestExternalClass): Promise<string> => {
+        return await wrapper.invokeGlobalFunction<{ arg: ITestExternalClass }, string>(
+          "testReceiveReference", 
+          { arg }
+        );
       },
       TestInternalClass: {
         async constructor(arg: string): Promise<TestInternalClass> {
@@ -26,52 +37,11 @@ export class ObjectReferencesExample {
           const object = await wrapper.invokeClassMethod<TestInstanceMethodArgs, IObjectReference>("TestObjectGetter", "testStaticMethod", { arg });
 
           return new TestInternalClass(wrapper, object.__objectReferencePtr);
+        },
+        async testStaticReceiveReference(arg: ITestExternalClass): Promise<string> {
+          return wrapper.invokeClassMethod<{ arg: ITestExternalClass }, string>("TestObjectGetter", "testStaticReceiveReference", { arg });
         }
       }
     };
-  }
-}
-
-export interface IObjectReference {
-  __objectReferencePtr: number;
-}
-
-export class TestInternalClass {
-  constructor(private readonly __wrapper: IWrapper, private readonly __objectReferencePtr: number) {
-  }
-
-  testInstanceMethod(arg: string): Promise<string> {
-    return this.__wrapper.invokeClassMethod<{
-      objectReferencePtr: number;
-      args: TestInstanceMethodArgs;
-    }, string>(
-      "TestInternalClass", 
-      "testInstanceMethod", 
-      { 
-        objectReferencePtr: this.__objectReferencePtr, 
-        args: { arg } 
-      }
-    );
-  }
-}
-
-export class TestObjectGetter {
-  constructor(private readonly __wrapper: IWrapper, private readonly __objectReferencePtr: number) {
-  }
-
-  async testInstanceMethod(arg: string): Promise<TestInternalClass> {
-    const object = await this.__wrapper.invokeClassMethod<{
-      objectReferencePtr: number;
-      args: TestInstanceMethodArgs;
-    }, IObjectReference>(
-      "TestObjectGetter", 
-      "testInstanceMethod", 
-      { 
-        objectReferencePtr: this.__objectReferencePtr, 
-        args: { arg } 
-      }
-    );
-
-    return new TestInternalClass(this.__wrapper, object.__objectReferencePtr);
   }
 }

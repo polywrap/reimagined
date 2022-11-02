@@ -1,9 +1,10 @@
 import { GlobalFunction } from "./GlobalFunction";
 import { bufferToU32 } from "../../buffer";
 import { 
-  testGlobalFunctionWrapped,
+  testReturnReferenceWrapped,
 } from "./functions";
 import { wrap_log } from "../../wrap/host-resources/wrap_log";
+import { testReceiveReferenceWrapped } from "./functions/testReceiveReference";
 
 export function invokeGlobalFunction(buffer: ArrayBuffer): ArrayBuffer {
   const func = bufferToU32(buffer);
@@ -12,8 +13,10 @@ export function invokeGlobalFunction(buffer: ArrayBuffer): ArrayBuffer {
   wrap_log("invokeGlobalFunction: " + func.toString());
 
   switch (func) {
-    case GlobalFunction.TestGlobalFunction:
-      return testGlobalFunctionWrapped(dataBuffer);
+    case GlobalFunction.TestReturnReference:
+      return testReturnReferenceWrapped(dataBuffer);
+    case GlobalFunction.TestReceiveReference:
+      return testReceiveReferenceWrapped(dataBuffer);
     default:
       throw new Error("Unknown function");
   }

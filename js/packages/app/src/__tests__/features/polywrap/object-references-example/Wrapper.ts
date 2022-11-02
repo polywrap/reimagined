@@ -1,21 +1,24 @@
 import { ResultOk, Result } from "@polywrap/result";
-import { IFunction, IWrapper, IWrapManifest, IClass, IMethod, IHost } from "@polywrap/reim-wrap";
+import { IFunction, IWrapper, IWrapManifest, IClass, IMethod } from "@polywrap/reim-wrap";
 import { IDataTranslator } from "./IDataTranslator";
 import { IDtInstance } from "@polywrap/reim-dt";
 import { IDtReceiver } from "./IDtReceiver";
 import { WrapperResourceV_0_1 } from "./wrapper-resources/WrapperResourceV_0_1";
 import { WrapperResourceV_0_2 } from "./wrapper-resources/WrapperResourceV_0_2";
 
-export class WasmWrapper implements IWrapper {
+export class Wrapper implements IWrapper {
   private objectReferenceCount: number = 0;
-  private trackedReferenceMap: Map<number, unknown> = new Map();
+  private objectReferences: Map<number, {
+    className: string;
+    objectReference: any
+  }> = new Map();
+  private classes: Map<string, IClass> = new Map();
 
   constructor(
     private readonly manifest: IWrapManifest, 
     private readonly dtInstance: IDtInstance, 
     private readonly dataTranslator: IDataTranslator,
     private readonly dtReceiver: IDtReceiver,
-    private readonly host: IHost | undefined
   ) {
   }
 
@@ -32,7 +35,7 @@ export class WasmWrapper implements IWrapper {
 
     const resultBuffer = await this.dtInstance.send(
       inputBuffer,
-      (buffer) => this.dtReceiver.onReceive(buffer, this.host, this.trackedReferenceMap)
+      (buffer) => this.dtReceiver.onReceive(buffer, this)
     );
 
     if (funcInfo.funcInfo.returnType === "void") {
@@ -64,7 +67,7 @@ export class WasmWrapper implements IWrapper {
 
     const resultBuffer = await this.dtInstance.send(
       inputBuffer,
-      (buffer) => this.dtReceiver.onReceive(buffer, this.host, this.trackedReferenceMap)
+      (buffer) => this.dtReceiver.onReceive(buffer, this)
     );
 
     if (methodInfo.methodInfo.returnType === "void" && methodName !== "constructor") {
@@ -74,37 +77,49 @@ export class WasmWrapper implements IWrapper {
     return this.dataTranslator.decode(resultBuffer) as TData;
   }
 
+  async invokeHostClassMethod<TArgs, TData>(buffer: Uint8Array): Promise<TData> {
+    const classType = bufferToU32(buffer);
+    const method = bufferToU32(buffer, 4);
+    const dataBuffer = buffer.slice(8);
+
+    // const resultBuffer = await this.externalObjectManager.invokeClassMethod(classType, method, dataBuffer);
+
+    // return this.dataTranslator.decode(resultBuffer) as TData;
+    return (undefined as unknown) as TData;
+  }
+
   parseArgsAndExtractReferences(args: any): Uint8Array {
-    if (!!args && typeof args === "object") {
-      const parsedArgs = this.extractAndReplaceReferences(args);
+    if (!!args && typeof args === "object" && !Array.isArray(args)) {
+      const newObj: any = {};
+      let isReference = false;
+      for (const key of Object.keys(args)) {
+        if (args[key] === "__objectReferencePtr") {
+          isReference = true;
+          newObj[key] = args[key];
+        } else if(typeof args[key] === "function") {
+          isReference = true;
+        } else {
+          newObj[key] = args[key];
+        }
+      }
 
-      const result = this.dataTranslator.encode(parsedArgs);
+      if (isReference || getMethods(args).length) {
+        newObj.__wrapInstancePtr = 0; 
+        const count = ++this.objectReferenceCount;
+        newObj.__objectReferencePtr = count; 
+        this.objectReferences.set(count, {
+          className: "",
+          objectReference: args
+        });
+      }
 
-      return result;
+      const ret = this.dataTranslator.encode(newObj);
+
+      return ret;
     } else {
       console.log("parseArgsAndExtractReferences not a match");
       return this.dataTranslator.encode(args);
     }
-  }
-
-  extractAndReplaceReferences(obj: any): any {
-    const newObj: any = {};
-
-    for(var m in obj) {
-        if(typeof obj[m] == "function") {
-          const ptr = this.objectReferenceCount++;
-          
-          newObj.__objectReferencePtr = ptr; 
-          
-          this.trackedReferenceMap.set(ptr, obj);
-        } else if (typeof obj[m] === "object") {
-          newObj[m] = this.extractAndReplaceReferences(obj[m])
-        } else {
-          newObj[m] = obj[m];
-        }
-    }
-
-    return newObj;
   }
 
   decodeResult<TData>(resultBuffer: Uint8Array): Result<TData, string> {
@@ -131,6 +146,16 @@ export class WasmWrapper implements IWrapper {
       return ResultOk(resultObj as TData);
     }
   }
+}
+
+function getMethods(obj: any): string[] {
+  var res = [];
+  for(var m in obj) {
+      if(typeof obj[m] == "function") {
+          res.push(m)
+      }
+  }
+  return res;
 }
 
 export const concat = (array: Uint8Array[]): Uint8Array => {

@@ -1,3 +1,4 @@
 export enum GlobalFunction {
-  TestGlobalFunction = 0,
+  TestReturnReference = 0,
+  TestReceiveReference = 1,
 }
