@@ -18,14 +18,24 @@ export class DtReceiver implements IDtReceiver {
         );
 
       return new Uint8Array();
+      case HostResourceV_0_3.LogBytes:
+        console.log(dataBuffer);
+        return new Uint8Array();
       case HostResourceV_0_3.InvokeGlobalFunction:
         console.log(
           "Host: InvokeGlobalFunction",
           dataBuffer,
           new TextDecoder().decode(dataBuffer)
         );
+        console.log(
+          "aaaaaaaaaaaaa",
+        );
 
-        return new Uint8Array();
+        if (host) {
+          return host.invokeGlobalFunction(dataBuffer, trackedReferenceMap);
+        } else {
+          throw new Error("Host is not defined");
+        }
       case HostResourceV_0_3.InvokeClassMethod:
         console.log(
           "Host: InvokeClassMethod",
@@ -38,8 +48,6 @@ export class DtReceiver implements IDtReceiver {
         } else {
           throw new Error("Host is not defined");
         }
-
-        return new Uint8Array();
     }
 
     return new Uint8Array();
