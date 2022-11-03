@@ -1,4 +1,4 @@
 export enum TestInternalClassMethod {
-  Constructor = 0,
+  Create = 0,
   TestInstanceMethod = 1,
 }

@@ -3,12 +3,12 @@ type Module {
 }
 
 type TestInternalClass @reference {
-  constructor(arg: string!): void
+  create(arg: string!): void
   testInstanceMethod(arg: string!): string! @instance
 }
 
 type TestObjectGetter {
-  constructor(arg: string!): void
+  create(arg: string!): void
   testInstanceMethod(arg: string!): TestInternalClass! @instance
   testStaticMethod(arg: string!): TestInternalClass!
 }

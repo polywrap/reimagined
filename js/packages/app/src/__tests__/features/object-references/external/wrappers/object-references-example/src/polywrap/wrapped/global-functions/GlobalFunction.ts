@@ -1,5 +1,6 @@
 export enum GlobalFunction {
   TestReceiveReference = 0,
-  TestInvokeExternalStaticMethod = 1,
-  TestInvokeExternalGlobalFunction = 2,
+  TestInvokeExternalGlobalFunction = 1,
+  TestInvokeExternalStaticMethod = 2,
+  TestInvokeExternalInstanceMethod = 3,
 }

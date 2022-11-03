@@ -19,6 +19,12 @@ export class ObjectReferencesExample {
           { arg }
         );
       },
+      testInvokeExternalInstanceMethod: async (arg: string): Promise<string> => {
+        return await wrapper.invokeGlobalFunction<{ arg: string }, string>(
+          "testInvokeExternalInstanceMethod", 
+          { arg }
+        );
+      },
       testInvokeExternalStaticMethod: async (arg: string): Promise<string> => {
         return await wrapper.invokeGlobalFunction<{ arg: string }, string>(
           "testInvokeExternalStaticMethod", 
@@ -32,14 +38,14 @@ export class ObjectReferencesExample {
         );
       },
       TestInternalClass: {
-        async constructor(arg: string): Promise<TestInternalClass> {
+        async create(arg: string): Promise<TestInternalClass> {
           const object = await wrapper.invokeClassMethod<TestInstanceMethodArgs, IObjectReference>("TestInternalClass", "constructor", { arg });
 
           return new TestInternalClass(wrapper, object.__objectReferencePtr);
         }
       },
       TestObjectGetter:{
-        async constructor(arg: string): Promise<TestObjectGetter> {
+        async create(arg: string): Promise<TestObjectGetter> {
           const objectReferencePtr = await wrapper.invokeClassMethod<TestInstanceMethodArgs, number>("TestObjectGetter", "constructor", { arg });
 
           return new TestObjectGetter(wrapper, objectReferencePtr);

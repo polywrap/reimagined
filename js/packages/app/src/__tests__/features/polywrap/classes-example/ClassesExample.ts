@@ -5,7 +5,7 @@ export class ClassesExample {
   static from(wrapper: IWrapper) {
     return {
       TestClass: {
-        async constructor(arg: string): Promise<TestClass> {
+        async create(arg: string): Promise<TestClass> {
           const objectReferencePtr = await wrapper.invokeClassMethod<TestInstanceMethodArgs, number>("TestClass", "constructor", { arg });
 
           return new TestClass(wrapper, objectReferencePtr);

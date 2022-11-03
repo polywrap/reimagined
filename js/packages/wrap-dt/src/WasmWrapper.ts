@@ -67,7 +67,7 @@ export class WasmWrapper implements IWrapper {
       (buffer) => this.dtReceiver.onReceive(buffer, this.host, this.trackedReferenceMap)
     );
 
-    if (methodInfo.methodInfo.returnType === "void" && methodName !== "constructor") {
+    if (methodInfo.methodInfo.returnType === "void" && methodName !== "create") {
       return (undefined as unknown) as TData;
     }
 

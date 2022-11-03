@@ -8,9 +8,32 @@ export const CLASS_ID = 0;
 
 @serializable
 export class TestExternalClass {
-  constructor(
-    private __objectReferencePtr: u32,
-  ) {
+  constructor(private readonly __objectReferencePtr: u32) {
+  }
+
+  static create(arg: string): TestExternalClass {
+    const buffer = 
+      concat(
+        concat(
+          u32ToBuffer(CLASS_ID),
+          u32ToBuffer(0),
+        ),
+        serializeTestStaticMethodArgs(
+          new TestStaticMethodArgs(
+            arg
+          )
+        )
+      );
+
+    const result = invoke_host_resource(HostResource.InvokeClassMethod, buffer);
+    wrap_log("constructor: result");
+
+    invoke_host_resource(HostResource.Log, result);
+
+    const objectReferencePtr = deserializeCtorResult(result);
+    
+    wrap_log("constructor: " + objectReferencePtr.toString());
+    return new TestExternalClass(objectReferencePtr);
   }
 
   testInstanceMethod(arg: string): string {
@@ -75,6 +98,10 @@ export class TestStaticMethodArgs {
   }
 }
 
+export function deserializeCtorResult(buffer: ArrayBuffer): u32 {
+  return parse<u32>(String.UTF8.decode(buffer));
+}
+
 export function serializeTestStaticMethodArgs(type: TestStaticMethodArgs): ArrayBuffer {
   return String.UTF8.encode(stringify<TestStaticMethodArgs>(type));
 }
@@ -82,7 +109,6 @@ export function serializeTestStaticMethodArgs(type: TestStaticMethodArgs): Array
 export function deserializeTestStaticMethodResult(buffer: ArrayBuffer): string {
   return parse<string>(String.UTF8.decode(buffer));
 }
-
 
 export function serializeTestInstanceMethodArgs(type: TestInstanceMethodArgsWrapped): ArrayBuffer {
   return String.UTF8.encode(stringify<TestInstanceMethodArgsWrapped>(type));

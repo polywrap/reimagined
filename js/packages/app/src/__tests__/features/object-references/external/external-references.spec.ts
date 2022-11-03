@@ -24,7 +24,7 @@ describe("Object references", () => {
 
       const { testReceiveReference } = ObjectReferencesExample.from(wrapper);
 
-      const externalObject = new TestExternalClass();
+      const externalObject = new TestExternalClass("test");
 
       const result = await testReceiveReference(externalObject);
 
@@ -45,7 +45,7 @@ describe("Object references", () => {
 
       const { TestObjectGetter } = ObjectReferencesExample.from(wrapper);
 
-      const externalObject = new TestExternalClass();
+      const externalObject = new TestExternalClass("test");
 
       const result = await TestObjectGetter.testStaticReceiveReference(externalObject);
 
@@ -66,13 +66,32 @@ describe("Object references", () => {
 
       const { TestObjectGetter } = ObjectReferencesExample.from(wrapper);
 
-      const objectGetter = await TestObjectGetter.constructor("test 1");
+      const objectGetter = await TestObjectGetter.create("test 1");
       
-      const externalObject = new TestExternalClass();
+      const externalObject = new TestExternalClass("test");
 
       const result = await objectGetter.testInstanceReceiveReference(externalObject);
 
       expect(result).toEqual("test instance");
+    });
+
+    it("can invoke an external global function", async () => {
+      const loader = new FileSystemLoader();
+      
+      const loadResult = await loader.load(wrapperPath);
+
+      if (!loadResult.ok) {
+        throw loadResult.error;
+      }
+
+      const wrapPackage: IWrapPackage = loadResult.value;
+      const wrapper: IWrapper = await wrapPackage.createWrapper(new ObjectReferencesExampleHost());
+
+      const { testInvokeExternalGlobalFunction } = ObjectReferencesExample.from(wrapper);
+
+      const result = await testInvokeExternalGlobalFunction("test");
+
+      expect(result).toEqual("test function");
     });
 
     it("can invoke an external static method", async () => {
@@ -94,7 +113,7 @@ describe("Object references", () => {
       expect(result).toEqual("test static");
     });
 
-    it("can invoke an external global function", async () => {
+    it("can invoke an external instance method", async () => {
       const loader = new FileSystemLoader();
       
       const loadResult = await loader.load(wrapperPath);
@@ -106,11 +125,11 @@ describe("Object references", () => {
       const wrapPackage: IWrapPackage = loadResult.value;
       const wrapper: IWrapper = await wrapPackage.createWrapper(new ObjectReferencesExampleHost());
 
-      const { testInvokeExternalGlobalFunction } = ObjectReferencesExample.from(wrapper);
+      const { testInvokeExternalInstanceMethod } = ObjectReferencesExample.from(wrapper);
 
-      const result = await testInvokeExternalGlobalFunction("test");
+      const result = await testInvokeExternalInstanceMethod("test");
 
-      expect(result).toEqual("test function");
+      expect(result).toEqual("test instance");
     });
   });
 });
@@ -120,7 +139,10 @@ export const testInvokeExternalGlobalFunction = async (arg: string): Promise<str
 };
 
 export class TestExternalClass {
-  testing = "haha";
+  constructor(arg: string) {
+    console.log("Created external TestExternalClass with arg: " + arg);
+  }
+
   async testInstanceMethod(arg: string): Promise<string> {
     return arg + " instance";
   }
@@ -164,18 +186,23 @@ export function serializeResult(result: string): Uint8Array {
   return new TextEncoder().encode(JSON.stringify(result));
 };
 
+export function serializeTestExternalClassResult(result: number): Uint8Array {
+  return new TextEncoder().encode(JSON.stringify(result));
+};
+
 export const deserializeSimpleType = (buffer: Uint8Array): MethodArgs => {
   return JSON.parse(new TextDecoder().decode(buffer)) as MethodArgs;
 };
 
-// TODO
 export const invokeConstructor = async (buffer: Uint8Array, trackedReferenceMap: Map<number, unknown>): Promise<Uint8Array> => {
-  const args = deserializeType(buffer);
+  console.log("invokeConstructor");
+  const args = deserializeSimpleType(buffer);
 
-  const object = trackedReferenceMap.get(args.__objectReferencePtr) as TestExternalClass;
-  const result = await object.testInstanceMethod(args.args.arg);
+  const result = new TestExternalClass(args.arg);
 
-  return serializeResult(result);
+  trackedReferenceMap.set(1, result);
+
+  return serializeTestExternalClassResult(1);
 };
 
 export const invokeTestInstanceMethod = async (buffer: Uint8Array, trackedReferenceMap: Map<number, unknown>): Promise<Uint8Array> => {

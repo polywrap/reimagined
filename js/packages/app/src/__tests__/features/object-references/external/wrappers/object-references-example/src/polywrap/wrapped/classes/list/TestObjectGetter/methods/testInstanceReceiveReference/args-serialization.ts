@@ -12,9 +12,7 @@ export function deserializeType(buffer: ArrayBuffer): MethodArgs {
   return new MethodArgs(
     args.objectReferencePtr,
     new Args(
-      new TestExternalClass(
-        args.args.arg.__objectReferencePtr
-      )
+      new TestExternalClass(args.args.arg.__objectReferencePtr),
     ),
   );
 }

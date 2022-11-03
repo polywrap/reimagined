@@ -84,7 +84,7 @@ describe("Object references", () => {
 
       const { TestObjectGetter } = ObjectReferencesExample.from(wrapper);
 
-      const objectGetter = await TestObjectGetter.constructor("test 1");
+      const objectGetter = await TestObjectGetter.create("test 1");
 
       const object = await objectGetter.testInstanceMethod("test 2");
 

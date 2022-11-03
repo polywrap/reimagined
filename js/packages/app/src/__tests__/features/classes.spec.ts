@@ -41,7 +41,7 @@ describe("Classes", () => {
 
     const { TestClass } = ClassesExample.from(wrapper);
 
-    const test = await TestClass.constructor("test 1");
+    const test = await TestClass.create("test 1");
 
     expect(test).toBeTruthy();
   });
@@ -60,7 +60,7 @@ describe("Classes", () => {
 
     const { TestClass } = ClassesExample.from(wrapper);
 
-    const test = await TestClass.constructor("test 1");
+    const test = await TestClass.create("test 1");
 
     const result = await test.testInstanceMethod("test 2");
 
