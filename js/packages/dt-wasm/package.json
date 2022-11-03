@@ -18,11 +18,12 @@
     "test": "jest --passWithNoTests --runInBand --verbose=true --detectOpenHandles --forceExit"
   },
   "dependencies": {
-    "typescript": "4.4.2",
     "@polywrap/result": "0.1.0",
-    "@polywrap/asyncify-js": "0.4.1"
+    "@polywrap/asyncify-js": "0.4.1",
+    "@polywrap/reim-dt": "0.1.0"
   },
   "devDependencies": {
+    "typescript": "4.4.2",
     "@types/node": "16.11.11",
     "ts-node": "10.3.0",
     "jest": "26.6.3",

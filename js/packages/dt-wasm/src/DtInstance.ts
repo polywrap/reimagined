@@ -1,10 +1,11 @@
 import { AsyncWasmInstance } from "@polywrap/asyncify-js";
+import { IDtInstance } from "@polywrap/reim-dt";
 import { State } from "./State";
 import { DtExports } from "./DtExports";
 import { readBytes } from "./buffer";
 import { DtImports } from "./DtImports";
 
-export class DtInstance {
+export class DtInstance implements IDtInstance {
   public static requiredExports: readonly string[] = ["_dt_receive"];
 
   constructor(

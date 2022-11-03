@@ -1,5 +1,5 @@
 import { ResultOk, Result } from "@polywrap/result";
-import { IFunction, IWrapper, IWrapManifest, IClass, IMethod } from "@polywrap/reim-wrap";
+import { IFunction, IWrapper, IWrapManifest, IClass, IMethod, IHost } from "@polywrap/reim-wrap";
 import { IDataTranslator } from "./IDataTranslator";
 import { IDtInstance } from "@polywrap/reim-dt";
 import { IDtReceiver } from "./IDtReceiver";
@@ -8,16 +8,14 @@ import { WrapperResourceV_0_2 } from "./wrapper-resources/WrapperResourceV_0_2";
 
 export class WasmWrapper implements IWrapper {
   private objectReferenceCount: number = 0;
-  private objectReferences: Map<number, {
-    className: string;
-    objectReference: any
-  }> = new Map();
+  private trackedReferenceMap: Map<number, unknown> = new Map();
 
   constructor(
     private readonly manifest: IWrapManifest, 
     private readonly dtInstance: IDtInstance, 
     private readonly dataTranslator: IDataTranslator,
-    private readonly dtReceiver: IDtReceiver
+    private readonly dtReceiver: IDtReceiver,
+    private readonly host: IHost | undefined
   ) {
   }
 
@@ -34,7 +32,7 @@ export class WasmWrapper implements IWrapper {
 
     const resultBuffer = await this.dtInstance.send(
       inputBuffer,
-      this.dtReceiver.onReceive
+      (buffer) => this.dtReceiver.onReceive(buffer, this.host, this.trackedReferenceMap)
     );
 
     if (funcInfo.funcInfo.returnType === "void") {
@@ -66,10 +64,10 @@ export class WasmWrapper implements IWrapper {
 
     const resultBuffer = await this.dtInstance.send(
       inputBuffer,
-      this.dtReceiver.onReceive
+      (buffer) => this.dtReceiver.onReceive(buffer, this.host, this.trackedReferenceMap)
     );
 
-    if (methodInfo.methodInfo.returnType === "void" && methodName !== "constructor") {
+    if (methodInfo.methodInfo.returnType === "void" && methodName !== "create") {
       return (undefined as unknown) as TData;
     }
 
@@ -77,37 +75,36 @@ export class WasmWrapper implements IWrapper {
   }
 
   parseArgsAndExtractReferences(args: any): Uint8Array {
-    if (!!args && typeof args === "object" && !Array.isArray(args)) {
-      const newObj: any = {};
-      let isReference = false;
-      for (const key of Object.keys(args)) {
-        if (args[key] === "__classInstancePtr") {
-          isReference = true;
-          newObj[key] = args[key];
-        } else if(typeof args[key] === "function") {
-          isReference = true;
-        } else {
-          newObj[key] = args[key];
-        }
-      }
+    if (!!args && typeof args === "object") {
+      const parsedArgs = this.extractAndReplaceReferences(args);
 
-      if (isReference || getMethods(args).length) {
-        newObj.__wrapInstancePtr = 0; 
-        const count = ++this.objectReferenceCount;
-        newObj.__objectReferencePtr = count; 
-        this.objectReferences.set(count, {
-          className: "",
-          objectReference: args
-        });
-      }
+      const result = this.dataTranslator.encode(parsedArgs);
 
-      const ret = this.dataTranslator.encode(newObj);
-
-      return ret;
+      return result;
     } else {
       console.log("parseArgsAndExtractReferences not a match");
       return this.dataTranslator.encode(args);
     }
+  }
+
+  extractAndReplaceReferences(obj: any): any {
+    const newObj: any = {};
+
+    for(var m in obj) {
+        if(typeof obj[m] == "function") {
+          const ptr = this.objectReferenceCount++;
+          
+          newObj.__objectReferencePtr = ptr; 
+          
+          this.trackedReferenceMap.set(ptr, obj);
+        } else if (typeof obj[m] === "object") {
+          newObj[m] = this.extractAndReplaceReferences(obj[m])
+        } else {
+          newObj[m] = obj[m];
+        }
+    }
+
+    return newObj;
   }
 
   decodeResult<TData>(resultBuffer: Uint8Array): Result<TData, string> {
@@ -136,16 +133,6 @@ export class WasmWrapper implements IWrapper {
   }
 }
 
-function getMethods(obj: any): string[] {
-  var res = [];
-  for(var m in obj) {
-      if(typeof obj[m] == "function") {
-          res.push(m)
-      }
-  }
-  return res;
-}
-
 export const concat = (array: Uint8Array[]): Uint8Array => {
   const totalLength = array.reduce((acc, cur) => acc + cur.length, 0);
   const result = new Uint8Array(totalLength);
@@ -170,8 +157,8 @@ export const u32ToBuffer = (num: number): Uint8Array => {
   return new Uint8Array(b);
 };
 
-export const bufferToU32 = (buffer: Uint8Array): number => {
-  return new DataView(buffer.buffer).getUint32(0);
+export const bufferToU32 = (buffer: Uint8Array, offset: number = 0): number => {
+  return new DataView(buffer.buffer, offset).getUint32(0);
 };
 
 export const getGlobalFunctionInfo = (funcName: string, manifest: IWrapManifest): {
