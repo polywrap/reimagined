@@ -1,3 +1,3 @@
-export * from './create';
-export * from './testInstanceMethod';
-export * from './testStaticMethod';
+export * from './createWrapped';
+export * from './testInstanceMethodWrapped';
+export * from './testStaticMethodWrapped';

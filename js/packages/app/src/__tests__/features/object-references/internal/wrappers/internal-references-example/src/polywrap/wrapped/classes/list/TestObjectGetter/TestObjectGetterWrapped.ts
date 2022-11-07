@@ -1,16 +1,20 @@
 import { stringify } from "@serial-as/json";
 import { TestObjectGetter } from "../../../../..";
-import { SerializableTestObjectGetter } from "./SerializableTestObjectGetter";
 import { 
   createWrapped,
   testInstanceMethodWrapped,
-  testStaticMethodWrapped
+  testStaticMethodWrapped,
 } from "./methods";
 import { TestObjectGetterMethod } from "./TestObjectGetterMethod";
 
 const CLASS_NAME = "TestObjectGetter";
 
 export class TestObjectGetterWrapped {
+  constructor(
+    public __referencePtr: u32,
+  ) {
+  }
+
   static invokeMethod(method: u32, buffer: ArrayBuffer): ArrayBuffer {  
     switch (method) {
       case TestObjectGetterMethod.Create:
@@ -24,15 +28,15 @@ export class TestObjectGetterWrapped {
     }
   }
   
-  static mapToSerializable(value: TestObjectGetter): SerializableTestObjectGetter {
-    return new SerializableTestObjectGetter(
+  static mapToSerializable(value: TestObjectGetter): TestObjectGetterWrapped {
+    return new TestObjectGetterWrapped(
       changetype<u32>(value)
     );
   }
 
   static serialize(value: TestObjectGetter): ArrayBuffer {
     return String.UTF8.encode(
-      stringify<SerializableTestObjectGetter>(
+      stringify<TestObjectGetterWrapped>(
         TestObjectGetterWrapped.mapToSerializable(value)
       )
     );

@@ -2,7 +2,7 @@ import { GlobalFunction } from "./GlobalFunction";
 import { bufferToU32 } from "../../buffer";
 import { 
   testReturnReferenceWrapped,
-} from "./functions";
+} from "./list";
 import { wrap_log } from "../../wrap/host-resources/wrap_log";
 
 export function invokeGlobalFunction(buffer: ArrayBuffer): ArrayBuffer {

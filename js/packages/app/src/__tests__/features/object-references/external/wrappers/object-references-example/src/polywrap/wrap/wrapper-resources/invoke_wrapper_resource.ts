@@ -1,5 +1,5 @@
 import { WrapperResource } from "./WrapperResource";
-import { invokeGlobalFunction } from "../../wrapped/global-functions";
+import { invokeGlobalFunction } from "../../wrapped/wrapper/global-functions";
 import { invokeClassMethod } from "../../wrapped/classes/invokeClassMethod";
 import { wrap_log } from "../host-resources/wrap_log";
 

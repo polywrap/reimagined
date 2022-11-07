@@ -5,14 +5,14 @@ import { TestObjectGetter } from "./TestObjectGetter";
 export const create = (wrapper: IWrapper) => {
   return {
     async create(arg: string): Promise<TestObjectGetter> {
-      const object = await wrapper.invokeClassMethod<CreateArgs, number>("TestObjectGetter", "create", { arg });
+      const object = await wrapper.invokeClassMethod<CreateArgs, SerializableTestObjectGetter>("TestObjectGetter", "create", { arg });
 
-      return new TestObjectGetter(wrapper, object.__objectReferencePtr);
+      return new TestObjectGetter(wrapper, object.__referencePtr);
     },
-    testStaticMethod(arg: string): Promise<TestInternalClass> {
+    testStaticMethod(arg: string): Promise<SerializableTestInternalClass> {
       const object = wrapper.invokeClassMethod<TestStaticMethodArgs, string>("TestObjectGetter", "testStaticMethod", { arg });
  
-      return new TestInternalClass(wrapper, object.__objectReferencePtr);
+      return new TestInternalClass(wrapper, object.__referencePtr);
     }
   };
 };
@@ -23,4 +23,8 @@ type CreateArgs = {
 
 type TestStaticMethodArgs = {
   arg: string;
+};
+
+type SerializableTestInternalClass = {
+  __referencePtr: number;
 };
