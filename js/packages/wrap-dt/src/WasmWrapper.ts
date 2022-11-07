@@ -39,9 +39,6 @@ export class WasmWrapper implements IWrapper {
       return (undefined as unknown) as TData;
     }
 
-    console.log("invokeGlobalFunction", resultBuffer);
-    console.log("invokeGlobalFunction", new TextDecoder().decode(resultBuffer));
-
     return this.dataTranslator.decode(resultBuffer) as TData;
   }
 
