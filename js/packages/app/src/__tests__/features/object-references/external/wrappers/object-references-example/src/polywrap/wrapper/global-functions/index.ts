@@ -1,2 +1,2 @@
-export * from './GlobalFunction';
+export * from './GlobalFunctionList';
 export * from './invokeGlobalFunction';

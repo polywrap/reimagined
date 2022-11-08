@@ -1,4 +1,4 @@
-export enum GlobalFunction {
+export enum GlobalFunctionList {
   TestReceiveReference = 0,
   TestInvokeExternalGlobalFunction = 1,
   TestInvokeExternalStaticMethod = 2,

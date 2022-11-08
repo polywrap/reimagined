@@ -1,5 +1,5 @@
 export enum TestObjectGetterMethod {
-  Constructor = 0,
+  Create = 0,
   TestInstanceReceiveReference = 1,
   TestStaticReceiveReference = 2,
 }

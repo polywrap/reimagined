@@ -1,4 +1,4 @@
-import { TestExternalClassWrapped, TestExternalClass } from "../../../../../host/TestExternalClass";
+import { TestExternalClassWrapped, TestExternalClass } from "../../../../../../host/classes/TestExternalClass";
 
 @serializable
 export class SerializedArgs {

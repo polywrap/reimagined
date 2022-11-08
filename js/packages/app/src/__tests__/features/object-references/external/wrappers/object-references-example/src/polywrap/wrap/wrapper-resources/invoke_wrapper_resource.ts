@@ -1,7 +1,7 @@
 import { WrapperResource } from "./WrapperResource";
-import { invokeGlobalFunction } from "../../wrapped/wrapper/global-functions";
-import { invokeClassMethod } from "../../wrapped/classes/invokeClassMethod";
+import { invokeGlobalFunction } from "../../wrapper/global-functions";
 import { wrap_log } from "../host-resources/wrap_log";
+import { invokeClassMethod } from "../../wrapper/classes/invokeClassMethod";
 
 export function invoke_wrapper_resource(func: WrapperResource, dataBuffer: ArrayBuffer): ArrayBuffer {
   wrap_log("invoke_wrapper_resource: " + func.toString());

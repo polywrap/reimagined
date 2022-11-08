@@ -1,2 +1,2 @@
-export * from './TestExternalClass';
-export * from './testExternalGlobalFunction';
+export * from './global-functions';
+export * from './classes';

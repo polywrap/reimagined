@@ -1,12 +1,12 @@
-import { GlobalFunction } from "./GlobalFunction";
-import { bufferToU32 } from "../../../buffer";
-import { wrap_log } from "../../../wrap/host-resources/wrap_log";
+import { GlobalFunctionList } from "./GlobalFunctionList";
+import { bufferToU32 } from "../../buffer";
+import { wrap_log } from "../../wrap/host-resources/wrap_log";
 import { 
   testReceiveReferenceWrapped, 
   testInvokeExternalGlobalFunctionWrapped,
   testInvokeExternalStaticMethodWrapped,
   testInvokeExternalInstanceMethodWrapped,
-} from "./functions";
+} from "./list";
 
 export function invokeGlobalFunction(buffer: ArrayBuffer): ArrayBuffer {
   const func = bufferToU32(buffer);
@@ -15,13 +15,13 @@ export function invokeGlobalFunction(buffer: ArrayBuffer): ArrayBuffer {
   wrap_log("invokeGlobalFunction: " + func.toString());
 
   switch (func) {
-    case GlobalFunction.TestReceiveReference:
+    case GlobalFunctionList.TestReceiveReference:
       return testReceiveReferenceWrapped(dataBuffer);
-    case GlobalFunction.TestInvokeExternalGlobalFunction:
+    case GlobalFunctionList.TestInvokeExternalGlobalFunction:
       return testInvokeExternalGlobalFunctionWrapped(dataBuffer);
-    case GlobalFunction.TestInvokeExternalStaticMethod:
+    case GlobalFunctionList.TestInvokeExternalStaticMethod:
       return testInvokeExternalStaticMethodWrapped(dataBuffer);
-    case GlobalFunction.TestInvokeExternalInstanceMethod:
+    case GlobalFunctionList.TestInvokeExternalInstanceMethod:
       return testInvokeExternalInstanceMethodWrapped(dataBuffer);
     default:
       throw new Error("Unknown function");

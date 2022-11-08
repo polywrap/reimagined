@@ -5,7 +5,6 @@ import {
   createWrapped, 
   testInstanceMethodWrapped
 } from "./methods";
-import { wrapInstance } from "../../../../wrap/WrapInstance";
 
 const CLASS_NAME = "TestInternalClass";
 
@@ -14,8 +13,6 @@ export class TestInternalClassWrapped {
     public __referencePtr: u32,
   ) {
   }
-
-  static referenceMap: Map<u32, TestInternalClass> = new Map<u32, TestInternalClass>();
 
   static invokeMethod(method: u32, buffer: ArrayBuffer): ArrayBuffer {  
     switch (method) {
@@ -36,23 +33,9 @@ export class TestInternalClassWrapped {
     );
   }
 
-  static findReference(referencePtr: u32): TestInternalClass {
-    const object = TestInternalClassWrapped.referenceMap.get(referencePtr);
-
-    if (!object) {
-      throw new Error(`Reference TestInternalClass(${referencePtr}) not found`);
-    }
-
-    return object;
-  }
-
   private static mapToSerializable(value: TestInternalClass): TestInternalClassWrapped {
-    const referencePtr = wrapInstance.referenceCount++;
-
-    this.referenceMap.set(referencePtr, value);
-  
     return new TestInternalClassWrapped(
-      referencePtr
+      changetype<u32>(value)
     );
   }
 }

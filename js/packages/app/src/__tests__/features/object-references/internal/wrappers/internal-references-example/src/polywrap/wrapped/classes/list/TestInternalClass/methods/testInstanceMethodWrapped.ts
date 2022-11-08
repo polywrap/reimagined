@@ -1,11 +1,11 @@
 import { parse } from "@serial-as/json";
-import { TestInternalClass } from "../../../../../..";
 import { BaseTypeSerialization } from "../../../../../serialization/BaseTypeSerialization";
+import { TestInternalClassWrapped } from "../TestInternalClassWrapped";
 
 export function testInstanceMethodWrapped(dataBuffer: ArrayBuffer): ArrayBuffer {
   const args = InstanceReferenceWithArgs.deserialize(dataBuffer);
 
-  const object = changetype<TestInternalClass>(args.referencePtr);
+  const object = TestInternalClassWrapped.findReference(args.referencePtr);
 
   const result = object.testInstanceMethod(args.args.arg);
 
