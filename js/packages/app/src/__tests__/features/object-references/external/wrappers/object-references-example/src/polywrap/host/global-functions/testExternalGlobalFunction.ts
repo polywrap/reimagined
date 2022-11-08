@@ -5,14 +5,11 @@ import { invoke_host_resource } from "../../wrap/host-resources/invoke_host_reso
 import { BaseTypeSerialization } from '../../serialization/BaseTypeSerialization';
 import { GlobalFunctionList } from './GlobalFunctionList';
 
-export const EXTERNAL_FUNCTION_ID = 0;
-
-@serializable
 export const testExternalGlobalFunction = (arg: string): string => {
   const buffer = 
     concat(
       u32ToBuffer(GlobalFunctionList.TestExternalGlobalFunction),
-      TestExternalGlobalFunctionArgs.serialize(
+      TestExternalGlobalFunctionArgsWrapped.serialize(
         new TestExternalGlobalFunctionArgs(
           arg
         )
@@ -25,13 +22,30 @@ export const testExternalGlobalFunction = (arg: string): string => {
 }
 
 @serializable
-export class TestExternalGlobalFunctionArgs {
+export class TestExternalGlobalFunctionArgsWrapped {
   constructor(
     public arg: string,
   ) {
   }
 
-  static serialize(args: TestExternalGlobalFunctionArgs): ArrayBuffer {
-    return String.UTF8.encode(stringify<TestExternalGlobalFunctionArgs>(args));
+  static serialize(value: TestExternalGlobalFunctionArgs): ArrayBuffer {
+    return String.UTF8.encode(
+      stringify<TestExternalGlobalFunctionArgsWrapped>(
+        TestExternalGlobalFunctionArgsWrapped.mapToSerializable(value)
+      )
+    );
+  }
+
+  static mapToSerializable(value: TestExternalGlobalFunctionArgs): TestExternalGlobalFunctionArgsWrapped {
+    return new TestExternalGlobalFunctionArgsWrapped(
+      value.arg,
+    );
+  }
+}
+
+export class TestExternalGlobalFunctionArgs {
+  constructor(
+    public arg: string,
+  ) {
   }
 }

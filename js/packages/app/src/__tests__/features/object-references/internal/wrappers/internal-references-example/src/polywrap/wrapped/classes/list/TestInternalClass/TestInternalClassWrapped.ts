@@ -36,7 +36,7 @@ export class TestInternalClassWrapped {
     );
   }
 
-  static findReference(referencePtr: u32): TestInternalClass {
+  static dereference(referencePtr: u32): TestInternalClass {
     const object = TestInternalClassWrapped.referenceMap.get(referencePtr);
 
     if (!object) {

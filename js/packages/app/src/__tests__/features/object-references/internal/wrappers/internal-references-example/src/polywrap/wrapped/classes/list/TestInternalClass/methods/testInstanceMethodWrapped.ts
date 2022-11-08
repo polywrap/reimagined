@@ -5,7 +5,7 @@ import { TestInternalClassWrapped } from "../TestInternalClassWrapped";
 export function testInstanceMethodWrapped(dataBuffer: ArrayBuffer): ArrayBuffer {
   const args = InstanceReferenceWithArgs.deserialize(dataBuffer);
 
-  const object = TestInternalClassWrapped.findReference(args.referencePtr);
+  const object = TestInternalClassWrapped.dereference(args.referencePtr);
 
   const result = object.testInstanceMethod(args.args.arg);
 

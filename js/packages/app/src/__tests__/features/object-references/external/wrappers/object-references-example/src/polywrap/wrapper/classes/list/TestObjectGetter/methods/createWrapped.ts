@@ -1,6 +1,6 @@
 import { parse } from '@serial-as/json'
 import { TestObjectGetter } from '../../../../../..';
-import { TestObjectGetterWrapped } from '../TestObjectGetterWrapped';
+import { TestObjectGetterWrapped } from '../../../../../wrapped/TestObjectGetterWrapped';
 
 export function createWrapped(dataBuffer: ArrayBuffer): ArrayBuffer {
   const args = Args.deserialize(dataBuffer);

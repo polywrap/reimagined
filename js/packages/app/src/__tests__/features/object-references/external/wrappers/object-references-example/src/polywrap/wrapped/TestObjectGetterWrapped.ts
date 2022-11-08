@@ -1,11 +1,11 @@
 import { stringify } from "@serial-as/json";
-import { TestObjectGetter } from "../../../../..";
+import { TestObjectGetter } from "../..";
 import { 
   createWrapped,
   testStaticReceiveReferenceWrapped,
   testInstanceReceiveReferenceWrapped
-} from "./methods";
-import { TestObjectGetterMethod } from "./TestObjectGetterMethod";
+} from "../wrapper/classes/list/TestObjectGetter/methods";
+import { TestObjectGetterMethod } from "../wrapper/classes/list/TestObjectGetter/TestObjectGetterMethod";
 
 const CLASS_NAME = "TestObjectGetter";
 

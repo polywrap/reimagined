@@ -1,6 +1,7 @@
 import { wrapInstance } from '../../../wrap/WrapInstance';
 import { ClassList } from '../ClassList';
 import { TestExternalClassMethod } from './TestExternalClassMethod';
+import { TestExternalClassWrapped } from '../../../wrapped/TestExternalClassWrapped';
 
 @serializable
 export class TestExternalClass {
@@ -8,7 +9,7 @@ export class TestExternalClass {
   }
 
   static create(arg: string): TestExternalClass {
-    const result = wrapInstance.invokeClassMethod<CreateArgsWrapped, TestExternalClassWrapped>(
+    const result = wrapInstance.invokeStaticMethod<CreateArgsWrapped, TestExternalClassWrapped>(
       ClassList.TestExternalClass, 
       TestExternalClassMethod.Create, 
       new CreateArgsWrapped( 
@@ -16,20 +17,16 @@ export class TestExternalClass {
       )
     );
 
-    return new TestExternalClass(
-      result.__referencePtr
-    );
+    return TestExternalClassWrapped.mapFromSerializable(result);
   }
 
   testInstanceMethod(arg: string): string {
-    const result = wrapInstance.invokeClassMethod<TestInstanceMethodArgsWrapped, string>(
+    const result = wrapInstance.invokeInstanceMethod<TestInstanceMethodArgsWrapped, string>(
       ClassList.TestExternalClass, 
       TestExternalClassMethod.Create, 
+      this.__referencePtr,
       new TestInstanceMethodArgsWrapped(
-        this.__referencePtr,
-        new TestInstanceMethodArgs(
-          arg
-        )
+        arg
       )
     );
 
@@ -37,10 +34,10 @@ export class TestExternalClass {
   }
 
   static testStaticMethod(arg: string): string {
-    const result = wrapInstance.invokeClassMethod<TestStaticMethodArgs, string>(
+    const result = wrapInstance.invokeStaticMethod<TestStaticMethodArgsWrapped, string>(
       ClassList.TestExternalClass, 
       TestExternalClassMethod.TestStaticMethod, 
-      new TestStaticMethodArgs(
+      new TestStaticMethodArgsWrapped(
         arg
       )
     );
@@ -58,6 +55,14 @@ class CreateArgsWrapped {
 }
 
 @serializable
+export class TestStaticMethodArgsWrapped {
+  constructor(
+    public arg: string,
+  ) {
+  }
+}
+
+@serializable
 export class TestStaticMethodArgs {
   constructor(
     public arg: string,
@@ -68,24 +73,7 @@ export class TestStaticMethodArgs {
 @serializable
 export class TestInstanceMethodArgsWrapped {
   constructor(
-    public __referencePtr: u32,
-    public args: TestInstanceMethodArgs,
-  ) {
-  }
-}
-
-@serializable
-export class TestInstanceMethodArgs {
-  constructor(
     public arg: string,
-  ) {
-  }
-}
-
-@serializable
-export class TestExternalClassWrapped {
-  constructor(
-    public __referencePtr: u32,
   ) {
   }
 }

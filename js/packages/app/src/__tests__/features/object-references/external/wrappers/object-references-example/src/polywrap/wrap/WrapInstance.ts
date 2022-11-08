@@ -4,8 +4,6 @@ import { send } from "../dt";
 import { HostResource } from "./host-resources/HostResource";
 
 export class WrapInstance {
-  public referenceCount: u32 = 0;
-
   invokeGlobalFunction<TArgs, TData>(funcId: u32, args: TArgs): TData {
     const buffer = 
       concat(
@@ -21,7 +19,7 @@ export class WrapInstance {
     return parse<TData>(String.UTF8.decode(result));
   }
 
-  invokeClassMethod<TArgs, TData>(classId: u32, methodId: u32, args: TArgs): TData {
+  invokeStaticMethod<TArgs, TData>(classId: u32, methodId: u32, args: TArgs): TData {
     const buffer = 
       concat(
         u32ToBuffer(HostResource.InvokeClassMethod),
@@ -29,6 +27,27 @@ export class WrapInstance {
           concat(
             u32ToBuffer(classId),
             u32ToBuffer(methodId),
+          ),
+          String.UTF8.encode(stringify<TArgs>(args))
+        )
+      );
+
+    const result = send(buffer);
+
+    return parse<TData>(String.UTF8.decode(result));
+  }
+
+  invokeInstanceMethod<TArgs, TData>(classId: u32, methodId: u32, instanceReferencePtr: u32, args: TArgs): TData {
+    const buffer = 
+      concat(
+        u32ToBuffer(HostResource.InvokeClassMethod),
+        concat(
+          concat(
+            concat(
+              u32ToBuffer(classId),
+              u32ToBuffer(methodId),
+            ),
+            u32ToBuffer(instanceReferencePtr)
           ),
           String.UTF8.encode(stringify<TArgs>(args))
         )

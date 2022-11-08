@@ -1,6 +1,7 @@
 import { parse } from "@serial-as/json";
 import { testReceiveReference } from "../../../..";
-import { TestExternalClass, TestExternalClassWrapped } from "../../../host";
+import { TestExternalClass } from "../../../host";
+import { TestExternalClassWrapped } from "../../../wrapped";
 import { BaseTypeSerialization } from "../../../serialization/BaseTypeSerialization";
 
 export function testReceiveReferenceWrapped(dataBuffer: ArrayBuffer): ArrayBuffer {
