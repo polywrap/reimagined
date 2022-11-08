@@ -1,0 +1,7 @@
+export enum ClassList {
+  {{#classes}}
+  {{#isExternal}}
+  {{name}} = {{index}},
+  {{/isExternal}}
+  {{/classes}}
+}

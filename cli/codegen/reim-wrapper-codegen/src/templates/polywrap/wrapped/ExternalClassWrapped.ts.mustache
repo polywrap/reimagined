@@ -1,0 +1,109 @@
+import { parse, stringify } from "@serial-as/json";
+import { wrapInstance } from "../wrap/WrapInstance";
+import { {{name}} } from "../host/classes/{{name}}/{{name}}";
+import { 
+  {{#relatedClasses}}
+  {{name}}Wrapped,
+  {{/relatedClasses}}
+} from ".";
+
+const CLASS_NAME = "{{name}}";
+
+class InstanceWithExternalReferencePtr {
+  constructor(
+    public externalReferencePtr: u32,
+    public instance: {{name}}
+  ) {
+  }
+}
+
+export class {{name}}Wrapped {
+  constructor(
+    public __referencePtr: u32,
+    {{#fields}}
+    public {{name}}: {{asTypeNameWrapped}},
+    {{/fields}}
+  ) {
+  }
+
+  static referenceMap: Map<u32, InstanceWithExternalReferencePtr> = new Map<u32, InstanceWithExternalReferencePtr>();
+
+  static dereference(referencePtr: u32): {{name}} {
+    const object = {{name}}Wrapped.referenceMap.get(referencePtr);
+
+    if (!object) {
+      throw new Error(`Could not dereference ${CLASS_NAME}(${referencePtr}). Not found`);
+    }
+
+    return object;
+  }
+
+  static deleteReference(referencePtr: u32): void {
+    const success = {{name}}Wrapped.referenceMap.delete(referencePtr);
+
+    if (!success) {
+      throw new Error(`Could not delete reference ${CLASS_NAME}(${referencePtr}). Not found`);
+    }
+  }
+
+  static serialize(value: {{name}}): ArrayBuffer {
+    return String.UTF8.encode(
+      stringify<{{name}}Wrapped>(
+        {{name}}Wrapped.mapToSerializable(value)
+      )
+    );
+  }
+
+  static mapToSerializable(value: {{name}}): {{name}}Wrapped {
+    const referencePtr = changetype<u32>(value);
+    const externalReferencePtr = this.referenceMap.get(referencePtr);
+
+    if (!externalReferencePtr) {
+      throw new Error(`Could not find external reference of ${CLASS_NAME}(${referencePtr}).`);
+    }
+  
+    return new {{name}}Wrapped(
+      externalReferencePtr,
+      {{#fields}}
+      {{#isClass}}
+      {{asTypeNameWrapped}}.mapToSerializable(value.{{name}}),
+      {{/isClass}}
+      {{^isClass}}
+      value.{{name}},
+      {{/isClass}}
+      {{/fields}}
+    );
+  }
+
+  static deserialize(buffer: ArrayBuffer): {{name}} {
+    const object = parse<{{name}}Wrapped>(String.UTF8.decode(buffer));
+  
+    return {{name}}Wrapped.mapFromSerializable(object);
+  }
+
+  static mapFromSerializable(value: {{name}}Wrapped): {{name}} {
+    const object = new {{name}}(
+      value.__referencePtr
+      {{#fields}}
+      {{#isClass}}
+      {{asTypeNameWrapped}}.mapFromSerializable(value.{{name}}),
+      {{/isClass}}
+      {{^isClass}}
+      value.{{name}},
+      {{/isClass}}
+      {{/fields}}
+    );
+
+    const referencePtr = changetype<u32>(value);
+  
+    this.referenceMap.set(
+      referencePtr, 
+      new InstanceWithExternalReferencePtr(
+        value.__referencePtr, 
+        object
+      )
+    );  
+
+    return object;
+  }
+}

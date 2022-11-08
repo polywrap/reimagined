@@ -1,0 +1,64 @@
+import { parse } from '@serial-as/json'
+import { {{name}} } from "../../../..";
+import { 
+  {{#classImports}}
+  {{name}}Wrapped 
+  {{/classImports}}
+} from "../../../wrapped";
+{{^result.isClass}}
+import { BaseTypeSerialization } from '../../serialization/BaseTypeSerialization';
+{{/result.isClass}}
+
+
+export function {{name}}Wrapped(dataBuffer: ArrayBuffer): ArrayBuffer {
+  const args = Args.deserialize(dataBuffer);
+
+  const result = {{name}}(
+    {{#args}}
+    args.{{name}},
+    {{/args}}
+  );
+
+  {{#result.isClass}}
+  return {{result.typeName}}Wrapped.serialize(result);
+  {{/result.isClass}}
+  {{^result.isClass}}
+  return BaseTypeSerialization.serialize<{{asTypeName}}>(result);
+  {{/result.isClass}}
+}
+
+@serializable
+export class Args {
+  constructor(
+    {{#args}}
+    public {{name}}: {{asTypeName}},
+    {{/args}}
+  ) {
+  }
+
+  static deserialize(buffer: ArrayBuffer): Args {
+    const args = parse<SerializedArgs>(String.UTF8.decode(buffer));
+  
+    return new Args(
+      {{#args}}
+      {{#isClass}}
+      {{asTypeNameWrapped}}.mapFromSerializable(args.{{name}}),
+      {{/isClass}}
+      {{^isClass}}
+      args.{{name}},
+      {{/isClass}}
+      {{/args}}
+    );
+  }  
+}
+
+
+@serializable
+class SerializedArgs {
+  constructor(
+    {{#args}}
+    public {{name}}: {{asTypeNameWrapped}},
+    {{/args}}
+  ) {
+  }
+}

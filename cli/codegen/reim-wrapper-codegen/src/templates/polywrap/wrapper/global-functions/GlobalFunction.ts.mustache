@@ -1,0 +1,5 @@
+export enum GlobalFunction {
+  {{#globalFunctions}}
+  {{namePascalCase}} = {{index}},
+  {{/globalFunctions}}
+}

@@ -1,0 +1,21 @@
+import { GlobalFunction } from "./GlobalFunction";
+import { bufferToU32 } from "../../buffer";
+import { 
+  {{#globalFunctions}}
+  {{name}}Wrapped,
+  {{/globalFunctions}}
+} from "./list";
+
+export function invokeGlobalFunction(buffer: ArrayBuffer): ArrayBuffer {
+  const funcId = bufferToU32(buffer);
+  const dataBuffer = buffer.slice(4);
+
+  switch (funcId) {
+    {{#globalFunctions}}
+    case GlobalFunction.{{namePascalCase}}:
+      return {{name}}Wrapped(dataBuffer);
+    {{/globalFunctions}}
+    default:
+      throw new Error("Unknown global function: " + funcId);
+  }
+}

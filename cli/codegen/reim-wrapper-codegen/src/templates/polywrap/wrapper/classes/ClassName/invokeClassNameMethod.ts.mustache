@@ -1,0 +1,17 @@
+import { 
+  {{#methods}}
+  {{name}}Wrapped,
+  {{/methods}}  
+} from "./methods";
+import { {{name}}Method } from "./{{name}}Method";
+
+export function invoke{{name}}Method(method: {{name}}Method, buffer: ArrayBuffer): ArrayBuffer {  
+  switch (method) {
+    {{#methods}}
+    case {{className}}Method.{{namePascalCase}}:
+      return {{name}}Wrapped(buffer);
+    {{/methods}}  
+    default:
+      throw new Error("Unknown method " + method.toString() + " on class {{name}}");
+  }
+}

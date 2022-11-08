@@ -1,0 +1,42 @@
+import { stringify } from "@serial-as/json";
+import { {{name}} } from "../..";
+import { 
+  {{#methods}}
+  {{name}}Wrapped,
+  {{/methods}}
+} from "../wrapper/classes/list/{{name}}/methods";
+import { {{name}}Method } from "../wrapper/classes/list/{{name}}/{{name}}Method";
+
+const CLASS_NAME = "{{name}}";
+
+export class {{name}}Wrapped {
+  constructor(
+    public __referencePtr: u32,
+  ) {
+  }
+
+  static invokeMethod(method: u32, buffer: ArrayBuffer): ArrayBuffer {  
+    switch (method) {
+      {{#methods}}
+      case {{name}}Method.{{namePascalCase}}:
+        return {{name}}Wrapped(buffer);
+      {{/methods}}
+      default:
+        throw new Error("Unknown method " + method.toString() + " on class " + CLASS_NAME);
+    }
+  }
+  
+  static mapToSerializable(value: {{name}}): {{name}}Wrapped {
+    return new {{name}}Wrapped(
+      changetype<u32>(value)
+    );
+  }
+
+  static serialize(value: {{name}}): ArrayBuffer {
+    return String.UTF8.encode(
+      stringify<{{name}}Wrapped>(
+        {{name}}Wrapped.mapToSerializable(value)
+      )
+    );
+  }
+}

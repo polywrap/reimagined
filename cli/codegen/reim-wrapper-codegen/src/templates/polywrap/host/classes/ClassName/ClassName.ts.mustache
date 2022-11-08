@@ -1,0 +1,80 @@
+import { wrapInstance } from '../../../wrap/WrapInstance';
+import { ClassList } from '../ClassList';
+import { {{name}}Method } from './{{name}}Method';
+import { {{name}}Wrapped } from '../../../wrapped';
+
+@serializable
+export class {{name}} {
+  constructor(private readonly __referencePtr: u32) {
+  }
+
+  {{#methods}}
+  {{#isStatic}}
+  static {{name}}(
+    {{#args}}
+    {{name}}: {{asTypeName}},
+    {{/args}}
+    arg: string
+  ): {{result.asTypeName}} {
+    const args = new {{namePascalCase}}ArgsWrapped( 
+      {{#args}}
+      {{name}},
+      {{/args}} 
+    );
+
+    const result = wrapInstance.invokeStaticMethod<{{namePascalCase}}ArgsWrapped, {{result.asTypeNameWrapped}}>(
+      ClassList.{{className}}, 
+      {{className}}Method.{{namePascalCase}}, 
+      args
+    );
+
+    {{#result.isClass}}
+    return {{result.typeNameWrapped}}Wrapped.mapFromSerializable(result);
+    {{/result.isClass}}
+    {{^result.isClass}}
+    return result;
+    {{/result.isClass}}
+  }
+  {{/isStatic}}
+  {{^isStatic}}
+  {{name}}(
+    {{#args}}
+    {{name}}: {{asTypeName}},
+    {{/args}}
+    arg: string
+  ): {{result.asTypeName}} {
+    const args = new {{namePascalCase}}ArgsWrapped( 
+      {{#args}}
+      {{name}},
+      {{/args}} 
+    );
+
+    const result = wrapInstance.invokeInstanceMethod<{{namePascalCase}}ArgsWrapped, {{result.asTypeNameWrapped}}>(
+      ClassList.{{className}}, 
+      {{className}}Method.{{namePascalCase}},
+      this.__referencePtr,
+      args
+    );
+
+    {{#result.isClass}}
+    return {{result.typeNameWrapped}}Wrapped.mapFromSerializable(result);
+    {{/result.isClass}}
+    {{^result.isClass}}
+    return result;
+    {{/result.isClass}}
+  }
+  {{/isStatic}}
+  {{/methods}}
+}
+
+{{methods}}
+@serializable
+export class {{namePascalCase}}ArgsWrapped {
+  constructor(
+    {{#args}}
+    public {{name}}: {{asTypeNameWrapped}},
+    {{/args}} 
+  ) {
+  }
+}
+{{/methods}}
