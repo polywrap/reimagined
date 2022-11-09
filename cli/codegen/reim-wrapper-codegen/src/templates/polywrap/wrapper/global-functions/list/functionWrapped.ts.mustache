@@ -7,7 +7,7 @@ import { {{nativeTypeNameWrapped}} } from "../../../wrapped";
 {{/relatedTypes}}
 {{#relatedTypes}}
 {{#isStruct}}
-import { {{nativeTypeName}} } from "../../../structs";
+import { {{nativeTypeName}} } from "../../../..";
 {{/isStruct}}
 {{/relatedTypes}}
 {{^result.isClass}}

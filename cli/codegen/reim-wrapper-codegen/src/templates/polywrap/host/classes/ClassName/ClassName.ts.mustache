@@ -9,11 +9,11 @@ import { {{nativeTypeNameWrapped}} } from "../../../wrapped";
 import { {{nativeTypeName}} } from "../{{nativeTypeName}}/{{nativeTypeName}}";
 {{/isExternal}}
 {{^isExternal}}
-import { {{nativeTypeName}} } from "../../../../..";
+import { {{nativeTypeName}} } from "../../../..";
 {{/isExternal}}
 {{/isClass}}
 {{#isStruct}}
-import { {{nativeTypeName}} } from "../../../structs";
+import { {{nativeTypeName}} } from "../../../..";
 {{/isStruct}}
 {{/relatedTypes}}
 

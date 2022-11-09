@@ -8,7 +8,7 @@ import { GlobalFunctionList } from './GlobalFunctionList';
 import { {{nativeTypeNameWrapped}} } from "../../../wrapped";
 {{/isClass}}
 {{#isStruct}}
-import { {{nativeTypeName}} } from "../../../structs";
+import { {{nativeTypeName}} } from "../../../..";
 {{/isStruct}}
 {{/relatedTypes}}
 {{^result.isClass}}

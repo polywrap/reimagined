@@ -7,13 +7,11 @@ import { {{nativeTypeNameWrapped}} } from "../../../../wrapped";
 import { {{nativeTypeName}} } from "../../../../host/classes";
 {{/isExternal}}
 {{^isExternal}}
-import { {{nativeTypeName}} } from "../../../../../..";
+import { {{nativeTypeName}} } from "../../../../..";
 {{/isExternal}}
 {{/isClass}}
-{{/relatedTypes}}
-{{#relatedTypes}}
 {{#isStruct}}
-import { {{nativeTypeName}} } from "../../../../structs";
+import { {{nativeTypeName}} } from "../../../../..";
 {{/isStruct}}
 {{/relatedTypes}}
 {{^result.isClass}}
