@@ -2,78 +2,94 @@ import { wrapInstance } from '../../../wrap/WrapInstance';
 import { ClassList } from '../ClassList';
 import { {{name}}Method } from './{{name}}Method';
 import { {{name}}Wrapped } from '../../../wrapped';
+{{#relatedTypes}}
+{{#isClass}}
+import { {{nativeTypeNameWrapped}} } from "../../../wrapped";
+{{#isExternal}}
+import { {{nativeTypeName}} } from "../{{nativeTypeName}}/{{nativeTypeName}}";
+{{/isExternal}}
+{{^isExternal}}
+import { {{nativeTypeName}} } from "../../../../..";
+{{/isExternal}}
+{{/isClass}}
+{{#isStruct}}
+import { {{nativeTypeName}} } from "../../../structs";
+{{/isStruct}}
+{{/relatedTypes}}
 
 @serializable
 export class {{name}} {
-  constructor(private readonly __referencePtr: u32) {
-  }
+  constructor(
+    private readonly __referencePtr: u32,
+    {{#fields}}
+    public {{model.name}}: {{model.typeInfo.nativeTypeName}},
+    {{/fields}}
+  ) {}
 
   {{#methods}}
-  {{#isStatic}}
-  static {{name}}(
-    {{#args}}
-    {{name}}: {{asTypeName}},
-    {{/args}}
-    arg: string
-  ): {{result.asTypeName}} {
-    const args = new {{namePascalCase}}ArgsWrapped( 
-      {{#args}}
-      {{name}},
-      {{/args}} 
+  {{#model.isStatic}}
+  static {{model.name}}(
+    {{#model.args}}
+    {{model.name}}: {{model.typeInfo.nativeTypeName}},
+    {{/model.args}}
+  ): {{model.result.nativeTypeName}} {
+    const args = new {{model.namePascalCase}}ArgsWrapped( 
+      {{#model.args}}
+      {{model.name}},
+      {{/model.args}} 
     );
 
-    const result = wrapInstance.invokeStaticMethod<{{namePascalCase}}ArgsWrapped, {{result.asTypeNameWrapped}}>(
-      ClassList.{{className}}, 
-      {{className}}Method.{{namePascalCase}}, 
+    const result = wrapInstance.invokeStaticMethod<{{model.namePascalCase}}ArgsWrapped, {{model.result.nativeTypeNameWrapped}}>(
+      ClassList.{{model.className}}, 
+      {{model.className}}Method.{{model.namePascalCase}}, 
       args
     );
 
-    {{#result.isClass}}
-    return {{result.typeNameWrapped}}Wrapped.mapFromSerializable(result);
-    {{/result.isClass}}
-    {{^result.isClass}}
+    {{#model.result.isClass}}
+    return {{model.result.nativeTypeNameWrapped}}.mapFromSerializable(result);
+    {{/model.result.isClass}}
+    {{^model.result.isClass}}
     return result;
-    {{/result.isClass}}
+    {{/model.result.isClass}}
   }
-  {{/isStatic}}
-  {{^isStatic}}
-  {{name}}(
-    {{#args}}
-    {{name}}: {{asTypeName}},
-    {{/args}}
-    arg: string
-  ): {{result.asTypeName}} {
-    const args = new {{namePascalCase}}ArgsWrapped( 
-      {{#args}}
-      {{name}},
-      {{/args}} 
+  {{/model.isStatic}}
+  {{^model.isStatic}}
+  {{model.name}}(
+    {{#model.args}}
+    {{model.name}}: {{model.typeInfo.nativeTypeName}},
+    {{/model.args}}
+  ): {{model.result.nativeTypeName}} {
+    const args = new {{model.namePascalCase}}ArgsWrapped( 
+      {{#model.args}}
+      {{model.name}},
+      {{/model.args}} 
     );
 
-    const result = wrapInstance.invokeInstanceMethod<{{namePascalCase}}ArgsWrapped, {{result.asTypeNameWrapped}}>(
-      ClassList.{{className}}, 
-      {{className}}Method.{{namePascalCase}},
+    const result = wrapInstance.invokeInstanceMethod<{{model.namePascalCase}}ArgsWrapped, {{model.result.nativeTypeNameWrapped}}>(
+      ClassList.{{model.className}}, 
+      {{model.className}}Method.{{model.namePascalCase}},
       this.__referencePtr,
       args
     );
 
-    {{#result.isClass}}
-    return {{result.typeNameWrapped}}Wrapped.mapFromSerializable(result);
-    {{/result.isClass}}
-    {{^result.isClass}}
+    {{#model.result.isClass}}
+    return {{model.result.nativeTypeNameWrapped}}.mapFromSerializable(result);
+    {{/model.result.isClass}}
+    {{^model.result.isClass}}
     return result;
-    {{/result.isClass}}
+    {{/model.result.isClass}}
   }
-  {{/isStatic}}
+  {{/model.isStatic}}
   {{/methods}}
 }
 
-{{methods}}
+{{#methods}}
 @serializable
-export class {{namePascalCase}}ArgsWrapped {
+class {{model.namePascalCase}}ArgsWrapped {
   constructor(
-    {{#args}}
-    public {{name}}: {{asTypeNameWrapped}},
-    {{/args}} 
+    {{#model.args}}
+    public {{model.name}}: {{model.typeInfo.nativeTypeNameWrapped}},
+    {{/model.args}} 
   ) {
   }
 }

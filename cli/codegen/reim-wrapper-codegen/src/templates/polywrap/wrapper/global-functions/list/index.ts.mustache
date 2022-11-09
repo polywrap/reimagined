@@ -1,3 +1,5 @@
 {{#globalFunctions}}
-export * from "./{{name}}Wrapped";
+{{^model.isExternal}}
+export * from "./{{model.name}}Wrapped";
+{{/model.isExternal}}
 {{/globalFunctions}}

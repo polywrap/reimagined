@@ -1,24 +1,23 @@
-import { parse } from '@serial-as/json'
-import { {{name}} } from "../../../..";
+import { parse } from "@serial-as/json";
+import { {{className}} } from '../../../../../..';
 {{#relatedTypes}}
 {{#isClass}}
-import { {{nativeTypeNameWrapped}} } from "../../../wrapped";
+import { {{nativeTypeNameWrapped}} } from "../../../../wrapped";
 {{/isClass}}
 {{/relatedTypes}}
 {{#relatedTypes}}
 {{#isStruct}}
-import { {{nativeTypeName}} } from "../../../structs";
+import { {{nativeTypeName}} } from "../../../../structs";
 {{/isStruct}}
 {{/relatedTypes}}
 {{^result.isClass}}
-import { BaseTypeSerialization } from '../../serialization/BaseTypeSerialization';
+import { BaseTypeSerialization } from '../../../../serialization/BaseTypeSerialization';
 {{/result.isClass}}
-
 
 export function {{name}}Wrapped(dataBuffer: ArrayBuffer): ArrayBuffer {
   const args = Args.deserialize(dataBuffer);
 
-  const result = {{name}}(
+  const result = {{className}}.{{name}}(
     {{#args}}
     args.{{model.name}},
     {{/args}}
@@ -56,7 +55,6 @@ export class Args {
     );
   }  
 }
-
 
 @serializable
 class SerializedArgs {

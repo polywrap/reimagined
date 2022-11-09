@@ -1,5 +1,5 @@
-export enum TestExternalClassMethod {
+export enum {{name}}Method {
   {{#methods}}
-  {{namePascalCase}} = {{index}},
-  {{/classes}}
+  {{model.namePascalCase}} = {{index}},
+  {{/methods}}
 }

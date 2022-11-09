@@ -1,7 +1,9 @@
 export enum ClassList {
-  {{#classes}}
-  {{#isExternal}}
-  {{name}} = {{index}},
-  {{/isExternal}}
-  {{/classes}}
+  {{#types}}
+  {{#model.isClass}}
+  {{#model.isExternal}}
+  {{model.name}} = {{index}},
+  {{/model.isExternal}}
+  {{/model.isClass}}
+  {{/types}}
 }

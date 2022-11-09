@@ -1,52 +1,56 @@
 use serde_derive::*;
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
-pub struct FieldInfo {
+pub struct NamedType {
     pub name: String,
-    pub type_name: String,
+    pub type_info: Type,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
-pub struct ArgInfo {
-    pub name: String,
-    pub type_name: String
+pub struct Type {
+    pub type_name: String,
+    pub required: bool,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct PropertyInfo {
     pub name: String,
-    pub type_name: String,
+    pub type_info: Type,
     pub get: bool,
-    pub set: bool
+    pub set: bool,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
-pub struct FunctionType {
+pub struct FunctionDefinition {
     pub name: String,
-    pub args: Vec<ArgInfo>,
-    pub return_type: String,
-    pub is_instance: bool
+    pub args: Vec<NamedType>,
+    pub result: Type,
+    pub is_static: bool,
+    pub is_external: bool,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
-pub struct ClassType {
+pub struct TypeDefinition {
     pub name: String,
-    pub fields: Vec<FieldInfo>,
+    pub fields: Vec<NamedType>,
     pub properties: Vec<PropertyInfo>,
-    pub methods: Vec<FunctionType>
+    pub methods: Vec<FunctionDefinition>,
+    pub is_class: bool,
+    pub is_external: bool,
+    pub is_struct: bool,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(tag = "type")]
 #[serde(rename_all = "camelCase")]
 pub enum SchemaType {
-    Function(FunctionType),
-    Class(ClassType)
+    Function(FunctionDefinition),
+    Type(TypeDefinition),
 }
 
 pub type WrapAbi = Vec<SchemaType>;

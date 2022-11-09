@@ -2,7 +2,9 @@ import { GlobalFunction } from "./GlobalFunction";
 import { bufferToU32 } from "../../buffer";
 import { 
   {{#globalFunctions}}
-  {{name}}Wrapped,
+  {{^model.isExternal}}
+  {{model.name}}Wrapped,
+  {{/model.isExternal}}
   {{/globalFunctions}}
 } from "./list";
 
@@ -12,8 +14,10 @@ export function invokeGlobalFunction(buffer: ArrayBuffer): ArrayBuffer {
 
   switch (funcId) {
     {{#globalFunctions}}
-    case GlobalFunction.{{namePascalCase}}:
-      return {{name}}Wrapped(dataBuffer);
+    {{^model.isExternal}}
+    case GlobalFunction.{{model.namePascalCase}}:
+      return {{model.name}}Wrapped(dataBuffer);
+    {{/model.isExternal}}
     {{/globalFunctions}}
     default:
       throw new Error("Unknown global function: " + funcId);

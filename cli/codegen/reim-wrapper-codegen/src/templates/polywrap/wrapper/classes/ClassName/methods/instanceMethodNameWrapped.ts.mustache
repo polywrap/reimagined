@@ -1,0 +1,92 @@
+import { parse } from "@serial-as/json";
+import { {{className}} } from '../../../../../..';
+{{#relatedTypes}}
+{{#isClass}}
+import { {{nativeTypeNameWrapped}} } from "../../../../wrapped";
+{{#isExternal}}
+import { {{nativeTypeName}} } from "../../../../host/classes";
+{{/isExternal}}
+{{^isExternal}}
+import { {{nativeTypeName}} } from "../../../../../..";
+{{/isExternal}}
+{{/isClass}}
+{{/relatedTypes}}
+{{#relatedTypes}}
+{{#isStruct}}
+import { {{nativeTypeName}} } from "../../../../structs";
+{{/isStruct}}
+{{/relatedTypes}}
+{{^result.isClass}}
+import { BaseTypeSerialization } from '../../../../serialization/BaseTypeSerialization';
+{{/result.isClass}}
+
+export function {{name}}Wrapped(dataBuffer: ArrayBuffer): ArrayBuffer {
+  const value = InstanceReferenceWithArgsWrapped.deserialize(dataBuffer);
+
+  const object = {{className}}Wrapped.dereference(value.referencePtr);
+
+  const result = object.{{name}}(
+    {{#args}}
+    value.args.{{model.name}},
+    {{/args}}
+  );
+
+  {{#result.isClass}}
+  return {{result.nativeTypeNameWrapped}}.serialize(result);
+  {{/result.isClass}}
+  {{^result.isClass}}
+  return BaseTypeSerialization.serialize<{{result.nativeTypeName}}>(result);
+  {{/result.isClass}}
+}
+
+@serializable
+export class InstanceReferenceWithArgs {
+  constructor(
+    public referencePtr: u32,
+    public args: Args
+  ) {}
+}
+
+@serializable
+export class InstanceReferenceWithArgsWrapped {
+  constructor(
+    public referencePtr: u32,
+    public args: ArgsWrapped
+  ) {}
+
+  static deserialize(buffer: ArrayBuffer): InstanceReferenceWithArgs {
+    const value = parse<InstanceReferenceWithArgsWrapped>(String.UTF8.decode(buffer));
+
+    return new InstanceReferenceWithArgs(
+      value.referencePtr,
+      new Args(
+        {{#args}}
+        {{#model.typeInfo.isClass}}
+        {{model.typeInfo.nativeTypeNameWrapped}}.mapFromSerializable(value.args.{{model.name}}),
+        {{/model.typeInfo.isClass}}
+        {{^model.typeInfo.isClass}}
+        value.args.{{model.name}},
+        {{/model.typeInfo.isClass}}
+        {{/args}}
+      )
+    );
+  }
+}
+
+@serializable
+export class ArgsWrapped {
+  constructor(
+    {{#args}}
+    public {{model.name}}: {{model.typeInfo.nativeTypeNameWrapped}},
+    {{/args}}
+  ) {}
+}
+
+@serializable
+export class Args {
+  constructor(
+    {{#args}}
+    public {{model.name}}: {{model.typeInfo.nativeTypeName}},
+    {{/args}}
+  ) {}
+}

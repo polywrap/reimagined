@@ -3,142 +3,152 @@ pub use abi::*;
 
 use tree_sitter::{TreeCursor, Node};
 
-pub const SCALAR_TYPE_NAMES : [&str; 5] = ["String", "Uint32", "Int32", "Boolean", "Bytes"];
-
 pub fn parse_schema(source: String) -> WrapAbi {
-  let mut parser = tree_sitter::Parser::new();
-  parser.set_language(tree_sitter_wrap::language()).unwrap();
+    let mut parser = tree_sitter::Parser::new();
+    parser.set_language(tree_sitter_wrap::language()).unwrap();
 
-  let tree = parser.parse(&source, None).unwrap();
-  
-  let mut cursor = tree.walk();
-  let mut type_info: Vec<SchemaType> = vec![];
+    let tree = parser.parse(&source, None).unwrap();
+    
+    let mut cursor = tree.walk();
+    let mut type_info: Vec<SchemaType> = vec![];
 
-  walk(&mut cursor, "TypeDefinition".into(), &mut |type_def_node| {
-      walk(&mut type_def_node.walk(), "Name", &mut |name_node| {
-          match name_node.utf8_text(source.as_bytes()) {
-              Ok(name) => {
-                  let mut schema_type: Option<SchemaType> = None;
+    walk(&mut cursor, "TypeDefinition".into(), &mut |type_def_node| {
+        walk(&mut type_def_node.walk(), "Name", &mut |name_node| {
+            match name_node.utf8_text(source.as_bytes()) {
+                Ok(name) => {
+                    let mut schema_type: Option<SchemaType> = None;
 
-                  walk(&mut type_def_node.walk(), "ObjectTypeDefinition", &mut |obj_def_node| {
-                      let mut methods: Vec<FunctionType> = vec![];
-                      let mut fields: Vec<FieldInfo> = vec![];
-                      
-                      walk(&mut obj_def_node.walk(), "FieldDefinition", &mut |field_def_node| {
-                          let field_name = get_name_from_node(&field_def_node, &source);
+                    walk(&mut type_def_node.walk(), "ObjectTypeDefinition", &mut |obj_def_node| {
+                        let mut methods: Vec<FunctionDefinition> = vec![];
+                        let mut fields: Vec<NamedType> = vec![];
+                        let is_class = if get_directives(&obj_def_node, &source).contains(&"class".to_string()) { true } else { false };
+                        let is_external = if get_directives(&obj_def_node, &source).contains(&"external".to_string()) { true } else { false };
+                        let is_struct = if get_directives(&obj_def_node, &source).contains(&"struct".to_string()) { true } else { false };
+                        if is_class && is_struct {
+                            panic!("TypeDefinition cannot be both class and struct");
+                        }
 
-                          let mut is_method = false;
+                        walk(&mut obj_def_node.walk(), "FieldDefinition", &mut |field_def_node| {
+                            let field_name = get_name_from_node(&field_def_node, &source);
 
-                          match field_def_node.utf8_text(source.as_bytes()) {
-                            Ok(name) =>  if name.contains("(") && name.contains(")") {
-                              is_method = true;
-                            },
-                            Err(e) => println!("{:?}", e)
-                          }
+                            let directives = get_directives(&field_def_node, &source);
+                            let is_method = if directives.contains(&"fn".to_string()) || directives.contains(&"staticFn".to_string()) || directives.contains(&"externalFn".to_string()) { true } else { false };
 
-                          if is_method {
-                            let mut args: Vec<ArgInfo> = vec![];
-                            walk(&mut field_def_node.walk(), "InputValueDefinition", &mut |node| {
-                              args.push(ArgInfo {
-                                name: get_name_from_node(&node, &source),
-                                type_name: get_named_type(&node, &source)
-                              });
-                              false
-                            });
+                            if is_method {
+                                let mut args: Vec<NamedType> = vec![];
+                                walk(&mut field_def_node.walk(), "InputValueDefinition", &mut |node| {
+                                    args.push(NamedType {
+                                        name: get_name_from_node(&node, &source),
+                                        type_info: Type {
+                                            type_name: get_named_type(&node, &source),
+                                            required: true
+                                        },
+                                    });
+                                    false
+                                });
 
-                            methods.push(FunctionType {
-                              name: field_name,
-                              args: args,
-                              return_type: get_named_type(&field_def_node, &source),
-                              is_instance: if let Some(x) = get_directive(&field_def_node, &source) && x == "instance" { true } else { false },
-                            });
-                          } else {
-                            fields.push(FieldInfo {
-                              name: field_name,
-                              type_name: get_named_type(&field_def_node, &source)
-                            });
-                          }
-                          
-                          false
-                      });
+                                methods.push(FunctionDefinition {
+                                    name: field_name,
+                                    args: args,
+                                    is_static: if directives.contains(&"staticFn".to_string()) { true } else { false },
+                                    is_external: if directives.contains(&"externalFn".to_string()) { true } else { false },
+                                    result: Type {
+                                        type_name: get_named_type(&field_def_node, &source),
+                                        required: true
+                                    },
+                                });
+                            } else {
+                                fields.push(NamedType {
+                                    name: field_name,
+                                    type_info: Type {
+                                        type_name: get_named_type(&field_def_node, &source),
+                                        required: true
+                                    }
+                                });
+                            }
+                            
+                            false
+                        });
 
-                      schema_type = Some(SchemaType::Class(ClassType {
-                          name: name.to_string(),
-                          fields: fields,
-                          properties: vec![],
-                          methods: methods
-                      }));
+                        schema_type = Some(SchemaType::Type(TypeDefinition {
+                            name: name.to_string(),
+                            fields: fields,
+                            properties: vec![],
+                            methods: methods,
+                            is_class,
+                            is_external,
+                            is_struct
+                        }));
 
-                      true
-                  });
+                        true
+                    });
                   
-                  if schema_type.is_some() {
+                    if schema_type.is_some() {
                     type_info.push(schema_type.unwrap());
-                  }
-              },
-              Err(_) => {}
-          }
-          true
-      });
+                    }
+                },
+                Err(_) => {}
+            }
+            true
+        });
 
-      true
-  });
-
-  let global_functions = type_info
-    .iter()
-    .find(|x| {
-        match x {
-            SchemaType::Class(class) => {
-                class.name == "Module"
-            },
-            _ => false
-        }
-    })
-    .map(|x| {
-        match x {
-            SchemaType::Class(class) => {
-                class.methods
-                    .iter()
-                    .map(|x| {
-                        SchemaType::Function(x.clone())
-                    })
-                    .collect()
-            },
-            _ => vec![]
-        }
+        true
     });
 
-  let mut abi: Vec<SchemaType> = type_info
-    .into_iter()
-    .filter(|x| {
-        match x {
-            SchemaType::Class(class) => {
-                class.name != "Module"
-            },
-            _ => true
-        }
-    })
-    .collect();
+    let global_functions = type_info
+        .iter()
+        .find(|x| {
+            match x {
+                SchemaType::Type(type_model) => {
+                    type_model.name == "Module"
+                },
+                _ => false
+            }
+        })
+        .map(|x| {
+            match x {
+                SchemaType::Type(type_model) => {
+                type_model.methods
+                        .iter()
+                        .map(|x| {
+                            SchemaType::Function(x.clone())
+                        })
+                        .collect()
+                },
+                _ => vec![]
+            }
+        });
 
-  if let Some(global_functions) = global_functions {
-    abi.extend(global_functions); 
-  }
+    let mut abi: Vec<SchemaType> = type_info
+        .into_iter()
+        .filter(|x| {
+            match x {
+                SchemaType::Type(type_model) => {
+                    type_model.name != "Module"
+                },
+                _ => true
+            }
+        })
+        .collect();
 
-  abi
+    if let Some(global_functions) = global_functions {
+        abi.extend(global_functions); 
+    }
+
+    abi
 }
 
 fn get_name_from_node(node: &Node, source: &str) -> String {
     let mut name: Option<String> = None;
 
     walk(&mut node.walk(), "Name", &mut |name_node| {
-    match name_node.utf8_text(source.as_bytes()) {
-        Ok(name_str) => name = Some(name_str.to_string()),
-        Err(e) => {
-            println!("{:?}", e);
-            panic!("Name of node is not defined");
+        match name_node.utf8_text(source.as_bytes()) {
+            Ok(name_str) => name = Some(name_str.to_string()),
+            Err(e) => {
+                panic!("Name of node is not defined");
+            }
         }
-    }
-    true
+        true
     });
 
     if name.is_none() {
@@ -164,15 +174,16 @@ fn get_named_type(node: &Node, source: &str) -> String {
 }
 
 
-fn get_directive(node: &Node, source: &str) -> Option<String> {
-  let mut name: Option<String> = None;
+fn get_directives(node: &Node, source: &str) -> Vec<String> {
+  let mut names: Vec<String> = vec![];
 
   walk(&mut node.walk(), "Directive", &mut |name_node| {
-  name = Some(get_name_from_node(&name_node, source));
-  true
+    let name = get_name_from_node(&name_node, source);
+    names.push(name.clone());
+    false
   });
 
-  name
+  names
 }
 
 fn walk<F: FnMut(Node) -> bool>(cursor: &mut TreeCursor, node_kind: &str, on_node_kind: &mut F) {
@@ -184,9 +195,6 @@ fn walk<F: FnMut(Node) -> bool>(cursor: &mut TreeCursor, node_kind: &str, on_nod
   loop {
       let node = cursor.node();
       let kind = node.kind();
-      println!("Kind {:?}", kind);
-      println!("type {:?}", cursor.node());
-
       let node = cursor.node();
       let kind = node.kind();
   
@@ -201,11 +209,8 @@ fn walk<F: FnMut(Node) -> bool>(cursor: &mut TreeCursor, node_kind: &str, on_nod
 
       let succ = cursor.goto_next_sibling();
       if !succ {
-          println!("success {:?}", succ);
           break;
       }
-
-      println!("next");
   }
 }
 #[cfg(test)]

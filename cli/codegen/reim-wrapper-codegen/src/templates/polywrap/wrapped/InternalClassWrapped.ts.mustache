@@ -1,25 +1,46 @@
 import { stringify } from "@serial-as/json";
 import { {{name}} } from "../..";
-import { 
-  {{#methods}}
-  {{name}}Wrapped,
-  {{/methods}}
-} from "../wrapper/classes/list/{{name}}/methods";
-import { {{name}}Method } from "../wrapper/classes/list/{{name}}/{{name}}Method";
+import { {{name}}Method } from "../wrapper/classes/{{name}}/{{name}}Method";
+{{#methods}}
+import { {{model.name}}Wrapped } from "../wrapper/classes/{{name}}/methods";
+{{/methods}}
+{{#relatedTypes}}
+{{#isClass}}
+import { {{nativeTypeNameWrapped}} } from ".";
+{{/isClass}}
+{{#isStruct}}
+import { {{nativeTypeName}} } from "../structs";
+{{/isStruct}}
+{{/relatedTypes}}
 
 const CLASS_NAME = "{{name}}";
 
 export class {{name}}Wrapped {
   constructor(
     public __referencePtr: u32,
+    {{#fields}}
+    public {{model.name}}: {{model.typeInfo.nativeTypeNameWrapped}},
+    {{/fields}}
   ) {
+  }
+
+  static referenceMap: Map<u32, {{name}}> = new Map<u32, {{name}}>();
+
+  static dereference(referencePtr: u32): {{name}} {
+    const object = {{name}}Wrapped.referenceMap.get(referencePtr);
+
+    if (!object) {
+      throw new Error(`Reference {{name}}(${referencePtr}) not found`);
+    }
+
+    return object;
   }
 
   static invokeMethod(method: u32, buffer: ArrayBuffer): ArrayBuffer {  
     switch (method) {
       {{#methods}}
-      case {{name}}Method.{{namePascalCase}}:
-        return {{name}}Wrapped(buffer);
+      case {{model.className}}Method.{{model.namePascalCase}}:
+        return {{model.name}}Wrapped(buffer);
       {{/methods}}
       default:
         throw new Error("Unknown method " + method.toString() + " on class " + CLASS_NAME);
@@ -27,8 +48,19 @@ export class {{name}}Wrapped {
   }
   
   static mapToSerializable(value: {{name}}): {{name}}Wrapped {
+    const referencePtr = changetype<u32>(value);
+    this.referenceMap.set(referencePtr, value);
+  
     return new {{name}}Wrapped(
-      changetype<u32>(value)
+      referencePtr,
+      {{#fields}}
+      {{#model.typeInfo.isClass}}
+      {{model.typeInfo.nativeTypeNameWrapped}}.mapToSerializable(value.{{model.name}}),
+      {{/model.typeInfo.isClass}}
+      {{^model.typeInfo.isClass}}
+      value.{{model.name}},
+      {{/model.typeInfo.isClass}}
+      {{/fields}}
     );
   }
 
@@ -38,5 +70,27 @@ export class {{name}}Wrapped {
         {{name}}Wrapped.mapToSerializable(value)
       )
     );
+  }
+
+  static deserialize(buffer: ArrayBuffer): {{name}} {
+    const object = parse<{{name}}Wrapped>(String.UTF8.decode(buffer));
+  
+    return {{name}}Wrapped.mapFromSerializable(object);
+  }
+
+  static mapFromSerializable(value: {{name}}Wrapped): {{name}} {
+    const object = new {{name}}(
+      value.__referencePtr,
+      {{#fields}}
+      {{#model.isClass}}
+      {{model.typeInfo.nativeTypeNameWrapped}}.mapFromSerializable(value.{{model.name}}),
+      {{/model.isClass}}
+      {{^model.isClass}}
+      value.{{model.name}},
+      {{/model.isClass}}
+      {{/fields}}
+    );
+
+    return object;
   }
 }

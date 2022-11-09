@@ -1,10 +1,12 @@
 import { bufferToU32 } from "../../buffer";
 import { ClassList } from "./ClassList";
-{{#classes}}
-{{#isInternal}}
-import { invoke{{name}}Method } from "./list/{{name}}/invoke{{name}}Method";
-{{/isInternal}}
-{{/classes}}
+{{#types}}
+{{#model.isClass}}
+{{^model.isExternal}}
+import { invoke{{model.name}}Method } from "./list/{{model.name}}/invoke{{model.name}}Method";
+{{/model.isExternal}}
+{{/model.isClass}}
+{{/types}}
 
 export function invokeClassMethod(buffer: ArrayBuffer): ArrayBuffer {
   const classId = bufferToU32(buffer);
@@ -12,12 +14,14 @@ export function invokeClassMethod(buffer: ArrayBuffer): ArrayBuffer {
   const dataBuffer = buffer.slice(8);
 
   switch (classId) {
-    {{#classes}}
-    {{#isInternal}}
-    case ClassList.{{name}}:
-      return invoke{{name}}Method(method, dataBuffer);
-    {{/isInternal}}
-    {{/classes}}
+    {{#types}}
+    {{#model.isClass}}
+    {{^model.isExternal}}
+    case ClassList.{{model.name}}:
+      return invoke{{model.name}}Method(method, dataBuffer);
+    {{/model.isExternal}}
+    {{/model.isClass}}
+    {{/types}}
     default:
       throw new Error("Unknown class ID: " + classId);
   }
