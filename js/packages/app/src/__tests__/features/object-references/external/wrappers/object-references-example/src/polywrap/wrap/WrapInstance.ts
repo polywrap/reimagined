@@ -3,7 +3,13 @@ import { concat, u32ToBuffer } from "../buffer";
 import { send } from "../dt";
 import { HostResource } from "./host-resources/HostResource";
 
-export class WrapInstance {
+export interface IWrapInterface {
+  invokeGlobalFunction<TArgs, TData>(funcId: u32, args: TArgs): TData;
+  invokeStaticMethod<TArgs, TData>(classId: u32, methodId: u32, args: TArgs): TData;
+  invokeInstanceMethod<TArgs, TData>(classId: u32, methodId: u32, instanceReferencePtr: u32, args: TArgs): TData;
+}
+
+export class WrapInstance implements IWrapInterface {
   invokeGlobalFunction<TArgs, TData>(funcId: u32, args: TArgs): TData {
     const buffer = 
       concat(

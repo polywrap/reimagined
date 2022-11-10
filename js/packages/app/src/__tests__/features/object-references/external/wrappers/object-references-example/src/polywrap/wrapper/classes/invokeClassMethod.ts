@@ -1,6 +1,9 @@
 import { bufferToU32 } from "../../buffer";
-import { ClassList } from "./ClassList";
 import { invokeTestObjectGetterMethod } from "./list/TestObjectGetter/invokeTestObjectGetterMethod";
+
+export enum ClassList {
+  TestObjectGetter = 1,
+}
 
 export function invokeClassMethod(buffer: ArrayBuffer): ArrayBuffer {
   const classType = bufferToU32(buffer);

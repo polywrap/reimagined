@@ -5,7 +5,7 @@ import { TestExternalClassWrapped } from "../../../wrapped";
 import { BaseTypeSerialization } from "../../../serialization/BaseTypeSerialization";
 
 export function testReceiveReferenceWrapped(dataBuffer: ArrayBuffer): ArrayBuffer {
-  const args = Args.deserialize(dataBuffer);
+  const args = ArgsWrapped.deserialize(dataBuffer);
 
   const result = testReceiveReference(
     args.arg
@@ -20,20 +20,20 @@ class Args {
     public arg: TestExternalClass,
   ) {
   }
+}
+
+@serializable
+class ArgsWrapped {
+  constructor(
+    public arg: TestExternalClassWrapped,
+  ) {
+  }
 
   static deserialize(buffer: ArrayBuffer): Args {
-    const args = parse<SerializedArgs>(String.UTF8.decode(buffer));
+    const args = parse<ArgsWrapped>(String.UTF8.decode(buffer));
   
     return new Args(
       new TestExternalClass(args.arg.__referencePtr),
     );
-  }
-}
-
-@serializable
-class SerializedArgs {
-  constructor(
-    public arg: TestExternalClassWrapped,
-  ) {
   }
 }

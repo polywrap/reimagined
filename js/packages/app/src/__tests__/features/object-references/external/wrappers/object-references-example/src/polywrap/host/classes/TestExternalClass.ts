@@ -1,7 +1,12 @@
 import { wrapInstance } from '../../../wrap/WrapInstance';
 import { ClassList } from '../ClassList';
-import { TestExternalClassMethod } from './TestExternalClassMethod';
 import { TestExternalClassWrapped } from '../../../wrapped/TestExternalClassWrapped';
+
+enum TestExternalClassMethod {
+  Create = 0,
+  TestInstanceMethod = 1,
+  TestStaticMethod = 2,
+}
 
 @serializable
 export class TestExternalClass {
@@ -10,7 +15,7 @@ export class TestExternalClass {
 
   static create(arg: string): TestExternalClass {
     const result = wrapInstance.invokeStaticMethod<CreateArgsWrapped, TestExternalClassWrapped>(
-      ClassList.TestExternalClass, 
+      WrapManifest, 
       TestExternalClassMethod.Create, 
       new CreateArgsWrapped( 
         arg 

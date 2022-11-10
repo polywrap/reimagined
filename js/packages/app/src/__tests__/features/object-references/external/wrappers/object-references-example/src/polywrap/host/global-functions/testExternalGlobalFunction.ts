@@ -1,24 +1,27 @@
-import { stringify } from '@serial-as/json'
-import { concat, u32ToBuffer } from '../../buffer';
-import { HostResource } from "../../wrap/host-resources/HostResource";
-import { invoke_host_resource } from "../../wrap/host-resources/invoke_host_resource";
-import { BaseTypeSerialization } from '../../serialization/BaseTypeSerialization';
-import { GlobalFunctionList } from './GlobalFunctionList';
+import { IWrapInterface, wrapInstance } from '../../wrap/WrapInstance';
+
+export enum GlobalFunctionList {
+  TestExternalGlobalFunction = 0
+}
 
 export const testExternalGlobalFunction = (arg: string): string => {
-  const buffer = 
-    concat(
-      u32ToBuffer(GlobalFunctionList.TestExternalGlobalFunction),
-      TestExternalGlobalFunctionArgsWrapped.serialize(
-        new TestExternalGlobalFunctionArgs(
-          arg
-        )
+  return testExternalGlobalFunctionFromInstance(
+    wrapInstance,
+    arg
+  );
+}
+
+export const testExternalGlobalFunctionFromInstance = (instance: IWrapInterface, arg: string): string => {
+  const result = instance.invokeGlobalFunction<TestExternalGlobalFunctionArgsWrapped, string>(
+    GlobalFunctionList.TestExternalGlobalFunction,
+    TestExternalGlobalFunctionArgsWrapped.mapToSerializable(
+      new TestExternalGlobalFunctionArgs(
+        arg
       )
-    );
+    )
+  );
 
-  const result = invoke_host_resource(HostResource.InvokeGlobalFunction, buffer);
-
-  return BaseTypeSerialization.deserialize<string>(result);
+  return result;
 }
 
 @serializable
@@ -26,14 +29,6 @@ export class TestExternalGlobalFunctionArgsWrapped {
   constructor(
     public arg: string,
   ) {
-  }
-
-  static serialize(value: TestExternalGlobalFunctionArgs): ArrayBuffer {
-    return String.UTF8.encode(
-      stringify<TestExternalGlobalFunctionArgsWrapped>(
-        TestExternalGlobalFunctionArgsWrapped.mapToSerializable(value)
-      )
-    );
   }
 
   static mapToSerializable(value: TestExternalGlobalFunctionArgs): TestExternalGlobalFunctionArgsWrapped {

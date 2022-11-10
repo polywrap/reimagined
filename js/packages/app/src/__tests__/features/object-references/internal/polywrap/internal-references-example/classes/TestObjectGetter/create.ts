@@ -9,8 +9,8 @@ export const create = (wrapper: IWrapper) => {
 
       return new TestObjectGetter(wrapper, object.__referencePtr);
     },
-    testStaticMethod(arg: string): Promise<SerializableTestInternalClass> {
-      const object = wrapper.invokeClassMethod<TestStaticMethodArgs, string>("TestObjectGetter", "testStaticMethod", { arg });
+    async testStaticMethod(arg: string): Promise<TestInternalClass> {
+      const object = await wrapper.invokeClassMethod<TestStaticMethodArgs, string>("TestObjectGetter", "testStaticMethod", { arg });
  
       return new TestInternalClass(wrapper, object.__referencePtr);
     }

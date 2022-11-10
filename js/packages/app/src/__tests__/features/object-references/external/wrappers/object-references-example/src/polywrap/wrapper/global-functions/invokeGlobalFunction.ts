@@ -1,8 +1,8 @@
-import { GlobalFunctionList } from "./GlobalFunctionList";
+import { testReceiveReference } from "../../..";
 import { bufferToU32 } from "../../buffer";
+import { BaseTypeSerialization } from "../../serialization/BaseTypeSerialization";
 import { wrap_log } from "../../wrap/host-resources/wrap_log";
 import { 
-  testReceiveReferenceWrapped, 
   testInvokeExternalGlobalFunctionWrapped,
   testInvokeExternalStaticMethodWrapped,
   testInvokeExternalInstanceMethodWrapped,
@@ -15,15 +15,45 @@ export function invokeGlobalFunction(buffer: ArrayBuffer): ArrayBuffer {
   wrap_log("invokeGlobalFunction: " + func.toString());
 
   switch (func) {
-    case GlobalFunctionList.TestReceiveReference:
-      return testReceiveReferenceWrapped(dataBuffer);
-    case GlobalFunctionList.TestInvokeExternalGlobalFunction:
+    case WrapManifest.Internal.GlobalFunction.TestReceiveReference:
+      const args = TestReceiveReferenceArgsWrapped.deserialize(dataBuffer);
+
+      const result = testReceiveReference(
+        args.arg
+      );
+    
+      return BaseTypeSerialization.serialize<String>(result);
+    case WrapManifest.Internal.GlobalFunction.TestInvokeExternalGlobalFunction:
       return testInvokeExternalGlobalFunctionWrapped(dataBuffer);
-    case GlobalFunctionList.TestInvokeExternalStaticMethod:
+    case WrapManifest.Internal.GlobalFunction.TestInvokeExternalStaticMethod:
       return testInvokeExternalStaticMethodWrapped(dataBuffer);
-    case GlobalFunctionList.TestInvokeExternalInstanceMethod:
+    case WrapManifest.Internal.GlobalFunction.TestInvokeExternalInstanceMethod:
       return testInvokeExternalInstanceMethodWrapped(dataBuffer);
     default:
       throw new Error("Unknown function");
+  }
+}
+
+@serializable
+class TestReceiveReferenceArgs {
+  constructor(
+    public arg: TestExternalClass,
+  ) {
+  }
+}
+
+@serializable
+class TestReceiveReferenceArgsWrapped {
+  constructor(
+    public arg: TestExternalClassWrapped,
+  ) {
+  }
+
+  static deserialize(buffer: ArrayBuffer): Args {
+    const args = parse<ArgsWrapped>(String.UTF8.decode(buffer));
+  
+    return new Args(
+      new TestExternalClass(args.arg.__referencePtr),
+    );
   }
 }

@@ -1,6 +1,6 @@
 import { IWrapPackage, IWrapper} from "@polywrap/reim-wrap";
 import { FileSystemLoader } from "../../../FileSystemLoader";
-import { InternalReferencesExample } from "./polywrap/internal-references-example";
+import { WrapModule as InternalReferencesExample } from "./polywrap/internal-references-example";
 
 jest.setTimeout(200000);
 
@@ -21,7 +21,7 @@ describe("Object references", () => {
       const wrapPackage: IWrapPackage = loadResult.value;
       const wrapper: IWrapper = await wrapPackage.createWrapper();
 
-      const { testReturnReference } = InternalReferencesExample.from(wrapper);
+      const { testReturnReference } = InternalReferencesExample.import(wrapper);
 
       const object = await testReturnReference("test");
 
@@ -40,7 +40,7 @@ describe("Object references", () => {
       const wrapPackage: IWrapPackage = loadResult.value;
       const wrapper: IWrapper = await wrapPackage.createWrapper();
 
-      const { testReturnReference } = InternalReferencesExample.from(wrapper);
+      const { testReturnReference } = InternalReferencesExample.import(wrapper);
 
       const object = await testReturnReference("test 1");
 
@@ -61,7 +61,7 @@ describe("Object references", () => {
       const wrapPackage: IWrapPackage = loadResult.value;
       const wrapper: IWrapper = await wrapPackage.createWrapper();
 
-      const { TestObjectGetter } = InternalReferencesExample.from(wrapper);
+      const { TestObjectGetter } = InternalReferencesExample.import(wrapper);
 
       const object = await TestObjectGetter.testStaticMethod("test 1");
 
@@ -82,7 +82,7 @@ describe("Object references", () => {
       const wrapPackage: IWrapPackage = loadResult.value;
       const wrapper: IWrapper = await wrapPackage.createWrapper();
 
-      const { TestObjectGetter } = InternalReferencesExample.from(wrapper);
+      const { TestObjectGetter } = InternalReferencesExample.import(wrapper);
 
       const objectGetter = await TestObjectGetter.create("test 1");
 
