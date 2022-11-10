@@ -1,6 +1,6 @@
 import { parse, stringify } from "@serial-as/json";
 import { wrapInstance } from "../wrap/WrapInstance";
-import { TestExternalClass } from "../host/classes/TestExternalClass/TestExternalClass";
+import { TestExternalClass } from "../external/classes/TestExternalClass";
 
 const CLASS_NAME = "TestExternalClass";
 

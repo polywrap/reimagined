@@ -1,16 +1,9 @@
 import { concat, bufferToU32, u32ToBuffer } from "../buffer";
 import { __dt_fill_send_result, __dt_send } from "./imports";
-import { invoke_wrapper_resource } from "../wrap/wrapper-resources/invoke_wrapper_resource";
-import { wrap_log } from "../wrap/host-resources/wrap_log";
-import { HostResource } from "../wrap/host-resources/HostResource";
-import { invoke_host_resource } from "../wrap/host-resources/invoke_host_resource";
+import { wrapInstance } from "../wrap/WrapInstance";
 
 export function receive(buffer: ArrayBuffer): u32 {
-  const functionId = bufferToU32(buffer);
-
-  const dataBuffer = buffer.slice(4);
-
-  const result = invoke_wrapper_resource(functionId, dataBuffer);
+  const result = wrapInstance.onReceive(buffer);
 
   const tmp = concat(u32ToBuffer(result.byteLength), result);
 

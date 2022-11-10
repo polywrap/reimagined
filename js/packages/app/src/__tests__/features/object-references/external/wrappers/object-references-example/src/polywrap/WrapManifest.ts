@@ -10,6 +10,14 @@ namespace WrapManifest {
     export enum Class {
       TestObjectGetter = 1,
     }
+
+    export namespace Classes {
+      export enum TestObjectGetterMethod {
+        Create = 0,
+        TestInstanceReceiveReference = 1,
+        TestStaticReceiveReference = 2,
+      }
+    }
   }
 
   export namespace External {
@@ -19,6 +27,13 @@ namespace WrapManifest {
 
     export enum Class {
       TestExternalClass = 0,
+    }
+
+    export namespace Classes {
+      export enum TestExternalClassMethod {
+        Create = 0,
+        TestInstanceMethod = 1
+      }
     }
   }
 }

@@ -1,5 +1,5 @@
-{{#globalFunctions}}
+{{#globalFunctions.list}}
 {{#model.isExternal}}
-export * from "./{{model.name}}";
+export * from "./{{model.name}}/{{model.name}}";
 {{/model.isExternal}}
-{{/globalFunctions}}
+{{/globalFunctions.list}}

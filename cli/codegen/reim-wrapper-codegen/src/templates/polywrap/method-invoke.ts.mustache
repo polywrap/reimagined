@@ -1,15 +1,8 @@
 import { parse } from '@serial-as/json'
 import { bufferToU32 } from "../../buffer";
-import { 
-  {{#globalFunctions.list}}
-  {{^model.isExternal}}
-  {{model.name}},
-  {{/model.isExternal}}
-  {{/globalFunctions.list}} 
-} from "../../..";
-{{#globalFunctions.relatedTypes}}
+{{#relatedTypes}}
 {{#isClass}}
-import { {{nativeTypeNameWrapped}} } from "../../wrapped";
+import { {{nativeTypeNameWrapped}} } from "..";
 {{#isExternal}}
 import { {{nativeTypeName}} } from "../../host/classes";
 {{/isExternal}}
@@ -20,41 +13,58 @@ import { {{nativeTypeName}} } from "../../..";
 {{#isStruct}}
 import { {{nativeTypeName}} } from "../../..";
 {{/isStruct}}
-{{/globalFunctions.relatedTypes}}
+{{/relatedTypes}}
 import { BaseTypeSerialization } from '../../serialization/BaseTypeSerialization';
 
-export function invokeGlobalFunction(buffer: ArrayBuffer): ArrayBuffer {
+export function invoke(buffer: ArrayBuffer): ArrayBuffer {
   const funcId = bufferToU32(buffer);
   const dataBuffer = buffer.slice(4);
 
   switch (funcId) {
-    {{#globalFunctions.list}}
-    {{^model.isExternal}}
+    {{#list}}
     case WrapManifest.Internal.GlobalFunction.{{model.namePascalCase}}:
-        const args = {{model.namePascalCase}}ArgsWrapped.deserialize(dataBuffer);
-
-        const result = {{model.name}}(
-          {{#model.args}}
-          args.{{model.name}},
-          {{/model.args}}
-        );
-
-        {{#model.result.isClass}}
-        return {{model.result.nativeTypeNameWrapped}}.serialize(result);
-        {{/model.result.isClass}}
-        {{^model.result.isClass}}
-        return BaseTypeSerialization.serialize<{{model.result.nativeTypeName}}>(result);
-        {{/model.result.isClass}}
-    {{/model.isExternal}}
-    {{/globalFunctions.list}}
+        return invoke{{model.namePascalCase}}Wrapped(dataBuffer);
+    {{/list}}
     default:
-      throw new Error("Unknown global function: " + funcId);
+      throw new Error("Unknown function/method: " + funcId);
   }
 }
 
-{{#globalFunctions.list}}
-{{^model.isExternal}}
-export class {{model.namePascalCase}}Args {
+{{#list}}
+const invoke{{model.namePascalCase}}Wrapped = (buffer: ArrayBuffer): ArrayBuffer => {
+  {{#model.isStatic}}
+  const args = {{model.namePascalCase}}ArgsWrapped.deserialize(buffer);
+
+  const result = {{model.className}}.{{model.name}}(
+    {{#model.args}}
+    args.{{model.name}},
+    {{/model.args}}
+  );
+  {{/model.isStatic}}
+  {{^model.isStatic}}
+  const referencePtr = bufferToU32(buffer);
+  const dataBuffer = buffer.slice(4);
+
+  const args = {{model.namePascalCase}}ArgsWrapped.deserialize(dataBuffer);
+
+  const object = {{model.className}}Wrapped.dereference(referencePtr);
+
+  const result = object.{{model.name}}(
+    {{#model.args}}
+    args.{{model.name}},
+    {{/model.args}}
+  );
+  {{/model.isStatic}}
+
+  {{#model.result.isClass}}
+  return {{model.result.nativeTypeNameWrapped}}.serialize(result);
+  {{/model.result.isClass}}
+  {{^model.result.isClass}}
+  return BaseTypeSerialization.serialize<{{model.result.nativeTypeName}}>(result);
+  {{/model.result.isClass}}
+};
+
+class {{model.namePascalCase}}Args {
   constructor(
     {{#model.args}}
     public {{model.name}}: {{model.typeInfo.nativeTypeName}},
@@ -66,9 +76,9 @@ export class {{model.namePascalCase}}Args {
 @serializable
 class {{model.namePascalCase}}ArgsWrapped {
   constructor(
-    {{#args}}
+    {{#model.args}}
     public {{model.name}}: {{model.typeInfo.nativeTypeNameWrapped}},
-    {{/args}}
+    {{/model.args}}
   ) {
   }
 
@@ -87,5 +97,4 @@ class {{model.namePascalCase}}ArgsWrapped {
     );
   }  
 }
-{{/model.isExternal}}
-{{/globalFunctions.list}}
+{{/list}}

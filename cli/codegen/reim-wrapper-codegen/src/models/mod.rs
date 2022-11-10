@@ -46,14 +46,14 @@ impl TypeInfo {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct NamedTypeInfo {
   pub name: String,
   pub type_info: TypeInfo,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct FunctionModel {
   pub name: String,
@@ -91,18 +91,41 @@ impl FunctionModel {
             is_static: model.is_static,
             is_external: model.is_external,
             class_name: model.class_name,
-            related_types
+            related_types,
         }
     }
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct ListModel<T> {
   pub model: T,
   pub index: usize,
   pub first: bool,
   pub last: bool,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct GlobalFunctionsModel {
+  pub list: Vec<ListModel<FunctionModel>>,
+  pub related_types: Vec<TypeInfo>,
+}
+
+impl GlobalFunctionsModel {
+  pub fn build(list: Vec<ListModel<FunctionModel>>, ) -> GlobalFunctionsModel {
+      let related_types = list
+        .iter()
+        .flat_map(|func| func.model.related_types.clone())
+        .collect::<HashSet<TypeInfo>>()
+        .into_iter()
+        .collect();
+
+      GlobalFunctionsModel {
+          list,
+          related_types,
+      }
+  }
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -158,7 +181,7 @@ fn get_function_related_types(func: &FunctionModel) -> Vec<TypeInfo> {
 #[serde(rename_all = "camelCase")]
 pub struct WrapperModel {
   pub wrapper_name: String,
-  pub global_functions: Vec<ListModel<FunctionModel>>,
+  pub global_functions: GlobalFunctionsModel,
   pub types: Vec<ListModel<TypeModel>>,
 }
 

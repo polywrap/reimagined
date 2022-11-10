@@ -4,8 +4,8 @@ import {
   createWrapped,
   testStaticReceiveReferenceWrapped,
   testInstanceReceiveReferenceWrapped
-} from "../wrapper/classes/list/TestObjectGetter/methods";
-import { TestObjectGetterMethod } from "../wrapper/classes/list/TestObjectGetter/TestObjectGetterMethod";
+} from "../internal/classes/list/TestObjectGetter/methods";
+import { TestObjectGetterMethod } from "../internal/classes/list/TestObjectGetter/TestObjectGetterMethod";
 
 const CLASS_NAME = "TestObjectGetter";
 

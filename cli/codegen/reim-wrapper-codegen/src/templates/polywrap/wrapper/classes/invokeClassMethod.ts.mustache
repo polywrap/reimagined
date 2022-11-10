@@ -1,9 +1,8 @@
 import { bufferToU32 } from "../../buffer";
-import { ClassList } from "./ClassList";
 {{#types}}
 {{#model.isClass}}
 {{^model.isExternal}}
-import { invoke{{model.name}}Method } from "./list/{{model.name}}/invoke{{model.name}}Method";
+import { {{model.name}}Wrapped } from "../../wrapped/{{model.name}}Wrapped";
 {{/model.isExternal}}
 {{/model.isClass}}
 {{/types}}
@@ -17,8 +16,8 @@ export function invokeClassMethod(buffer: ArrayBuffer): ArrayBuffer {
     {{#types}}
     {{#model.isClass}}
     {{^model.isExternal}}
-    case ClassList.{{model.name}}:
-      return invoke{{model.name}}Method(method, dataBuffer);
+    case WrapManifest.Internal.Class.{{model.name}}:
+      return {{model.name}}Wrapped.invokeMethod(method, dataBuffer);
     {{/model.isExternal}}
     {{/model.isClass}}
     {{/types}}

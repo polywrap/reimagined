@@ -1,17 +1,21 @@
 import { stringify } from "@serial-as/json";
+import { parse } from '@serial-as/json'
 import { {{name}} } from "../..";
-import { {{name}}Method } from "../wrapper/classes/{{name}}/{{name}}Method";
-{{#methods}}
-import { {{model.name}}Wrapped } from "../wrapper/classes/{{name}}/methods";
-{{/methods}}
 {{#relatedTypes}}
 {{#isClass}}
 import { {{nativeTypeNameWrapped}} } from ".";
+{{#isExternal}}
+import { {{nativeTypeName}} } from "../host/classes";
+{{/isExternal}}
+{{^isExternal}}
+import { {{nativeTypeName}} } from "../..";
+{{/isExternal}}
 {{/isClass}}
 {{#isStruct}}
 import { {{nativeTypeName}} } from "../..";
 {{/isStruct}}
 {{/relatedTypes}}
+import { invoke } from './invoke';
 
 const CLASS_NAME = "{{name}}";
 
@@ -30,21 +34,14 @@ export class {{name}}Wrapped {
     const object = {{name}}Wrapped.referenceMap.get(referencePtr);
 
     if (!object) {
-      throw new Error(`Reference {{name}}(${referencePtr}) not found`);
+      throw new Error(`Reference {{name}}(${referencePtr}) not found on class: ${CLASS_NAME}`);
     }
 
     return object;
   }
 
-  static invokeMethod(method: u32, buffer: ArrayBuffer): ArrayBuffer {  
-    switch (method) {
-      {{#methods}}
-      case {{model.className}}Method.{{model.namePascalCase}}:
-        return {{model.name}}Wrapped(buffer);
-      {{/methods}}
-      default:
-        throw new Error("Unknown method " + method.toString() + " on class " + CLASS_NAME);
-    }
+  static invokeMethod(buffer: ArrayBuffer): ArrayBuffer {  
+    return invoke(buffer);
   }
   
   static mapToSerializable(value: {{name}}): {{name}}Wrapped {

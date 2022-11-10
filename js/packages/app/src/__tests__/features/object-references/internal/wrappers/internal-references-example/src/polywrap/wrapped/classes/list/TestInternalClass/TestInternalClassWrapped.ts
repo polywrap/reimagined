@@ -5,7 +5,7 @@ import {
   createWrapped, 
   testInstanceMethodWrapped
 } from "./methods";
-import { wrapInstance } from "../../../../wrap/WrapInstance";
+import { WrapModule } from "../../../../wrap/WrapModule";
 
 const CLASS_NAME = "TestInternalClass";
 
@@ -47,7 +47,7 @@ export class TestInternalClassWrapped {
   }
 
   private static mapToSerializable(value: TestInternalClass): TestInternalClassWrapped {
-    const referencePtr = wrapInstance.referenceCount++;
+    const referencePtr = WrapModule.wrapInstance.referenceCount++;
 
     this.referenceMap.set(referencePtr, value);
   

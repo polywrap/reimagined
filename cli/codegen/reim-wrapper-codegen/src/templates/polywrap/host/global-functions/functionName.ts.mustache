@@ -1,14 +1,14 @@
 import { stringify } from '@serial-as/json'
+import { IWrapInterface, wrapInstance } from '../../wrap/WrapInstance';
 import { concat, u32ToBuffer } from '../../buffer';
 import { HostResource } from "../../wrap/host-resources/HostResource";
 import { invoke_host_resource } from "../../wrap/host-resources/invoke_host_resource";
-import { GlobalFunctionList } from './GlobalFunctionList';
 {{#relatedTypes}}
 {{#isClass}}
-import { {{nativeTypeNameWrapped}} } from "../../../wrapped";
+import { {{nativeTypeNameWrapped}} } from "../../wrapped";
 {{/isClass}}
 {{#isStruct}}
-import { {{nativeTypeName}} } from "../../../..";
+import { {{nativeTypeName}} } from "../../..";
 {{/isStruct}}
 {{/relatedTypes}}
 {{^result.isClass}}
@@ -16,30 +16,36 @@ import { BaseTypeSerialization } from '../../serialization/BaseTypeSerialization
 {{/result.isClass}}
 
 export const {{name}} = (
-    {{#args}}
-    {{model.name}}: {{model.nativeTypeName}},
-    {{/args}}
+  {{#args}}
+  {{model.name}}: {{model.typeInfo.nativeTypeName}},
+  {{/args}}
 ): string => {
-  const buffer = 
-    concat(
-      u32ToBuffer(GlobalFunctionList.{{namePascalCase}}),
-      {{namePascalCase}}ArgsWrapped.serialize(
-        new {{namePascalCase}}Args(
-            {{#args}}
-            {{model.name}},
-            {{/args}}
-        )
+  return {{name}}FromInstance(
+    wrapInstance,
+    {{#args}}
+    {{model.name}},
+    {{/args}}
+  );
+}
+
+export const {{name}}FromInstance = (
+  instance: IWrapInterface, 
+  {{#args}}
+  {{model.name}}: {{model.typeInfo.nativeTypeName}},
+  {{/args}}
+): string => {
+  const result = instance.invokeGlobalFunction<{{namePascalCase}}ArgsWrapped, string>(
+    WrapManifest.External.GlobalFunction.{{namePascalCase}},
+    {{namePascalCase}}ArgsWrapped.mapToSerializable(
+      new {{namePascalCase}}Args(
+        {{#args}}
+        {{model.name}},
+        {{/args}}
       )
-    );
+    )
+  );
 
-  const result = invoke_host_resource(HostResource.InvokeGlobalFunction, buffer);
-
-  {{#result.isClass}}
-  return {{result.nativeTypeNameWrapped}}.serialize(result);
-  {{/result.isClass}}
-  {{^result.isClass}}
-  return BaseTypeSerialization.serialize<{{result.nativeTypeName}}>(result);
-  {{/result.isClass}}
+  return result;
 }
 
 @serializable
