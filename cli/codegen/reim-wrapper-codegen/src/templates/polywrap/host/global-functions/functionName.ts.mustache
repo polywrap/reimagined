@@ -1,0 +1,83 @@
+import { stringify } from '@serial-as/json'
+import { concat, u32ToBuffer } from '../../buffer';
+import { HostResource } from "../../wrap/host-resources/HostResource";
+import { invoke_host_resource } from "../../wrap/host-resources/invoke_host_resource";
+import { GlobalFunctionList } from './GlobalFunctionList';
+{{#relatedTypes}}
+{{#isClass}}
+import { {{nativeTypeNameWrapped}} } from "../../../wrapped";
+{{/isClass}}
+{{#isStruct}}
+import { {{nativeTypeName}} } from "../../../..";
+{{/isStruct}}
+{{/relatedTypes}}
+{{^result.isClass}}
+import { BaseTypeSerialization } from '../../serialization/BaseTypeSerialization';
+{{/result.isClass}}
+
+export const {{name}} = (
+    {{#args}}
+    {{model.name}}: {{model.nativeTypeName}},
+    {{/args}}
+): string => {
+  const buffer = 
+    concat(
+      u32ToBuffer(GlobalFunctionList.{{namePascalCase}}),
+      {{namePascalCase}}ArgsWrapped.serialize(
+        new {{namePascalCase}}Args(
+            {{#args}}
+            {{model.name}},
+            {{/args}}
+        )
+      )
+    );
+
+  const result = invoke_host_resource(HostResource.InvokeGlobalFunction, buffer);
+
+  {{#result.isClass}}
+  return {{result.nativeTypeNameWrapped}}.serialize(result);
+  {{/result.isClass}}
+  {{^result.isClass}}
+  return BaseTypeSerialization.serialize<{{result.nativeTypeName}}>(result);
+  {{/result.isClass}}
+}
+
+@serializable
+export class {{namePascalCase}}ArgsWrapped {
+  constructor(
+    {{#args}}
+    public {{model.name}}: {{model.typeInfo.nativeTypeNameWrapped}},
+    {{/args}}
+  ) {
+  }
+
+  static serialize(value: {{namePascalCase}}Args): ArrayBuffer {
+    return String.UTF8.encode(
+      stringify<{{namePascalCase}}ArgsWrapped>(
+        {{namePascalCase}}ArgsWrapped.mapToSerializable(value)
+      )
+    );
+  }
+
+  static mapToSerializable(value: {{namePascalCase}}Args): {{namePascalCase}}ArgsWrapped {
+    return new {{namePascalCase}}ArgsWrapped(
+      {{#args}}
+      {{#model.isClass}}
+      {{model.typeInfo.nativeTypeNameWrapped}}.mapToSerializable(value.{{model.name}}),
+      {{/model.isClass}}
+      {{^model.isClass}}
+      value.{{model.name}},
+      {{/model.isClass}}
+      {{/args}}
+    );
+  }
+}
+
+export class {{namePascalCase}}Args {
+  constructor(
+    {{#args}}
+    public {{model.name}}: {{model.typeInfo.nativeTypeName}},
+    {{/args}}
+  ) {
+  }
+}

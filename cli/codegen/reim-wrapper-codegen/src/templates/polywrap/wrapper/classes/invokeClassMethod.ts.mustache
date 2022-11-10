@@ -1,0 +1,28 @@
+import { bufferToU32 } from "../../buffer";
+import { ClassList } from "./ClassList";
+{{#types}}
+{{#model.isClass}}
+{{^model.isExternal}}
+import { invoke{{model.name}}Method } from "./list/{{model.name}}/invoke{{model.name}}Method";
+{{/model.isExternal}}
+{{/model.isClass}}
+{{/types}}
+
+export function invokeClassMethod(buffer: ArrayBuffer): ArrayBuffer {
+  const classId = bufferToU32(buffer);
+  const method = bufferToU32(buffer, 4);
+  const dataBuffer = buffer.slice(8);
+
+  switch (classId) {
+    {{#types}}
+    {{#model.isClass}}
+    {{^model.isExternal}}
+    case ClassList.{{model.name}}:
+      return invoke{{model.name}}Method(method, dataBuffer);
+    {{/model.isExternal}}
+    {{/model.isClass}}
+    {{/types}}
+    default:
+      throw new Error("Unknown class ID: " + classId);
+  }
+}

@@ -1,34 +1,41 @@
 type Module {
-  internalFunction(arg1: string, arg2: string): ExternalType
+  internalFunction(arg1: string, arg2: string): ExternalType @fn
+  externalFunction(arg1: string, arg2: string): ExternalType @externalFn
 }
 
-type InternalType {
-  constructor(ctorArg: String): void
+type InternalType @class {
+  create(ctorArg: String): InternalType @staticFn
   # Example of an instance method and instance state
-  instanceMethod(arg: string): string
+  instanceMethod(arg: string): string @fn
   # Example of an instance method and instance state
-  instanceMethodMultiArgs(arg1: string, arg2: string): string
+  instanceMethodMultiArgs(arg1: string, arg2: string): string @fn
   # Example of returning a new class instance
-  instanceReturningReference(): InternalReferenceType
+  instanceReturningReference: InternalReferenceType @fn
   # Example of receiving an external class instance with a field (state)
-  instanceReceivingReference(ext: IExternalInterface): string
+  instanceReceivingReference(ext: ExternalInterface): string @fn
 } 
 
-type InternalReferenceType {
-  constructor(arg: String): void
-  getAddress(): String
+type InternalReferenceType @class {
+  count: u32
+  create(arg: String): InternalReferenceType @staticFn
+  getAddress: String @fn
 } 
 
-# Example of an external interface to receive
-type IExternalInterface {
-  count: Uint23
-  instanceMethod(arg: String): String
+# Example of an external reference to receive
+type ExternalInterface @class @external {
+  count: u32
+  instanceMethod(arg: string): String @fn
 }
 
-# Example of an external type to instantiate
-type ExternalType {
-  count: Uint23
-  test: IExternalInterface
-  constructor(arg: String): void
-  instanceMethod(arg: String): String
+# Example of an internal type to instantiate
+type ExternalType @class @external {
+  count: u32
+  test: ExternalInterface @fn
+  create(arg: string): ExternalType @staticFn
+  instanceMethod(arg: string): BasicObject @fn
+}
+
+# Example of an basic non-class object
+type BasicObject @struct {
+  count: u32
 }

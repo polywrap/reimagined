@@ -1,0 +1,7 @@
+export enum GlobalFunction {
+  {{#globalFunctions}}
+  {{^model.isExternal}}
+  {{model.namePascalCase}} = {{index}},
+  {{/model.isExternal}}
+  {{/globalFunctions}}
+}

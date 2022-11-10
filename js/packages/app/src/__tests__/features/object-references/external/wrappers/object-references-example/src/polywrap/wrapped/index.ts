@@ -1,1 +1,2 @@
-export * from './global-functions';
+export * from './TestExternalClassWrapped';
+export * from './TestObjectGetterWrapped';
