@@ -1,21 +1,21 @@
 {
   "name": "@nerfzael/reim-wrap-as",
   "description": "Polywrap Reim Wrap AS",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/polywrap-reimagined/monorepo.git"
   },
-  "main": "./src/index.ts",
+  "main": "./assemblyscript/index.ts",
   "files": [
     "build",
-    "src",
+    "assemblyscript",
     "tsconfig.json",
     "as-pect.config.js"
   ],
   "scripts": {
-    "build": "asc ./src/index.ts -o ./build/index.wasm -d ./build/index.d.ts",
+    "build": "asc ./assemblyscript/index.ts -o ./build/index.wasm -d ./build/index.d.ts",
     "lint": "eslint --color src/",
     "test": "asp --verbose",
     "test:ci": "asp --summary"
