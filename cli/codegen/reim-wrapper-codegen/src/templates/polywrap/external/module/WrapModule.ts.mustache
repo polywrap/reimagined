@@ -1,0 +1,36 @@
+import { IWrapInstance } from "@polywrap/reim-wrap-as";
+import { ImportBindings } from "./ImportBindings";
+
+{{#globalFunctions}}
+{{#isExternal}}
+import { create as create{{model.namePascalCase}} } from "../global-functions/{{model.name}}";
+{{/isExternal}}
+{{/globalFunctions}}
+{{#classes}}
+{{#isExternal}}
+import { create as create{{model.name}} } from "../classes/{{model.name}}";
+{{/isExternal}}
+{{/classes}}
+
+export class WrapModule {
+  static wrapInstance: IWrapInstance = new ExternalWrapInstance();
+
+  static connect(instance: IWrapInstance): void {
+    WrapModule.wrapInstance = instance;
+  }
+
+  static import(instance: IWrapInstance): ImportBindings {
+    return new ImportBindings(
+      {{#globalFunctions}}
+      {{#isExternal}}
+      create{{model.namePascalCase}}(instance),
+      {{/isExternal}}
+      {{/globalFunctions}}
+      {{#classes}}
+      {{#isExternal}}
+      create{{model.name}}(instance),
+      {{/isExternal}}
+      {{/classes}}
+    );
+  }
+}

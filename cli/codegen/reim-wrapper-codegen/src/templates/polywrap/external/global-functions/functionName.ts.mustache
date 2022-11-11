@@ -1,8 +1,6 @@
 import { stringify } from '@serial-as/json'
 import { IWrapInterface, wrapInstance } from '../../wrap/WrapInstance';
-import { concat, u32ToBuffer } from '../../buffer';
-import { HostResource } from "../../wrap/host-resources/HostResource";
-import { invoke_host_resource } from "../../wrap/host-resources/invoke_host_resource";
+import { concat, u32ToBuffer, IWrapInstance } from '@polywrap/reim-wrap-as';
 {{#relatedTypes}}
 {{#isClass}}
 import { {{nativeTypeNameWrapped}} } from "../../wrapped";
@@ -19,33 +17,59 @@ export const {{name}} = (
   {{#args}}
   {{model.name}}: {{model.typeInfo.nativeTypeName}},
   {{/args}}
-): string => {
+): {{model.result.nativeTypeName}} => {
   return {{name}}FromInstance(
-    wrapInstance,
+    WrapModule.wrapInstance,
     {{#args}}
     {{model.name}},
     {{/args}}
   );
-}
+};
+
+export const create = (instance: IWrapInstance) => {
+  return async (
+    {{#args}}
+    {{model.name}}: {{model.typeInfo.nativeTypeName}},
+    {{/args}}
+  ): {{model.result.nativeTypeName}} => {
+    return {{model.name}}FromInstance(
+      instance, 
+      {{#args}}
+      {{model.name}},
+      {{/args}}
+    );
+  };
+};
 
 export const {{name}}FromInstance = (
-  instance: IWrapInterface, 
+  instance: IWrapInterface | null, 
   {{#args}}
   {{model.name}}: {{model.typeInfo.nativeTypeName}},
   {{/args}}
-): string => {
-  const result = instance.invokeGlobalFunction<{{namePascalCase}}ArgsWrapped, string>(
-    WrapManifest.External.GlobalFunction.{{namePascalCase}},
-    {{namePascalCase}}ArgsWrapped.mapToSerializable(
-      new {{namePascalCase}}Args(
-        {{#args}}
-        {{model.name}},
-        {{/args}}
-      )
-    )
+): {{model.result.nativeTypeName}} => {
+  if (instance == null) {
+    throw new Error("connect() or import() must be called before using this module");
+  }
+
+  const args = new {{namePascalCase}}Args(
+    {{#args}}
+    {{model.name}},
+    {{/args}}
   );
 
-  return result;
+  const buffer = concat(
+    u32ToBuffer(WrapManifest.External.GlobalFunction.{{namePascalCase}}),
+    {{namePascalCase}}ArgsWrapped.serialize(args),
+  );
+
+  const result = instance.invokeResource(HostResource.InvokeGlobalFunction, buffer);
+
+  {{#model.result.isClass}}
+  return {{model.result.nativeTypeNameWrapped}}.serialize(result);
+  {{/model.result.isClass}}
+  {{^model.result.isClass}}
+  return BaseTypeSerialization.serialize<{{model.result.nativeTypeName}}>(result);
+  {{/model.result.isClass}}
 }
 
 @serializable

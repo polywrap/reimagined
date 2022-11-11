@@ -1,4 +1,4 @@
-import { wrapInstance } from '../../wrap/WrapInstance';
+import { IWrapInstance } from "@polywrap/reim-wrap-as";
 import { {{name}}Wrapped } from '../../wrapped';
 {{#relatedTypes}}
 {{#isClass}}
@@ -15,10 +15,48 @@ import { {{nativeTypeName}} } from "../../..";
 {{/isStruct}}
 {{/relatedTypes}}
 
-@serializable
+export const create = (instance: IWrapInstance) => {
+  return new {{name}}Import(instance);
+};
+
+export class {{name}}Import {
+  constructor(private readonly wrapInstance: IWrapInstance) {}
+
+  {{#methods}}
+  {{#model.isStatic}}
+  {{model.name}}(
+    {{#model.args}}
+    {{model.name}}: {{model.typeInfo.nativeTypeName}},
+    {{/model.args}}
+  ): {{model.result.nativeTypeName}} {
+    const args = new {{model.namePascalCase}}Args( 
+      {{#model.args}}
+      {{model.name}},
+      {{/model.args}} 
+    );
+
+    const buffer = concat(
+      u32ToBuffer(WrapManifest.External.Classes.{{model.className}}.{{model.namePascalCase}}),
+      {{model.namePascalCase}}ArgsWrapped.serialize(args),
+    );
+
+    const result = await this.wrapInstance.invokeResource(HostResource.InvokeClassMethod, buffer);
+
+    {{#model.result.isClass}}
+    return {{model.result.nativeTypeNameWrapped}}.mapFromSerializable(result);
+    {{/model.result.isClass}}
+    {{^model.result.isClass}}
+    return result;
+    {{/model.result.isClass}}
+  }
+  {{/model.isStatic}}
+  {{/methods}}
+}
+
 export class {{name}} {
   constructor(
     private readonly __referencePtr: u32,
+    private readonly __wrapInstance: IWrapInstance,
     {{#fields}}
     public {{model.name}}: {{model.typeInfo.nativeTypeName}},
     {{/fields}}
@@ -31,24 +69,12 @@ export class {{name}} {
     {{model.name}}: {{model.typeInfo.nativeTypeName}},
     {{/model.args}}
   ): {{model.result.nativeTypeName}} {
-    const args = new {{model.namePascalCase}}ArgsWrapped( 
-      {{#model.args}}
-      {{model.name}},
-      {{/model.args}} 
-    );
-
-    const result = wrapInstance.invokeStaticMethod<{{model.namePascalCase}}ArgsWrapped, {{model.result.nativeTypeNameWrapped}}>(
-      WrapManifest.External.Class.{{model.className}}, 
-      WrapManifest.External.Classes.{{model.className}}Method.{{model.namePascalCase}}, 
-      args
-    );
-
-    {{#model.result.isClass}}
-    return {{model.result.nativeTypeNameWrapped}}.mapFromSerializable(result);
-    {{/model.result.isClass}}
-    {{^model.result.isClass}}
-    return result;
-    {{/model.result.isClass}}
+    return new {{model.className}}Import(WrapModule.wrapInstance)
+      .{{model.name}}(
+        {{#model.args}}
+        {{model.name}},
+        {{/model.args}}
+      );
   }
   {{/model.isStatic}}
   {{^model.isStatic}}
@@ -57,18 +83,19 @@ export class {{name}} {
     {{model.name}}: {{model.typeInfo.nativeTypeName}},
     {{/model.args}}
   ): {{model.result.nativeTypeName}} {
-    const args = new {{model.namePascalCase}}ArgsWrapped( 
+    const args = new {{model.namePascalCase}}Args( 
       {{#model.args}}
       {{model.name}},
       {{/model.args}} 
     );
 
-    const result = wrapInstance.invokeInstanceMethod<{{model.namePascalCase}}ArgsWrapped, {{model.result.nativeTypeNameWrapped}}>(
-      WrapManifest.External.Class.{{model.className}}, 
-      WrapManifest.External.Classes.{{model.className}}Method.{{model.namePascalCase}}, 
-      this.__referencePtr,
-      args
-    );
+    const buffer = concat([
+      u32ToBuffer(WrapManifest.External.Classes.{{model.className}}.{{model.namePascalCase}}),
+      u32ToBuffer(this.__referencePtr),
+      {{model.namePascalCase}}ArgsWrapped.serialize(args),
+    ]);
+
+    const result = await this.wrapInstance.invokeResource(HostResource.InvokeClassMethod, buffer);
 
     {{#model.result.isClass}}
     return {{model.result.nativeTypeNameWrapped}}.mapFromSerializable(result);

@@ -1,0 +1,36 @@
+{{#classes}}
+{{#isExternal}}
+import { {{model.name}}Import } from "../classes/{{model.name}}";
+{{/isExternal}}
+{{/classes}}
+{{#relatedTypes}}
+{{#isClass}}
+{{#isExternal}}
+import { {{nativeTypeName}} } from "../classes";
+{{/isExternal}}
+{{^isExternal}}
+import { {{nativeTypeName}} } from "../../..";
+{{/isExternal}}
+{{/isClass}}
+{{#isStruct}}
+import { {{nativeTypeName}} } from "../../..";
+{{/isStruct}}
+{{/relatedTypes}}
+
+export class ImportBindings {
+  constructor(
+    {{#globalFunctions}}
+    {{#isExternal}}
+    public {{model.name}}: (
+      arg: string
+    ) => Promise<{{model.result.nativeTypeName}}>,
+    {{/isExternal}}
+    {{/globalFunctions}}
+    {{#classes}}
+    {{#isExternal}}
+    public {{model.name}}: {{model.name}}Import,
+    {{/isExternal}}
+    {{/classes}}
+  ) {
+  }
+}
