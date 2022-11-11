@@ -1,8 +1,8 @@
-{{#classes}}
-{{#isExternal}}
+{{#types}}
+{{#model.isExternal}}
 import { {{model.name}}Import } from "../classes/{{model.name}}";
-{{/isExternal}}
-{{/classes}}
+{{/model.isExternal}}
+{{/types}}
 {{#relatedTypes}}
 {{#isClass}}
 {{#isExternal}}
@@ -19,18 +19,20 @@ import { {{nativeTypeName}} } from "../../..";
 
 export class ImportBindings {
   constructor(
-    {{#globalFunctions}}
-    {{#isExternal}}
+    {{#globalFunctions.list}}
+    {{#model.isExternal}}
     public {{model.name}}: (
-      arg: string
-    ) => Promise<{{model.result.nativeTypeName}}>,
-    {{/isExternal}}
-    {{/globalFunctions}}
-    {{#classes}}
-    {{#isExternal}}
+      {{#model.args}}
+      {{model.name}}: {{model.typeInfo.nativeTypeName}},
+      {{/model.args}}
+    ) => {{model.result.nativeTypeName}},
+    {{/model.isExternal}}
+    {{/globalFunctions.list}}
+    {{#types}}
+    {{#model.isExternal}}
     public {{model.name}}: {{model.name}}Import,
-    {{/isExternal}}
-    {{/classes}}
+    {{/model.isExternal}}
+    {{/types}}
   ) {
   }
 }

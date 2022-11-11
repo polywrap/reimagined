@@ -107,8 +107,9 @@ pub fn generate_bindings(input_path: String, output_path: String) -> Result<(), 
     };
 
     render_wrapped(&wrapper, output_path.clone())?;
-    render_wrapper(&wrapper, output_path.clone())?;
-    render_host(&wrapper, output_path.clone())?;
+    render_internal(&wrapper, output_path.clone())?;
+    render_external(&wrapper, output_path.clone())?;
+    render_wrap_manifest(&wrapper, &output_path.clone())?;
     
     Ok(())
 }
@@ -210,14 +211,14 @@ fn render_wrapped(wrapper: &WrapperModel, output_path: String) -> Result<(), std
     Ok(())
 }
 
-fn render_wrapper(wrapper: &WrapperModel, output_path: String) -> Result<(), std::io::Error> {
-    render_wrapper_global_functions(wrapper, &output_path)?;
-    render_wrapper_classes(wrapper, &output_path)?;
+fn render_internal(wrapper: &WrapperModel, output_path: String) -> Result<(), std::io::Error> {
+    render_internal_global_functions(wrapper, &output_path)?;
+    render_internal_classes(wrapper, &output_path)?;
     Ok(())
 }
 
-fn render_wrapper_global_functions(wrapper: &WrapperModel, output_path: &str) -> Result<(), std::io::Error> {
-    let base_dir_path = output_path.to_string() + "/polywrap/wrapper/global-functions";
+fn render_internal_global_functions(wrapper: &WrapperModel, output_path: &str) -> Result<(), std::io::Error> {
+    let base_dir_path = output_path.to_string() + "/polywrap/internal/global-functions";
     fs::create_dir_all(&base_dir_path)?;
 
     let template_str = String::from_utf8_lossy(include_bytes!("templates/polywrap/global-function-invoke.ts.mustache"));
@@ -231,7 +232,7 @@ fn render_wrapper_global_functions(wrapper: &WrapperModel, output_path: &str) ->
         _ => {}
     };
     
-    let template_str = String::from_utf8_lossy(include_bytes!("templates/polywrap/wrapper/global-functions/index.ts.mustache"));
+    let template_str = String::from_utf8_lossy(include_bytes!("templates/polywrap/internal/global-functions/index.ts.mustache"));
 
     let template = mustache::compile_str(&template_str).unwrap();
 
@@ -245,11 +246,11 @@ fn render_wrapper_global_functions(wrapper: &WrapperModel, output_path: &str) ->
     Ok(())
 }
 
-fn render_wrapper_classes(wrapper: &WrapperModel, output_path: &str) -> Result<(), std::io::Error> {
-    let base_dir_path = output_path.to_string() + "/polywrap/wrapper/classes";
+fn render_internal_classes(wrapper: &WrapperModel, output_path: &str) -> Result<(), std::io::Error> {
+    let base_dir_path = output_path.to_string() + "/polywrap/internal/classes";
     fs::create_dir_all(&base_dir_path)?;
     
-    let template_str = String::from_utf8_lossy(include_bytes!("templates/polywrap/wrapper/classes/invokeClassMethod.ts.mustache"));
+    let template_str = String::from_utf8_lossy(include_bytes!("templates/polywrap/internal/classes/invokeClassMethod.ts.mustache"));
 
     let template = mustache::compile_str(&template_str).unwrap();
 
@@ -263,18 +264,48 @@ fn render_wrapper_classes(wrapper: &WrapperModel, output_path: &str) -> Result<(
     Ok(())
 }
 
-fn render_host(wrapper: &WrapperModel, output_path: String) -> Result<(), std::io::Error> {
-    render_host_global_functions(wrapper, &output_path)?;
-    render_host_classes(wrapper, &output_path)?;
+fn render_external(wrapper: &WrapperModel, output_path: String) -> Result<(), std::io::Error> {
+    render_module(wrapper, &output_path)?;
+    render_external_global_functions(wrapper, &output_path)?;
+    render_external_classes(wrapper, &output_path)?;
     Ok(())
 }
 
-fn render_host_global_functions(wrapper: &WrapperModel, output_path: &str) -> Result<(), std::io::Error> {
-    let base_dir_path = output_path.to_string() + "/polywrap/host/global-functions";
+fn render_module(wrapper: &WrapperModel, output_path: &str) -> Result<(), std::io::Error> {
+    let base_dir_path = output_path.to_string() + "/polywrap/external/module";
+    fs::create_dir_all(&base_dir_path)?;
+
+    let template_str = String::from_utf8_lossy(include_bytes!("templates/polywrap/external/module/WrapModule.ts.mustache"));
+
+    let template = mustache::compile_str(&template_str).unwrap();
+
+    match template.render_to_string(&wrapper) {
+        Ok(str) => {
+            write(format!("{}/WrapModule.ts", base_dir_path.clone()), str.as_bytes()).unwrap()
+        },
+        _ => {}
+    };
+
+    let template_str = String::from_utf8_lossy(include_bytes!("templates/polywrap/external/module/ImportBindings.ts.mustache"));
+
+    let template = mustache::compile_str(&template_str).unwrap();
+
+    match template.render_to_string(&wrapper) {
+        Ok(str) => {
+            write(format!("{}/ImportBindings.ts", base_dir_path.clone()), str.as_bytes()).unwrap()
+        },
+        _ => {}
+    };
+
+    Ok(())
+}
+
+fn render_external_global_functions(wrapper: &WrapperModel, output_path: &str) -> Result<(), std::io::Error> {
+    let base_dir_path = output_path.to_string() + "/polywrap/external/global-functions";
     fs::create_dir_all(&base_dir_path)?;
 
     for func in wrapper.global_functions.list.iter().filter(|x| x.model.is_external) {
-        let template_str = String::from_utf8_lossy(include_bytes!("templates/polywrap/host/global-functions/functionName.ts.mustache"));
+        let template_str = String::from_utf8_lossy(include_bytes!("templates/polywrap/external/global-functions/functionName.ts.mustache"));
 
         let template = mustache::compile_str(&template_str).unwrap();
 
@@ -286,7 +317,7 @@ fn render_host_global_functions(wrapper: &WrapperModel, output_path: &str) -> Re
         };
     }
 
-    let template_str = String::from_utf8_lossy(include_bytes!("templates/polywrap/host/global-functions/index.ts.mustache"));
+    let template_str = String::from_utf8_lossy(include_bytes!("templates/polywrap/external/global-functions/index.ts.mustache"));
 
     let template = mustache::compile_str(&template_str).unwrap();
 
@@ -300,12 +331,12 @@ fn render_host_global_functions(wrapper: &WrapperModel, output_path: &str) -> Re
     Ok(())
 }
 
-fn render_host_classes(wrapper: &WrapperModel, output_path: &str) -> Result<(), std::io::Error> {
-    let base_dir_path = output_path.to_string() + "/polywrap/host/classes";
+fn render_external_classes(wrapper: &WrapperModel, output_path: &str) -> Result<(), std::io::Error> {
+    let base_dir_path = output_path.to_string() + "/polywrap/external/classes";
     fs::create_dir_all(&base_dir_path)?;
     
     for class_type in wrapper.types.iter().filter(|x| x.model.is_class && x.model.is_external) {
-        let template_str = String::from_utf8_lossy(include_bytes!("templates/polywrap/host/classes/ClassName.ts.mustache"));
+        let template_str = String::from_utf8_lossy(include_bytes!("templates/polywrap/external/classes/ClassName.ts.mustache"));
 
         let template = mustache::compile_str(&template_str).unwrap();
 
@@ -317,7 +348,7 @@ fn render_host_classes(wrapper: &WrapperModel, output_path: &str) -> Result<(), 
         };
     }
 
-    let template_str = String::from_utf8_lossy(include_bytes!("templates/polywrap/host/classes/index.ts.mustache"));
+    let template_str = String::from_utf8_lossy(include_bytes!("templates/polywrap/external/classes/index.ts.mustache"));
 
     let template = mustache::compile_str(&template_str).unwrap();
 
@@ -329,6 +360,24 @@ fn render_host_classes(wrapper: &WrapperModel, output_path: &str) -> Result<(), 
     };
 
     Ok(())
+}
+
+fn render_wrap_manifest(wrapper: &WrapperModel, output_path: &str) -> Result<(), std::io::Error> {
+  let base_dir_path = output_path.to_string() + "/polywrap";
+  fs::create_dir_all(&base_dir_path)?;
+  
+  let template_str = String::from_utf8_lossy(include_bytes!("templates/polywrap/WrapManifest.ts.mustache"));
+
+  let template = mustache::compile_str(&template_str).unwrap();
+
+  match template.render_to_string(&wrapper) {
+      Ok(str) => {
+          write(format!("{}/WrapManifest.ts", base_dir_path.clone()), str.as_bytes()).unwrap()
+      },
+      _ => {}
+  };
+
+  Ok(())
 }
 
 #[cfg(test)]

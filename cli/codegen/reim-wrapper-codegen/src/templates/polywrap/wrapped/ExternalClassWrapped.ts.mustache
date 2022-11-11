@@ -1,6 +1,6 @@
 import { parse, stringify } from "@serial-as/json";
-import { wrapInstance } from "../wrap/WrapInstance";
-import { {{name}} } from "../host/classes/{{name}}/{{name}}";
+import { WrapManifest } from '../../WrapManifest';
+import { {{name}} } from "../external/classes/{{name}}/{{name}}";
 {{#relatedTypes}}
 {{#isClass}}
 import { {{nativeTypeNameWrapped}} } from ".";

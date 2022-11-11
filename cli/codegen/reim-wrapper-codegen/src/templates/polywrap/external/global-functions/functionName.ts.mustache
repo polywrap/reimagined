@@ -1,23 +1,28 @@
 import { stringify } from '@serial-as/json'
-import { IWrapInterface, wrapInstance } from '../../wrap/WrapInstance';
 import { concat, u32ToBuffer, IWrapInstance } from '@polywrap/reim-wrap-as';
+import { WrapModule } from '../module/WrapModule';
+import { WrapManifest } from '../../WrapManifest';
 {{#relatedTypes}}
 {{#isClass}}
 import { {{nativeTypeNameWrapped}} } from "../../wrapped";
+{{#isExternal}}
+import { {{nativeTypeName}} } from "../classes";
+{{/isExternal}}
+{{^isExternal}}
+import { {{nativeTypeName}} } from "../../..";
+{{/isExternal}}
 {{/isClass}}
 {{#isStruct}}
 import { {{nativeTypeName}} } from "../../..";
 {{/isStruct}}
 {{/relatedTypes}}
-{{^result.isClass}}
 import { BaseTypeSerialization } from '../../serialization/BaseTypeSerialization';
-{{/result.isClass}}
 
 export const {{name}} = (
   {{#args}}
   {{model.name}}: {{model.typeInfo.nativeTypeName}},
   {{/args}}
-): {{model.result.nativeTypeName}} => {
+): {{result.nativeTypeName}} => {
   return {{name}}FromInstance(
     WrapModule.wrapInstance,
     {{#args}}
@@ -27,12 +32,12 @@ export const {{name}} = (
 };
 
 export const create = (instance: IWrapInstance) => {
-  return async (
+  return (
     {{#args}}
     {{model.name}}: {{model.typeInfo.nativeTypeName}},
     {{/args}}
-  ): {{model.result.nativeTypeName}} => {
-    return {{model.name}}FromInstance(
+  ): {{result.nativeTypeName}} => {
+    return {{name}}FromInstance(
       instance, 
       {{#args}}
       {{model.name}},
@@ -46,7 +51,7 @@ export const {{name}}FromInstance = (
   {{#args}}
   {{model.name}}: {{model.typeInfo.nativeTypeName}},
   {{/args}}
-): {{model.result.nativeTypeName}} => {
+): {{result.nativeTypeName}} => {
   if (instance == null) {
     throw new Error("connect() or import() must be called before using this module");
   }
@@ -62,13 +67,13 @@ export const {{name}}FromInstance = (
     {{namePascalCase}}ArgsWrapped.serialize(args),
   );
 
-  const result = instance.invokeResource(HostResource.InvokeGlobalFunction, buffer);
+  const result = instance.invokeResource(ExternalResource.InvokeGlobalFunction, buffer);
 
   {{#model.result.isClass}}
-  return {{model.result.nativeTypeNameWrapped}}.serialize(result);
+  return {{model.result.nativeTypeNameWrapped}}.deserialize(result);
   {{/model.result.isClass}}
   {{^model.result.isClass}}
-  return BaseTypeSerialization.serialize<{{model.result.nativeTypeName}}>(result);
+  return BaseTypeSerialization.deserialize<{{model.result.nativeTypeName}}>(result);
   {{/model.result.isClass}}
 }
 

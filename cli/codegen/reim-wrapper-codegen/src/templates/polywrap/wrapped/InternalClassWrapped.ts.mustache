@@ -5,7 +5,7 @@ import { {{name}} } from "../..";
 {{#isClass}}
 import { {{nativeTypeNameWrapped}} } from ".";
 {{#isExternal}}
-import { {{nativeTypeName}} } from "../host/classes";
+import { {{nativeTypeName}} } from "../external/classes";
 {{/isExternal}}
 {{^isExternal}}
 import { {{nativeTypeName}} } from "../..";

@@ -1,10 +1,11 @@
 import { parse } from '@serial-as/json'
-import { bufferToU32 } from "../../buffer";
+import { bufferToU32 } from "@polywrap/reim-wrap-as";
+import { WrapManifest } from '../../WrapManifest';
 {{#relatedTypes}}
 {{#isClass}}
 import { {{nativeTypeNameWrapped}} } from "..";
 {{#isExternal}}
-import { {{nativeTypeName}} } from "../../host/classes";
+import { {{nativeTypeName}} } from "../../external/classes";
 {{/isExternal}}
 {{^isExternal}}
 import { {{nativeTypeName}} } from "../../..";

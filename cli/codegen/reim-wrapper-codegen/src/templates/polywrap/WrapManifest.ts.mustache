@@ -1,0 +1,69 @@
+export namespace WrapManifest {
+  export namespace Internal {
+    export enum GlobalFunction {
+      {{#globalFunctions.list}}
+      {{^model.isExternal}}
+      {{model.namePascalCase}} = {{index}},
+      {{/model.isExternal}}
+      {{/globalFunctions.list}}
+    }
+
+    export enum Class {
+      {{#types}}
+      {{#model.isClass}}
+      {{#model.isExternal}}
+      {{model.name}} = {{index}},
+      {{/model.isExternal}}
+      {{/model.isClass}}
+      {{/types}}
+    }
+
+    export namespace Classes {
+      {{#types}}
+      {{#model.isClass}}
+      {{#model.isExternal}}
+      export enum {{model.name}}Method {
+        {{#model.methods}}
+        {{model.namePascalCase}} = {{index}},
+        {{/model.methods}}
+      }
+      {{/model.isExternal}}
+      {{/model.isClass}}
+      {{/types}}
+    }
+  }
+
+  export namespace External {
+    export enum GlobalFunction {
+      {{#globalFunctions.list}}
+      {{#model.isExternal}}
+      {{model.namePascalCase}} = {{index}},
+      {{/model.isExternal}}
+      {{/globalFunctions.list}}
+    }
+
+    export enum Class {
+      {{#types}}
+      {{#model.isClass}}
+      {{^model.isExternal}}
+      {{model.name}} = {{index}},
+      {{/model.isExternal}}
+      {{/model.isClass}}
+      {{/types}}
+    }
+
+    export namespace Classes {
+      {{#types}}
+      {{#model.isClass}}
+      {{^model.isExternal}}
+      export enum {{model.name}}Method {
+        {{#model.methods}}
+        {{model.namePascalCase}} = {{index}},
+        {{/model.methods}}
+      }
+      {{/model.isExternal}}
+      {{/model.isClass}}
+      {{/types}}
+    }
+  }
+}

@@ -1,4 +1,5 @@
 import { IWrapInstance } from "@polywrap/reim-wrap-as";
+import { WrapManifest } from '../../WrapManifest';
 import { {{name}}Wrapped } from '../../wrapped';
 {{#relatedTypes}}
 {{#isClass}}
@@ -14,6 +15,7 @@ import { {{nativeTypeName}} } from "../../..";
 import { {{nativeTypeName}} } from "../../..";
 {{/isStruct}}
 {{/relatedTypes}}
+import { BaseTypeSerialization } from '../../serialization/BaseTypeSerialization';
 
 export const create = (instance: IWrapInstance) => {
   return new {{name}}Import(instance);
@@ -40,13 +42,13 @@ export class {{name}}Import {
       {{model.namePascalCase}}ArgsWrapped.serialize(args),
     );
 
-    const result = await this.wrapInstance.invokeResource(HostResource.InvokeClassMethod, buffer);
+    const result = await this.wrapInstance.invokeResource(ExternalResource.InvokeClassMethod, buffer);
 
     {{#model.result.isClass}}
-    return {{model.result.nativeTypeNameWrapped}}.mapFromSerializable(result);
+    return {{model.result.nativeTypeNameWrapped}}.deserialize(result);
     {{/model.result.isClass}}
     {{^model.result.isClass}}
-    return result;
+    return BaseTypeSerialization.deserialize<{{model.result.nativeTypeName}}>(result);
     {{/model.result.isClass}}
   }
   {{/model.isStatic}}
@@ -95,13 +97,13 @@ export class {{name}} {
       {{model.namePascalCase}}ArgsWrapped.serialize(args),
     ]);
 
-    const result = await this.wrapInstance.invokeResource(HostResource.InvokeClassMethod, buffer);
+    const result = await this.wrapInstance.invokeResource(ExternalResource.InvokeClassMethod, buffer);
 
     {{#model.result.isClass}}
-    return {{model.result.nativeTypeNameWrapped}}.mapFromSerializable(result);
+    return {{model.result.nativeTypeNameWrapped}}.deserialize(result);
     {{/model.result.isClass}}
     {{^model.result.isClass}}
-    return result;
+    return BaseTypeSerialization.deserialize<{{model.result.nativeTypeName}}>(result);
     {{/model.result.isClass}}
   }
   {{/model.isStatic}}
