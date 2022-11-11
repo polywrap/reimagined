@@ -1,15 +1,15 @@
 import { IDtReceiver } from "./IDtReceiver";
 import { HostResourceV_0_3 } from "./host-resources/HostResourceV_0_3";
 import { bufferToU32 } from "./WasmWrapper";
-import { IWrapper, IHost } from "@polywrap/reim-wrap";
+import { IWrapInstance } from "@polywrap/reim-wrap";
 
 
 export class DtReceiver implements IDtReceiver {
-  async onReceive(buffer: Uint8Array, host: IHost | undefined, trackedReferenceMap: Map<number, unknown>): Promise<Uint8Array> {
-    const func: HostResourceV_0_3 = bufferToU32(buffer);
+  async onReceive(buffer: Uint8Array, internalInstance: IWrapInstance | undefined, trackedReferenceMap: Map<number, unknown>): Promise<Uint8Array> {
+    const resource: number = bufferToU32(buffer);
     const dataBuffer = buffer.slice(4, buffer.length);
 
-    switch (func) {
+    switch (resource) {
       case HostResourceV_0_3.Log:
         console.log(
           "Host: Log",
@@ -31,10 +31,10 @@ export class DtReceiver implements IDtReceiver {
           "aaaaaaaaaaaaa",
         );
 
-        if (host) {
-          return host.invokeGlobalFunction(dataBuffer, trackedReferenceMap);
+        if (internalInstance) {
+          return internalInstance.invokeResource(HostResourceV_0_3.InvokeGlobalFunction, dataBuffer);
         } else {
-          throw new Error("Host is not defined");
+          throw new Error("Internal instance is not defined");
         }
       case HostResourceV_0_3.InvokeClassMethod:
         console.log(
@@ -43,13 +43,13 @@ export class DtReceiver implements IDtReceiver {
           new TextDecoder().decode(dataBuffer)
         );
 
-        if (host) {
-          return host.invokeClassMethod(dataBuffer, trackedReferenceMap);
+        if (internalInstance) {
+          return internalInstance.invokeResource(HostResourceV_0_3.InvokeClassMethod, dataBuffer);
         } else {
           throw new Error("Host is not defined");
         }
+      default:
+        throw new Error(`Unknown resource: ${resource}`);
     }
-
-    return new Uint8Array();
   }
 }

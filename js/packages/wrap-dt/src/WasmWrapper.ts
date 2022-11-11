@@ -1,5 +1,5 @@
 import { ResultOk, Result } from "@polywrap/result";
-import { IFunction, IWrapper, IWrapManifest, IClass, IMethod, IHost } from "@polywrap/reim-wrap";
+import { IFunction, IWrapper, IWrapManifest, IClass, IMethod, IWrapInstance } from "@polywrap/reim-wrap";
 import { IDataTranslator } from "./IDataTranslator";
 import { IDtInstance } from "@polywrap/reim-dt";
 import { IDtReceiver } from "./IDtReceiver";
@@ -15,7 +15,7 @@ export class WasmWrapper implements IWrapper {
     private readonly dtInstance: IDtInstance, 
     private readonly dataTranslator: IDataTranslator,
     private readonly dtReceiver: IDtReceiver,
-    private readonly host: IHost | undefined
+    private readonly internalInstance: IWrapInstance | undefined
   ) {
   }
 
@@ -32,7 +32,7 @@ export class WasmWrapper implements IWrapper {
 
     const resultBuffer = await this.dtInstance.send(
       inputBuffer,
-      (buffer) => this.dtReceiver.onReceive(buffer, this.host, this.trackedReferenceMap)
+      (buffer) => this.dtReceiver.onReceive(buffer, this.internalInstance, this.trackedReferenceMap)
     );
 
     if (funcInfo.funcInfo.returnType === "void") {
@@ -61,7 +61,7 @@ export class WasmWrapper implements IWrapper {
 
     const resultBuffer = await this.dtInstance.send(
       inputBuffer,
-      (buffer) => this.dtReceiver.onReceive(buffer, this.host, this.trackedReferenceMap)
+      (buffer) => this.dtReceiver.onReceive(buffer, this.internalInstance, this.trackedReferenceMap)
     );
 
     if (methodInfo.methodInfo.returnType === "void" && methodName !== "create") {
@@ -69,6 +69,18 @@ export class WasmWrapper implements IWrapper {
     }
 
     return this.dataTranslator.decode(resultBuffer) as TData;
+  }
+
+  async invokeResource(resource: number, buffer: Uint8Array): Promise<Uint8Array> {
+    const result = await this.dtInstance.send(
+      concat([
+        u32ToBuffer(resource),
+        buffer
+      ]),
+      (buffer: Uint8Array) => this.dtReceiver.onReceive(buffer, this.internalInstance, this.trackedReferenceMap)
+    );
+
+    return result;
   }
 
   parseArgsAndExtractReferences(args: any): Uint8Array {

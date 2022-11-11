@@ -1,8 +1,7 @@
-import { IObjectReference } from "../IObjectReference";
-import { 
-  TestInternalClass, 
-} from "../classes";
-import { IWrapInstance, wrapInstance } from "../WrapModule";
+import { IObjectReference } from "../../IObjectReference";
+import { IWrapInstance } from "../../wrap/WrapInstance";
+import { WrapModule } from "../../wrap/WrapModule";
+import { TestInternalClass } from "../classes";
 
 export const createTestReturnReference = (instance: IWrapInstance) => {
   return async (arg: string): Promise<TestInternalClass> => {
@@ -17,7 +16,7 @@ export const testReturnReference = (
   arg: string
 ) => {
   return testReturnReferenceFromInstance(
-    wrapInstance, 
+    WrapModule.wrapInstance, 
     arg
   );
 };

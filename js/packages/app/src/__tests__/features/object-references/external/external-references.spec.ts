@@ -272,3 +272,45 @@ export class ObjectReferencesExampleHost implements IHost {
     }
   }
 }
+
+export class InternalWrapInstance extends WrapInstance {
+  constructor() {
+    super();
+  }
+
+  invokeResource(resource: u32, buffer: ArrayBuffer): ArrayBuffer {
+    switch(resource) {
+      case InternalResource.InvokeGlobalFunction: 
+        return this.invokeGlobalFunction(buffer);
+      case InternalResource.InvokeClassMethod: 
+        return this.invokeClassMethod(buffer);
+      default: 
+        throw new Error("Unknown function");
+    }
+  }
+
+  private async invokeGlobalFunction(buffer: Uint8Array): Promise<Uint8Array> {
+    const functionId = bufferToU32(buffer);
+    const dataBuffer = buffer.slice(4);
+
+    switch(functionId) {
+      case HostGlobalFunction.TestInvokeExternalGlobalFunction: 
+        return await invokeTestInvokeExternalGlobalFunction(dataBuffer);
+      default:
+        throw new Error(`Unknown function: ${functionId}`);
+    }
+  }
+ 
+  private async invokeClassMethod(buffer: Uint8Array): Promise<Uint8Array> {
+    const classId = bufferToU32(buffer);
+    const method = bufferToU32(buffer, 4);
+    const dataBuffer = buffer.slice(8);
+
+    switch(classId) {
+      case ClassList.TestExternalClass: 
+        return await invokeTestExternalClassMethod(method, dataBuffer);
+      default:
+        throw new Error(`Unknown class: ${classId}`);
+    }
+  }
+}

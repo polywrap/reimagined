@@ -1,6 +1,7 @@
 import { IWrapPackage, IWrapper} from "@polywrap/reim-wrap";
 import { FileSystemLoader } from "../../../FileSystemLoader";
 import { WrapModule as InternalReferencesExample } from "./polywrap/internal-references-example";
+import { InternalWrapInstance } from "./polywrap/internal-references-example/wrap/WrapInstance";
 
 jest.setTimeout(200000);
 
@@ -19,7 +20,7 @@ describe("Object references", () => {
       }
 
       const wrapPackage: IWrapPackage = loadResult.value;
-      const wrapper: IWrapper = await wrapPackage.createWrapper();
+      const wrapper: IWrapper = await wrapPackage.createWrapper(new InternalWrapInstance());
 
       const { testReturnReference } = InternalReferencesExample.import(wrapper);
 
