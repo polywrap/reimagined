@@ -1,1 +1,3 @@
-export * from './TestExternalClass';
+
+export { TestExternalClass } from "./TestExternalClass";
+

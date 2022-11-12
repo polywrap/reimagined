@@ -1,5 +1,8 @@
-import { IWrapInstance } from "@polywrap/reim-wrap-as";
+import { stringify } from "@serial-as/json";
+import { IExternalWrapInstance, BaseTypeSerialization, u32ToBuffer, concat } from "@nerfzael/reim-wrap-as";
 import { WrapManifest } from '../../WrapManifest';
+import { ExternalResource } from "../../dt/ExternalResource";
+import { WrapModule } from "../module/WrapModule";
 import { {{name}}Wrapped } from '../../wrapped';
 {{#relatedTypes}}
 {{#isClass}}
@@ -15,14 +18,13 @@ import { {{nativeTypeName}} } from "../../..";
 import { {{nativeTypeName}} } from "../../..";
 {{/isStruct}}
 {{/relatedTypes}}
-import { BaseTypeSerialization } from '../../serialization/BaseTypeSerialization';
 
-export const create = (instance: IWrapInstance) => {
-  return new {{name}}Import(instance);
-};
+//export const create = (instance: IExternalWrapInstance) => {
+//  return new {{name}}Import(instance);
+//};
 
 export class {{name}}Import {
-  constructor(private readonly wrapInstance: IWrapInstance) {}
+  constructor(private readonly wrapInstance: IExternalWrapInstance) {}
 
   {{#methods}}
   {{#model.isStatic}}
@@ -37,15 +39,15 @@ export class {{name}}Import {
       {{/model.args}} 
     );
 
-    const buffer = concat(
-      u32ToBuffer(WrapManifest.External.Classes.{{model.className}}.{{model.namePascalCase}}),
+    const buffer = concat([
+      u32ToBuffer(WrapManifest.External.Classes.{{model.className}}Method.{{model.namePascalCase}}),
       {{model.namePascalCase}}ArgsWrapped.serialize(args),
-    );
+    ]);
 
-    const result = await this.wrapInstance.invokeResource(ExternalResource.InvokeClassMethod, buffer);
+    const result = this.wrapInstance.invokeResource(ExternalResource.InvokeClassMethod, buffer);
 
     {{#model.result.isClass}}
-    return {{model.result.nativeTypeNameWrapped}}.deserialize(result);
+    return {{model.result.nativeTypeNameWrapped}}.deserialize(result, this.wrapInstance);
     {{/model.result.isClass}}
     {{^model.result.isClass}}
     return BaseTypeSerialization.deserialize<{{model.result.nativeTypeName}}>(result);
@@ -58,7 +60,7 @@ export class {{name}}Import {
 export class {{name}} {
   constructor(
     private readonly __referencePtr: u32,
-    private readonly __wrapInstance: IWrapInstance,
+    private readonly __wrapInstance: IExternalWrapInstance,
     {{#fields}}
     public {{model.name}}: {{model.typeInfo.nativeTypeName}},
     {{/fields}}
@@ -71,7 +73,11 @@ export class {{name}} {
     {{model.name}}: {{model.typeInfo.nativeTypeName}},
     {{/model.args}}
   ): {{model.result.nativeTypeName}} {
-    return new {{model.className}}Import(WrapModule.wrapInstance)
+    if (WrapModule.wrapInstance == null) {
+      throw new Error("connect() or import() must be called before using this module");
+    }
+
+    return new {{model.className}}Import(WrapModule.wrapInstance as IExternalWrapInstance)
       .{{model.name}}(
         {{#model.args}}
         {{model.name}},
@@ -85,6 +91,10 @@ export class {{name}} {
     {{model.name}}: {{model.typeInfo.nativeTypeName}},
     {{/model.args}}
   ): {{model.result.nativeTypeName}} {
+    if (this.__wrapInstance == null) {
+      throw new Error("connect() or import() must be called before using this module");
+    }
+
     const args = new {{model.namePascalCase}}Args( 
       {{#model.args}}
       {{model.name}},
@@ -92,15 +102,15 @@ export class {{name}} {
     );
 
     const buffer = concat([
-      u32ToBuffer(WrapManifest.External.Classes.{{model.className}}.{{model.namePascalCase}}),
+      u32ToBuffer(WrapManifest.External.Classes.{{model.className}}Method.{{model.namePascalCase}}),
       u32ToBuffer(this.__referencePtr),
       {{model.namePascalCase}}ArgsWrapped.serialize(args),
     ]);
 
-    const result = await this.wrapInstance.invokeResource(ExternalResource.InvokeClassMethod, buffer);
+    const result = this.__wrapInstance.invokeResource(ExternalResource.InvokeClassMethod, buffer);
 
     {{#model.result.isClass}}
-    return {{model.result.nativeTypeNameWrapped}}.deserialize(result);
+    return {{model.result.nativeTypeNameWrapped}}.deserialize(result, this.__wrapInstance);
     {{/model.result.isClass}}
     {{^model.result.isClass}}
     return BaseTypeSerialization.deserialize<{{model.result.nativeTypeName}}>(result);
@@ -127,6 +137,14 @@ class {{model.namePascalCase}}ArgsWrapped {
     public {{model.name}}: {{model.typeInfo.nativeTypeNameWrapped}},
     {{/model.args}}
   ) {
+  }
+
+  static serialize(value: {{model.namePascalCase}}Args): ArrayBuffer {
+    return String.UTF8.encode(
+      stringify<{{model.namePascalCase}}ArgsWrapped>(
+        {{model.namePascalCase}}ArgsWrapped.mapToSerializable(value)
+      )
+    );
   }
 
   static mapToSerializable(value: {{model.namePascalCase}}Args): {{model.namePascalCase}}ArgsWrapped {

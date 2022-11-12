@@ -11,7 +11,7 @@ export namespace WrapManifest {
     export enum Class {
       {{#types}}
       {{#model.isClass}}
-      {{#model.isExternal}}
+      {{^model.isExternal}}
       {{model.name}} = {{index}},
       {{/model.isExternal}}
       {{/model.isClass}}
@@ -21,7 +21,7 @@ export namespace WrapManifest {
     export namespace Classes {
       {{#types}}
       {{#model.isClass}}
-      {{#model.isExternal}}
+      {{^model.isExternal}}
       export enum {{model.name}}Method {
         {{#model.methods}}
         {{model.namePascalCase}} = {{index}},
@@ -45,7 +45,7 @@ export namespace WrapManifest {
     export enum Class {
       {{#types}}
       {{#model.isClass}}
-      {{^model.isExternal}}
+      {{#model.isExternal}}
       {{model.name}} = {{index}},
       {{/model.isExternal}}
       {{/model.isClass}}
@@ -55,7 +55,7 @@ export namespace WrapManifest {
     export namespace Classes {
       {{#types}}
       {{#model.isClass}}
-      {{^model.isExternal}}
+      {{#model.isExternal}}
       export enum {{model.name}}Method {
         {{#model.methods}}
         {{model.namePascalCase}} = {{index}},

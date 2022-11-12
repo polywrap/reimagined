@@ -1,38 +1,38 @@
-{{#types}}
-{{#model.isExternal}}
-import { {{model.name}}Import } from "../classes/{{model.name}}";
-{{/model.isExternal}}
-{{/types}}
-{{#relatedTypes}}
-{{#isClass}}
-{{#isExternal}}
-import { {{nativeTypeName}} } from "../classes";
-{{/isExternal}}
-{{^isExternal}}
-import { {{nativeTypeName}} } from "../../..";
-{{/isExternal}}
-{{/isClass}}
-{{#isStruct}}
-import { {{nativeTypeName}} } from "../../..";
-{{/isStruct}}
-{{/relatedTypes}}
-
-export class ImportBindings {
-  constructor(
-    {{#globalFunctions.list}}
-    {{#model.isExternal}}
-    public {{model.name}}: (
-      {{#model.args}}
-      {{model.name}}: {{model.typeInfo.nativeTypeName}},
-      {{/model.args}}
-    ) => {{model.result.nativeTypeName}},
-    {{/model.isExternal}}
-    {{/globalFunctions.list}}
-    {{#types}}
-    {{#model.isExternal}}
-    public {{model.name}}: {{model.name}}Import,
-    {{/model.isExternal}}
-    {{/types}}
-  ) {
-  }
-}
+//{{#types}}
+//{{#model.isExternal}}
+//import { {{model.name}}Import } from "../classes/{{model.name}}";
+//{{/model.isExternal}}
+//{{/types}}
+//{{#relatedTypes}}
+//{{#isClass}}
+//{{#isExternal}}
+//import { {{nativeTypeName}} } from "../classes";
+//{{/isExternal}}
+//{{^isExternal}}
+//import { {{nativeTypeName}} } from "../../..";
+//{{/isExternal}}
+//{{/isClass}}
+//{{#isStruct}}
+//import { {{nativeTypeName}} } from "../../..";
+//{{/isStruct}}
+//{{/relatedTypes}}
+//
+//export class ImportBindings {
+//  constructor(
+//    {{#globalFunctions.list}}
+//    {{#model.isExternal}}
+//    public {{model.name}}: (
+//      {{#model.args}}
+//      {{model.name}}: {{model.typeInfo.nativeTypeName}},
+//      {{/model.args}}
+//    ) => {{model.result.nativeTypeName}},
+//    {{/model.isExternal}}
+//    {{/globalFunctions.list}}
+//    {{#types}}
+//    {{#model.isExternal}}
+//    public {{model.name}}: {{model.name}}Import,
+//    {{/model.isExternal}}
+//    {{/types}}
+//  ) {
+//  }
+//}

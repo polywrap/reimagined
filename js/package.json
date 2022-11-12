@@ -15,7 +15,8 @@
   "scripts": {
     "reset": "yarn clean && yarn && yarn build",
     "clean": "npx rimraf ./**/node_modules ./**/yarn.lock ./**/build ./**/coverage ./**/.polywrap",
-    "build": "yarn build:result && yarn build:wrap && yarn build:dt && yarn build:dt-wasm && yarn build:wrap-dt && yarn build:loader",
+    "build": "yarn build:result && yarn build:wrap-as && yarn build:wrap && yarn build:dt && yarn build:dt-wasm && yarn build:wrap-dt && yarn build:loader",
+    "build:wrap-as": "lerna run build --scope @polywrap/reim-wrap-as",
     "build:result": "lerna run build --scope @polywrap/result",
     "build:wrap": "lerna run build --scope @polywrap/reim-wrap",
     "build:dt": "lerna run build --scope @polywrap/reim-dt",

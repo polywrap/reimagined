@@ -1,1 +1,2 @@
-export * from './testExternalGlobalFunction';
+export { testExternalGlobalFunction } from "./testExternalGlobalFunction";
+

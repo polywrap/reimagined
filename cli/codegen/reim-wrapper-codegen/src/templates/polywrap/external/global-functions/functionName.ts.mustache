@@ -1,7 +1,8 @@
 import { stringify } from '@serial-as/json'
-import { concat, u32ToBuffer, IWrapInstance } from '@polywrap/reim-wrap-as';
+import { concat, u32ToBuffer, IExternalWrapInstance, BaseTypeSerialization } from '@nerfzael/reim-wrap-as';
 import { WrapModule } from '../module/WrapModule';
 import { WrapManifest } from '../../WrapManifest';
+import { ExternalResource } from '../../dt/ExternalResource';
 {{#relatedTypes}}
 {{#isClass}}
 import { {{nativeTypeNameWrapped}} } from "../../wrapped";
@@ -16,13 +17,12 @@ import { {{nativeTypeName}} } from "../../..";
 import { {{nativeTypeName}} } from "../../..";
 {{/isStruct}}
 {{/relatedTypes}}
-import { BaseTypeSerialization } from '../../serialization/BaseTypeSerialization';
 
-export const {{name}} = (
+export function {{name}}(
   {{#args}}
   {{model.name}}: {{model.typeInfo.nativeTypeName}},
   {{/args}}
-): {{result.nativeTypeName}} => {
+): {{result.nativeTypeName}} {
   return {{name}}FromInstance(
     WrapModule.wrapInstance,
     {{#args}}
@@ -31,23 +31,23 @@ export const {{name}} = (
   );
 };
 
-export const create = (instance: IWrapInstance) => {
-  return (
-    {{#args}}
-    {{model.name}}: {{model.typeInfo.nativeTypeName}},
-    {{/args}}
-  ): {{result.nativeTypeName}} => {
-    return {{name}}FromInstance(
-      instance, 
-      {{#args}}
-      {{model.name}},
-      {{/args}}
-    );
-  };
-};
+//export const create = (instance: IExternalWrapInstance) => {
+//  return (
+//    {{#args}}
+//    {{model.name}}: {{model.typeInfo.nativeTypeName}},
+//    {{/args}}
+//  ): {{result.nativeTypeName}} => {
+//    return {{name}}FromInstance(
+//      instance, 
+//      {{#args}}
+//      {{model.name}},
+//      {{/args}}
+//    );
+//  };
+//};
 
 export const {{name}}FromInstance = (
-  instance: IWrapInterface | null, 
+  instance: IExternalWrapInstance | null, 
   {{#args}}
   {{model.name}}: {{model.typeInfo.nativeTypeName}},
   {{/args}}
@@ -62,19 +62,19 @@ export const {{name}}FromInstance = (
     {{/args}}
   );
 
-  const buffer = concat(
+  const buffer = concat([
     u32ToBuffer(WrapManifest.External.GlobalFunction.{{namePascalCase}}),
     {{namePascalCase}}ArgsWrapped.serialize(args),
-  );
+  ]);
 
   const result = instance.invokeResource(ExternalResource.InvokeGlobalFunction, buffer);
 
-  {{#model.result.isClass}}
-  return {{model.result.nativeTypeNameWrapped}}.deserialize(result);
-  {{/model.result.isClass}}
-  {{^model.result.isClass}}
-  return BaseTypeSerialization.deserialize<{{model.result.nativeTypeName}}>(result);
-  {{/model.result.isClass}}
+  {{#result.isClass}}
+  return {{result.nativeTypeNameWrapped}}.deserialize(result);
+  {{/result.isClass}}
+  {{^result.isClass}}
+  return BaseTypeSerialization.deserialize<{{result.nativeTypeName}}>(result);
+  {{/result.isClass}}
 }
 
 @serializable

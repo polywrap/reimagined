@@ -1,11 +1,12 @@
 import { stringify } from "@serial-as/json";
 import { parse } from '@serial-as/json'
-import { {{name}} } from "../..";
+import { IExternalWrapInstance } from "@nerfzael/reim-wrap-as";
+import { {{name}} } from "../../..";
 {{#relatedTypes}}
 {{#isClass}}
-import { {{nativeTypeNameWrapped}} } from ".";
+import { {{nativeTypeNameWrapped}} } from "..";
 {{#isExternal}}
-import { {{nativeTypeName}} } from "../external/classes";
+import { {{nativeTypeName}} } from "../../external";
 {{/isExternal}}
 {{^isExternal}}
 import { {{nativeTypeName}} } from "../..";
@@ -40,8 +41,8 @@ export class {{name}}Wrapped {
     return object;
   }
 
-  static invokeMethod(buffer: ArrayBuffer): ArrayBuffer {  
-    return invoke(buffer);
+  static invokeMethod(buffer: ArrayBuffer, wrapInstance: IExternalWrapInstance): ArrayBuffer {  
+    return invoke(buffer, wrapInstance);
   }
   
   static mapToSerializable(value: {{name}}): {{name}}Wrapped {

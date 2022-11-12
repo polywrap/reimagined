@@ -1,6 +1,6 @@
 import { parse, stringify } from "@serial-as/json";
-import { wrapInstance } from "../wrap/WrapInstance";
 import { TestExternalClass } from "../external/classes/TestExternalClass";
+import { IWrapInstance } from "@nerfzael/reim-wrap-as";
 
 const CLASS_NAME = "TestExternalClass";
 
@@ -59,15 +59,16 @@ export class TestExternalClassWrapped {
     );
   }
 
-  static deserialize(buffer: ArrayBuffer): TestExternalClass {
+  static deserialize(buffer: ArrayBuffer, wrapInstance: IWrapInstance): TestExternalClass {
     const object = parse<TestExternalClassWrapped>(String.UTF8.decode(buffer));
   
-    return TestExternalClassWrapped.mapFromSerializable(object);
+    return TestExternalClassWrapped.mapFromSerializable(object, wrapInstance);
   }
 
-  static mapFromSerializable(value: TestExternalClassWrapped): TestExternalClass {
+  static mapFromSerializable(value: TestExternalClassWrapped, wrapInstance: IWrapInstance): TestExternalClass {
     const object = new TestExternalClass(
-      value.__referencePtr
+      value.__referencePtr,
+      wrapInstance,
     );
 
     const referencePtr = changetype<u32>(value);

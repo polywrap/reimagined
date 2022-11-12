@@ -1,12 +1,14 @@
 import { parse, stringify } from "@serial-as/json";
+import { IExternalWrapInstance } from "@nerfzael/reim-wrap-as";
 import { WrapManifest } from '../../WrapManifest';
-import { {{name}} } from "../external/classes/{{name}}/{{name}}";
+import { WrapModule } from "../../external/module/WrapModule";
+import { {{name}} } from "../../external/classes/{{name}}";
 {{#relatedTypes}}
 {{#isClass}}
 import { {{nativeTypeNameWrapped}} } from ".";
 {{/isClass}}
 {{#isStruct}}
-import { {{nativeTypeName}} } from "../..";
+import { {{nativeTypeName}} } from "../../..";
 {{/isStruct}}
 {{/relatedTypes}}
 
@@ -78,18 +80,19 @@ export class {{name}}Wrapped {
     );
   }
 
-  static deserialize(buffer: ArrayBuffer): {{name}} {
+  static deserialize(buffer: ArrayBuffer, wrapInstance: IExternalWrapInstance): {{name}} {
     const object = parse<{{name}}Wrapped>(String.UTF8.decode(buffer));
   
-    return {{name}}Wrapped.mapFromSerializable(object);
+    return {{name}}Wrapped.mapFromSerializable(object, wrapInstance);
   }
 
-  static mapFromSerializable(value: {{name}}Wrapped): {{name}} {
+  static mapFromSerializable(value: {{name}}Wrapped, wrapInstance: IExternalWrapInstance): {{name}} {
     const object = new {{name}}(
       value.__referencePtr,
+      wrapInstance,
       {{#fields}}
       {{#model.isClass}}
-      {{model.typeInfo.nativeTypeNameWrapped}}.mapFromSerializable(value.{{model.name}}),
+      {{model.typeInfo.nativeTypeNameWrapped}}.mapFromSerializable(value.{{model.name}}, wrapInstance),
       {{/model.isClass}}
       {{^model.isClass}}
       value.{{model.name}},

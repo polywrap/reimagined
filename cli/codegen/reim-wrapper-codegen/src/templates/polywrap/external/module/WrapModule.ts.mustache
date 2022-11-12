@@ -1,36 +1,36 @@
-import { IWrapInstance } from "@polywrap/reim-wrap-as";
-import { ImportBindings } from "./ImportBindings";
+import { IExternalWrapInstance } from "@nerfzael/reim-wrap-as";
+//import { ImportBindings } from "./ImportBindings";
 
-{{#globalFunctions.list}}
-{{#model.isExternal}}
-import { create as create{{model.namePascalCase}} } from "../global-functions/{{model.name}}";
-{{/model.isExternal}}
-{{/globalFunctions.list}}
-{{#types}}
-{{#model.isExternal}}
-import { create as create{{model.name}} } from "../classes/{{model.name}}";
-{{/model.isExternal}}
-{{/types}}
+//{{#globalFunctions.list}}
+//{{#model.isExternal}}
+//import { create as create{{model.namePascalCase}} } from "../global-functions/{{model.name}}";
+//{{/model.isExternal}}
+//{{/globalFunctions.list}}
+//{{#types}}
+//{{#model.isExternal}}
+//import { create as create{{model.name}} } from "../classes/{{model.name}}";
+//{{/model.isExternal}}
+//{{/types}}
 
 export class WrapModule {
-  static wrapInstance: IWrapInstance = new ExternalWrapInstance();
+  static wrapInstance: IExternalWrapInstance | null;
 
-  static connect(instance: IWrapInstance): void {
+  static connect(instance: IExternalWrapInstance): void {
     WrapModule.wrapInstance = instance;
   }
 
-  static import(instance: IWrapInstance): ImportBindings {
-    return new ImportBindings(
-      {{#globalFunctions.list}}
-      {{#model.isExternal}}
-      create{{model.namePascalCase}}(instance),
-      {{/model.isExternal}}
-      {{/globalFunctions.list}}
-      {{#types}}
-      {{#model.isExternal}}
-      create{{model.name}}(instance),
-      {{/model.isExternal}}
-      {{/types}}
-    );
-  }
+  //static import(instance: IExternalWrapInstance): ImportBindings {
+  //  return new ImportBindings(
+  //    {{#globalFunctions.list}}
+  //    {{#model.isExternal}}
+  //    create{{model.namePascalCase}}(instance),
+  //    {{/model.isExternal}}
+  //    {{/globalFunctions.list}}
+  //    {{#types}}
+  //    {{#model.isExternal}}
+  //    create{{model.name}}(instance),
+  //    {{/model.isExternal}}
+  //    {{/types}}
+  //  );
+  //}
 }

@@ -17,6 +17,7 @@ pub struct WrapManifest {
 pub struct TypeInfo {
   pub type_name: String,
   pub is_class: bool,
+  pub is_external: bool,
   pub is_base: bool,
   pub native_type_name: String,
   pub native_type_name_wrapped: String,
@@ -29,6 +30,7 @@ impl TypeInfo {
         let is_base = BASE_TYPE_NAMES.contains(&type_info.type_name.as_str());
         let is_class = is_class(&type_info.type_name, abi);
         let is_struct = !is_base && !is_class;
+        let is_external = is_external(&type_info.type_name, abi);
 
         TypeInfo {
             type_name: type_info.type_name.clone(),
@@ -42,6 +44,7 @@ impl TypeInfo {
             is_base,
             is_class,
             is_struct,
+            is_external,
         }
     }
 }
@@ -78,6 +81,7 @@ impl FunctionModel {
                 is_base: false,
                 is_class: true,
                 is_struct: false,
+                is_external: class_def.is_external,
             });
 
             related_types = related_types.into_iter().collect::<HashSet<TypeInfo>>().into_iter().collect();
@@ -201,4 +205,22 @@ fn is_class(type_name: &str, abi: &Vec<SchemaType>) -> bool {
         Some(SchemaType::Type(type_info)) => type_info.is_class,
         _ => false
     }
+}
+
+fn is_external(type_name: &str, abi: &Vec<SchemaType>) -> bool {
+  if BASE_TYPE_NAMES.contains(&type_name) {
+      return false;
+  }
+
+  let type_info = abi.iter().find(|x| {
+      match x {
+          SchemaType::Type(type_info) => type_info.name == type_name,
+          _ => false
+      }
+  });
+
+  match type_info {
+      Some(SchemaType::Type(type_info)) => type_info.is_external,
+      _ => false
+  }
 }

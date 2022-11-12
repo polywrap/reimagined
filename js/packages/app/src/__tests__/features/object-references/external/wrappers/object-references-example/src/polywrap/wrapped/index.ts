@@ -1,2 +1,2 @@
-export * from './TestExternalClassWrapped';
-export * from './TestObjectGetterWrapped';
+export * from "./TestObjectGetter/TestObjectGetterWrapped";
+export * from "./TestExternalClass/TestExternalClassWrapped";

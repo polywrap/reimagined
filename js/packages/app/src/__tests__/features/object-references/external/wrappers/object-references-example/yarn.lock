@@ -559,6 +559,13 @@
   resolved "https://registry.yarnpkg.com/@multiformats/base-x/-/base-x-4.0.1.tgz#95ff0fa58711789d53aefb2590a8b7a4e715d121"
   integrity sha512-eMk0b9ReBbV23xXU693TAIrLyeO5iTgBZGSJfpqriG8UkYvr/hC9u9pyMlAakDNHWmbhMZCDs6KQO0jzKD8OTw==
 
+"@nerfzael/reim-wrap-as@0.1.6":
+  version "0.1.6"
+  resolved "https://registry.yarnpkg.com/@nerfzael/reim-wrap-as/-/reim-wrap-as-0.1.6.tgz#ce140b58d4b96edc25e492d4eb2a4ea0c3610667"
+  integrity sha512-0u6DLxVubWZANlmhDPEU0pmqtF3wwU/8hTjy0D01XgBkDhcsVAb40C8ANStLepBAUvTA1g4ELl4XolAGigYIfg==
+  dependencies:
+    "@serial-as/json" "1.0.2"
+
 "@opentelemetry/api-metrics@0.20.0":
   version "0.20.0"
   resolved "https://registry.yarnpkg.com/@opentelemetry/api-metrics/-/api-metrics-0.20.0.tgz#5c332cadfacd1fa966318292ba8dbb542f5ead57"

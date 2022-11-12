@@ -1,5 +1,5 @@
 import { parse } from '@serial-as/json'
-import { bufferToU32 } from "@polywrap/reim-wrap-as";
+import { bufferToU32, BaseTypeSerialization, IExternalWrapInstance } from "@nerfzael/reim-wrap-as";
 import { WrapManifest } from '../../WrapManifest';
 import { 
   {{#list}}
@@ -12,7 +12,7 @@ import {
 {{#isClass}}
 import { {{nativeTypeNameWrapped}} } from "../../wrapped";
 {{#isExternal}}
-import { {{nativeTypeName}} } from "../../external/classes";
+import { {{nativeTypeName}} } from "../../external";
 {{/isExternal}}
 {{^isExternal}}
 import { {{nativeTypeName}} } from "../../..";
@@ -22,27 +22,29 @@ import { {{nativeTypeName}} } from "../../..";
 import { {{nativeTypeName}} } from "../../..";
 {{/isStruct}}
 {{/relatedTypes}}
-import { BaseTypeSerialization } from '../../serialization/BaseTypeSerialization';
 
-export function invoke(buffer: ArrayBuffer): ArrayBuffer {
+export function invoke(buffer: ArrayBuffer, wrapInstance: IExternalWrapInstance): ArrayBuffer {
   const funcId = bufferToU32(buffer);
   const dataBuffer = buffer.slice(4);
 
   switch (funcId) {
     {{#list}}
+    {{^model.isExternal}}
     case WrapManifest.Internal.GlobalFunction.{{model.namePascalCase}}:
-        return invoke{{model.namePascalCase}}Wrapped(dataBuffer);
+        return invoke{{model.namePascalCase}}Wrapped(dataBuffer, wrapInstance);
+    {{/model.isExternal}}
     {{/list}}
     default:
-      throw new Error("Unknown function/method: " + funcId);
+      throw new Error("Unknown function/method: " + funcId.toString());
   }
 }
 
 {{#list}}
-const invoke{{model.namePascalCase}}Wrapped = (buffer: ArrayBuffer): ArrayBuffer => {
+{{^model.isExternal}}
+const invoke{{model.namePascalCase}}Wrapped = (buffer: ArrayBuffer, wrapInstance: IExternalWrapInstance): ArrayBuffer => {
   const argsBuffer = buffer;
 
-  const args = {{model.namePascalCase}}ArgsWrapped.deserialize(argsBuffer);
+  const args = {{model.namePascalCase}}ArgsWrapped.deserialize(argsBuffer, wrapInstance);
 
   const result = {{model.name}}(
     {{#model.args}}
@@ -76,13 +78,13 @@ class {{model.namePascalCase}}ArgsWrapped {
   ) {
   }
 
-  static deserialize(buffer: ArrayBuffer): {{model.namePascalCase}}Args {
+  static deserialize(buffer: ArrayBuffer, wrapInstance: IExternalWrapInstance): {{model.namePascalCase}}Args {
     const args = parse<{{model.namePascalCase}}ArgsWrapped>(String.UTF8.decode(buffer));
   
     return new {{model.namePascalCase}}Args(
       {{#model.args}}
       {{#model.typeInfo.isClass}}
-      {{model.typeInfo.nativeTypeNameWrapped}}.mapFromSerializable(args.{{model.name}}),
+      {{model.typeInfo.nativeTypeNameWrapped}}.mapFromSerializable(args.{{model.name}}, wrapInstance),
       {{/model.typeInfo.isClass}}
       {{^model.typeInfo.isClass}}
       args.{{model.name}},
@@ -91,4 +93,5 @@ class {{model.namePascalCase}}ArgsWrapped {
     );
   }  
 }
+{{/model.isExternal}}
 {{/list}}
