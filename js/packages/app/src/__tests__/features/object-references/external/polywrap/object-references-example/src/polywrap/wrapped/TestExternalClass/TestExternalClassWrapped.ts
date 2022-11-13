@@ -1,12 +1,14 @@
-import { parse, stringify } from "@serial-as/json";
-import { TestExternalClass } from "../external/classes/TestExternalClass";
-import { IWrapInstance } from "@nerfzael/reim-wrap-as";
+import { IExternalWrapInstance } from "@nerfzael/reim-wrap-js";
+import { WrapManifest } from '../../WrapManifest';
+import { WrapModule } from "../../external/module/WrapModule";
+import { TestExternalClass } from "../../external/classes/TestExternalClass";
+
 
 const CLASS_NAME = "TestExternalClass";
 
 class InstanceWithExternalReferencePtr {
   constructor(
-    public externalReferencePtr: u32,
+    public externalReferencePtr: number,
     public instance: TestExternalClass
   ) {
   }
@@ -14,23 +16,23 @@ class InstanceWithExternalReferencePtr {
 
 export class TestExternalClassWrapped {
   constructor(
-    public __referencePtr: u32,
+    public __referencePtr: number,
   ) {
   }
 
   static referenceMap: Map<u32, InstanceWithExternalReferencePtr> = new Map<u32, InstanceWithExternalReferencePtr>();
 
-  static dereference(referencePtr: u32): TestExternalClass {
+  static dereference(referencePtr: number): TestExternalClass {
     const object = TestExternalClassWrapped.referenceMap.get(referencePtr);
 
     if (!object) {
       throw new Error(`Could not dereference ${CLASS_NAME}(${referencePtr}). Not found`);
     }
 
-    return object;
+    return object.instance;
   }
 
-  static deleteReference(referencePtr: u32): void {
+  static deleteReference(referencePtr: number): void {
     const success = TestExternalClassWrapped.referenceMap.delete(referencePtr);
 
     if (!success) {
@@ -38,9 +40,9 @@ export class TestExternalClassWrapped {
     }
   }
 
-  static serialize(value: TestExternalClass): ArrayBuffer {
-    return String.UTF8.encode(
-      stringify<TestExternalClassWrapped>(
+  static serialize(value: TestExternalClass): Uint8Array {
+    return new TextEncoder().encode(
+      JSON.stringify(
         TestExternalClassWrapped.mapToSerializable(value)
       )
     );
@@ -48,27 +50,29 @@ export class TestExternalClassWrapped {
 
   static mapToSerializable(value: TestExternalClass): TestExternalClassWrapped {
     const referencePtr = changetype<u32>(value);
-    const externalReferencePtr = this.referenceMap.get(referencePtr);
+    const existingReference = this.referenceMap.get(referencePtr);
 
-    if (!externalReferencePtr) {
+    if (!existingReference) {
       throw new Error(`Could not find external reference of ${CLASS_NAME}(${referencePtr}).`);
     }
   
     return new TestExternalClassWrapped(
-      externalReferencePtr,
+      existingReference.externalReferencePtr,
+
     );
   }
 
-  static deserialize(buffer: ArrayBuffer, wrapInstance: IWrapInstance): TestExternalClass {
-    const object = parse<TestExternalClassWrapped>(String.UTF8.decode(buffer));
+  static deserialize(buffer: Uint8Array, wrapInstance: IExternalWrapInstance): TestExternalClass {
+    const object = JSON.parse(new TextDecoder().decode(buffer));
   
     return TestExternalClassWrapped.mapFromSerializable(object, wrapInstance);
   }
 
-  static mapFromSerializable(value: TestExternalClassWrapped, wrapInstance: IWrapInstance): TestExternalClass {
+  static mapFromSerializable(value: TestExternalClassWrapped, wrapInstance: IExternalWrapInstance): TestExternalClass {
     const object = new TestExternalClass(
       value.__referencePtr,
       wrapInstance,
+
     );
 
     const referencePtr = changetype<u32>(value);

@@ -1,16 +1,17 @@
 import { bufferToU32, concat, u32ToBuffer } from "@nerfzael/reim-wrap-as";
 import { __dt_fill_send_result, __dt_send } from "./imports";
 import { WrapModule } from "../external/module/WrapModule";
-import { ExternalWrapInstance } from "../external/module/ExternalWrapInstance";
 import { InternalWrapInstance } from "../external/module/InternalWrapInstance";
+import { HostWrapInstance } from "../external/module/HostWrapInstance";
 
 export function receive(buffer: ArrayBuffer): u32 {
-  WrapModule.wrapInstance = new ExternalWrapInstance();
+  const externalInstance = new HostWrapInstance();
+  WrapModule.wrapInstance = externalInstance;
 
   const resource = bufferToU32(buffer);
   const dataBuffer = buffer.slice(4);
   
-  const result = new InternalWrapInstance().invokeResource(resource, dataBuffer, WrapModule.wrapInstance as ExternalWrapInstance);
+  const result = new InternalWrapInstance().invokeResource(resource, dataBuffer, externalInstance);
 
   const tmp = concat([
     u32ToBuffer(result.byteLength), 

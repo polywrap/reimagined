@@ -1,7 +1,7 @@
 import { concat, IExternalWrapInstance, u32ToBuffer } from "@nerfzael/reim-wrap-as";
 import { send } from "../../dt";
 
-export class ExternalWrapInstance extends IExternalWrapInstance {
+export class HostWrapInstance extends IExternalWrapInstance {
   constructor() {
     super();
   }

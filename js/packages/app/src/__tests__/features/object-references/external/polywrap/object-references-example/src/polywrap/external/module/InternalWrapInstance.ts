@@ -1,4 +1,4 @@
-import { IExternalWrapInstance, IInternalWrapInstance } from "@nerfzael/reim-wrap-as";
+import { IExternalWrapInstance, IInternalWrapInstance } from "@nerfzael/reim-wrap-js";
 import { invoke as invokeGlobalFunction } from "../../internal/global-functions/invokeGlobalFunction";
 import { invokeClassMethod } from "../../internal/classes/invokeClassMethod";
 import { InternalResource } from "../../dt/InternalResource";
@@ -9,7 +9,7 @@ export class InternalWrapInstance extends IInternalWrapInstance {
     super();
   }
 
-  invokeResource(resource: u32, buffer: ArrayBuffer, externalWrapInstance: IExternalWrapInstance): ArrayBuffer {
+  invokeResource(resource: number, buffer: Uint8Array, externalWrapInstance: IExternalWrapInstance): Uint8Array {
     switch (resource) {
       case ExternalResource.InvokeGlobalFunction:
         return invokeGlobalFunction(buffer, externalWrapInstance);
