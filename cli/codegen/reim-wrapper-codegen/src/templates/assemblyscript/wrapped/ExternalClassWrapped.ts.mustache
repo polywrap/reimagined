@@ -5,7 +5,7 @@ import { WrapModule } from "../../external/module/WrapModule";
 import { {{name}} } from "../../external/classes/{{name}}";
 {{#relatedTypes}}
 {{#isClass}}
-import { {{nativeTypeNameWrapped}} } from ".";
+import { {{nativeTypeNameWrapped}} } from "..";
 {{/isClass}}
 {{#isStruct}}
 import { {{nativeTypeName}} } from "../../..";

@@ -69,7 +69,7 @@ export const {{name}}FromInstance = async (
   const result = await instance.invokeResource(ExternalResource.InvokeGlobalFunction, buffer);
 
   {{#result.isClass}}
-  return {{result.nativeTypeNameWrapped}}.deserialize(result);
+  return {{result.nativeTypeNameWrapped}}.deserialize(result, instance);
   {{/result.isClass}}
   {{^result.isClass}}
   return BaseTypeSerialization.deserialize<{{result.nativeTypeName}}>(result);
