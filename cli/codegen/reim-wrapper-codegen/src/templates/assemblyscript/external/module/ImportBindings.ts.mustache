@@ -1,21 +1,17 @@
 //{{#types}}
+//{{#model.isClass}}
 //{{#model.isExternal}}
 //import { {{model.name}}Import } from "../classes/{{model.name}}";
+//import { {{model.name}} } from "../classes";
 //{{/model.isExternal}}
+//{{^model.isExternal}}
+//import { {{model.name}} } from "../../..";
+//{{/model.isExternal}}
+//{{/model.isClass}}
+//{{#model.isStruct}}
+//import { {{model.name}} } from "../../..";
+//{{/model.isStruct}}
 //{{/types}}
-//{{#relatedTypes}}
-//{{#isClass}}
-//{{#isExternal}}
-//import { {{nativeTypeName}} } from "../classes";
-//{{/isExternal}}
-//{{^isExternal}}
-//import { {{nativeTypeName}} } from "../../..";
-//{{/isExternal}}
-//{{/isClass}}
-//{{#isStruct}}
-//import { {{nativeTypeName}} } from "../../..";
-//{{/isStruct}}
-//{{/relatedTypes}}
 //
 //export class ImportBindings {
 //  constructor(

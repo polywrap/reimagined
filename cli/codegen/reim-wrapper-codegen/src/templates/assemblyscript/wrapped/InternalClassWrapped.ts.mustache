@@ -30,6 +30,7 @@ export class {{name}}Wrapped {
   }
 
   static referenceMap: Map<u32, {{name}}> = new Map<u32, {{name}}>();
+  static referenceCount: u32 = 0;
 
   static dereference(referencePtr: u32): {{name}} {
     const object = {{name}}Wrapped.referenceMap.get(referencePtr);
@@ -46,8 +47,8 @@ export class {{name}}Wrapped {
   }
   
   static mapToSerializable(value: {{name}}): {{name}}Wrapped {
-    const referencePtr = changetype<u32>(value);
-    this.referenceMap.set(referencePtr, value);
+    const referencePtr = ++{{name}}Wrapped.referenceCount;
+    {{name}}Wrapped.referenceMap.set(referencePtr, value);
   
     return new {{name}}Wrapped(
       referencePtr,
@@ -70,18 +71,18 @@ export class {{name}}Wrapped {
     );
   }
 
-  static deserialize(buffer: ArrayBuffer): {{name}} {
+  static deserialize(buffer: ArrayBuffer, wrapInstance: IExternalWrapInstance): {{name}} {
     const object = parse<{{name}}Wrapped>(String.UTF8.decode(buffer));
   
-    return {{name}}Wrapped.mapFromSerializable(object);
+    return {{name}}Wrapped.mapFromSerializable(object, wrapInstance);
   }
 
-  static mapFromSerializable(value: {{name}}Wrapped): {{name}} {
+  static mapFromSerializable(value: {{name}}Wrapped, wrapInstance: IExternalWrapInstance): {{name}} {
     const object = new {{name}}(
       value.__referencePtr,
       {{#fields}}
       {{#model.isClass}}
-      {{model.typeInfo.nativeTypeNameWrapped}}.mapFromSerializable(value.{{model.name}}),
+      {{model.typeInfo.nativeTypeNameWrapped}}.mapFromSerializable(value.{{model.name}}, wrapInstance),
       {{/model.isClass}}
       {{^model.isClass}}
       value.{{model.name}},

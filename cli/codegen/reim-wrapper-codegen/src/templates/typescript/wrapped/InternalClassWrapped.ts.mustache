@@ -1,0 +1,94 @@
+import { IExternalWrapInstance } from "@polywrap/reim-wrap-js";
+import { {{name}} } from "../../..";
+{{#relatedTypes}}
+{{#isClass}}
+import { {{nativeTypeNameWrapped}} } from "..";
+{{#isExternal}}
+import { {{nativeTypeName}} } from "../../external";
+{{/isExternal}}
+{{^isExternal}}
+import { {{nativeTypeName}} } from "../..";
+{{/isExternal}}
+{{/isClass}}
+{{#isStruct}}
+import { {{nativeTypeName}} } from "../..";
+{{/isStruct}}
+{{/relatedTypes}}
+import { invoke } from './invoke';
+
+const CLASS_NAME = "{{name}}";
+
+export class {{name}}Wrapped {
+  constructor(
+    public __referencePtr: number,
+    {{#fields}}
+    public {{model.name}}: {{model.typeInfo.nativeTypeNameWrapped}},
+    {{/fields}}
+  ) {
+  }
+
+  static referenceMap: Map<number, {{name}}> = new Map<number, {{name}}>();
+  static referenceCount: number = 0;
+
+  static dereference(referencePtr: number): {{name}} {
+    const object = {{name}}Wrapped.referenceMap.get(referencePtr);
+
+    if (!object) {
+      throw new Error(`Reference {{name}}(${referencePtr}) not found on class: ${CLASS_NAME}`);
+    }
+
+    return object;
+  }
+
+  static invokeMethod(buffer: Uint8Array, wrapInstance: IExternalWrapInstance): Promise<Uint8Array> {  
+    return invoke(buffer, wrapInstance);
+  }
+  
+  static mapToSerializable(value: {{name}}): {{name}}Wrapped {
+    const referencePtr = ++{{name}}Wrapped.referenceCount;
+
+    {{name}}Wrapped.referenceMap.set(referencePtr, value);
+  
+    return new {{name}}Wrapped(
+      referencePtr,
+      {{#fields}}
+      {{#model.typeInfo.isClass}}
+      {{model.typeInfo.nativeTypeNameWrapped}}.mapToSerializable(value.{{model.name}}),
+      {{/model.typeInfo.isClass}}
+      {{^model.typeInfo.isClass}}
+      value.{{model.name}},
+      {{/model.typeInfo.isClass}}
+      {{/fields}}
+    );
+  }
+
+  static serialize(value: {{name}}): Uint8Array {
+    return new TextEncoder().encode(
+      JSON.stringify(
+        {{name}}Wrapped.mapToSerializable(value)
+      )
+    );
+  }
+
+  static deserialize(buffer: Uint8Array): {{name}} {
+    const object = JSON.parse(new TextDecoder().decode(buffer));
+  
+    return {{name}}Wrapped.mapFromSerializable(object);
+  }
+
+  static mapFromSerializable(value: {{name}}Wrapped): {{name}} {
+    const object = new {{name}}(
+      value.__referencePtr,
+      {{#fields}}
+      {{#model.isClass}}
+      {{model.typeInfo.nativeTypeNameWrapped}}.mapFromSerializable(value.{{model.name}}),
+      {{/model.isClass}}
+      {{^model.isClass}}
+      value.{{model.name}},
+      {{/model.isClass}}
+      {{/fields}}
+    );
+
+    return object;
+  }
+}

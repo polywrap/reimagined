@@ -61,7 +61,7 @@ export class {{name}}Wrapped {
 
   static mapToSerializable(value: {{name}}): {{name}}Wrapped {
     const referencePtr = changetype<u32>(value);
-    const existingReference = this.referenceMap.get(referencePtr);
+    const existingReference = {{name}}Wrapped.referenceMap.get(referencePtr);
 
     if (!existingReference) {
       throw new Error(`Could not find external reference of ${CLASS_NAME}(${referencePtr}).`);

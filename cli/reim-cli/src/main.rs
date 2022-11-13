@@ -13,12 +13,24 @@ fn main() -> Result<(), std::io::Error> {
 
     match command.as_str() {
         "wrapper" => {
-            let input_path = if args.len() < 3 { "." } else { &args[2] };
-            let output_path = if args.len() < 4 { "./src" } else { &args[3] };
+            let input_path = if args.len() < 5 { "." } else { &args[4] };
+            let output_path = if args.len() < 6 { "./src" } else { &args[5] };
             
             println!("Generating wrapper bindings: {}/schema.graphql to {}/wrap/wrapped", input_path, output_path);
 
-            generate_bindings(input_path.to_string(), output_path.to_string())?;
+            let language = match args[2].as_str() {
+                "as" => Language::AssemblyScript,
+                "ts" => Language::TypeScript,
+                _ => Language::TypeScript,
+            };
+
+            let module_type = match args[3].as_str() {
+                "host" => ModuleType::Host,
+                "wrapper" => ModuleType::Wrapper,
+                _ => ModuleType::Wrapper,
+            };
+
+            generate_bindings(input_path.to_string(), output_path.to_string(), &language, &module_type)?;
         },
         "manifest" => {
             let input_path = if args.len() < 3 { "." } else { &args[2] };

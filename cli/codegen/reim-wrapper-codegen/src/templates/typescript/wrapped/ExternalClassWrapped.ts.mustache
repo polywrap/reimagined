@@ -1,0 +1,115 @@
+import { IExternalWrapInstance } from "@polywrap/reim-wrap-js";
+import { WrapManifest } from '../../WrapManifest';
+import { WrapModule } from "../../external/module/WrapModule";
+import { {{name}} } from "../../external/classes/{{name}}";
+{{#relatedTypes}}
+{{#isClass}}
+import { {{nativeTypeNameWrapped}} } from ".";
+{{/isClass}}
+{{#isStruct}}
+import { {{nativeTypeName}} } from "../../..";
+{{/isStruct}}
+{{/relatedTypes}}
+
+const CLASS_NAME = "{{name}}";
+
+class InstanceWithExternalReferencePtr {
+  constructor(
+    public externalReferencePtr: number,
+    public instance: {{name}}
+  ) {
+  }
+}
+
+export class {{name}}Wrapped {
+  constructor(
+    public __referencePtr: number,
+    {{#fields}}
+    public {{model.name}}: {{model.typeInfo.nativeTypeNameWrapped}},
+    {{/fields}}
+  ) {
+  }
+
+  static referenceMap: Map<{{name}}, InstanceWithExternalReferencePtr> = new Map<{{name}}, InstanceWithExternalReferencePtr>();
+  static referenceCount: number = 0;
+
+  static dereference(referencePtr: {{name}}): {{name}} {
+    const object = {{name}}Wrapped.referenceMap.get(referencePtr);
+
+    if (!object) {
+      throw new Error(`Could not dereference ${CLASS_NAME}. Not found`);
+    }
+
+    return object.instance;
+  }
+
+  static deleteReference(referencePtr: {{name}}): void {
+    const success = {{name}}Wrapped.referenceMap.delete(referencePtr);
+
+    if (!success) {
+      throw new Error(`Could not delete reference ${CLASS_NAME}. Not found`);
+    }
+  }
+
+  static serialize(value: {{name}}): Uint8Array {
+    return new TextEncoder().encode(
+      JSON.stringify(
+        {{name}}Wrapped.mapToSerializable(value)
+      )
+    );
+  }
+
+  static mapToSerializable(value: {{name}}): {{name}}Wrapped {
+    const referencePtr = value;
+    const existingReference = {{name}}Wrapped.referenceMap.get(referencePtr);
+
+    if (!existingReference) {
+      throw new Error(`Could not dereference ${CLASS_NAME}. Not found`);
+    }
+  
+    return new {{name}}Wrapped(
+      existingReference.externalReferencePtr,
+      {{#fields}}
+      {{#model.typeInfo.isClass}}
+      {{model.typeInfo.nativeTypeNameWrapped}}.mapToSerializable(value.{{model.name}}),
+      {{/model.typeInfo.isClass}}
+      {{^model.typeInfo.isClass}}
+      value.{{model.name}},
+      {{/model.typeInfo.isClass}}
+      {{/fields}}
+    );
+  }
+
+  static deserialize(buffer: Uint8Array, wrapInstance: IExternalWrapInstance): {{name}} {
+    const object = JSON.parse(new TextDecoder().decode(buffer));
+  
+    return {{name}}Wrapped.mapFromSerializable(object, wrapInstance);
+  }
+
+  static mapFromSerializable(value: {{name}}Wrapped, wrapInstance: IExternalWrapInstance): {{name}} {
+    const object = new {{name}}(
+      value.__referencePtr,
+      wrapInstance,
+      {{#fields}}
+      {{#model.isClass}}
+      {{model.typeInfo.nativeTypeNameWrapped}}.mapFromSerializable(value.{{model.name}}, wrapInstance),
+      {{/model.isClass}}
+      {{^model.isClass}}
+      value.{{model.name}},
+      {{/model.isClass}}
+      {{/fields}}
+    );
+
+    const referencePtr = object;
+  
+    this.referenceMap.set(
+      referencePtr, 
+      new InstanceWithExternalReferencePtr(
+        value.__referencePtr, 
+        object
+      )
+    );  
+
+    return object;
+  }
+}
