@@ -1,6 +1,26 @@
-import { wrap_log } from "./polywrap/wrap/host-resources/wrap_log";
-import { ObjectWithChildren } from "./polywrap/wrapped/types/ObjectWithChildren";
-import { TestObject } from "./polywrap/wrapped/types/TestObject";
+export class TestObject {
+  constructor(
+    public str: string,
+    public num: u32,
+  ) {
+  }
+}
+
+export class ObjectWithChildren {
+  constructor(
+    public obj1: TestObject,
+    public obj2: TestObject2,
+  ) {
+  }
+}
+
+export class TestObject2 {
+  constructor(
+    public str2: string,
+    public num2: u32,
+  ) {
+  }
+}
 
 export function stringArgFunction(arg: string): string {
     return arg;
@@ -11,10 +31,10 @@ export function objectArgFunction(arg: TestObject): string {
 }
 
 export function objectResultFunction(arg: TestObject): TestObject {
-  return {
-    str: arg.str,
-    num: arg.num
-  };
+  return new TestObject(
+    arg.str,
+    arg.num
+  );
 }
 
 export function nestedObjectArgFunction(arg: ObjectWithChildren): string {
@@ -22,14 +42,14 @@ export function nestedObjectArgFunction(arg: ObjectWithChildren): string {
 }
 
 export function nestedObjectResultFunction(arg: ObjectWithChildren): ObjectWithChildren {
-  return {
-    obj1: {
-        str: arg.obj1.str,
-        num: arg.obj1.num
-    },
-    obj2: {
-        str2: arg.obj2.str2,
-        num2: arg.obj2.num2
-    }
-  };
+  return new ObjectWithChildren(
+    new TestObject(
+      arg.obj1.str,
+      arg.obj1.num
+    ),
+    new TestObject2(
+      arg.obj2.str2,
+      arg.obj2.num2
+    )
+  );
 }

@@ -1,22 +1,22 @@
 type Module {
-  stringArgFunction(arg: string): string!
-  objectArgFunction(arg: TestObject): string!
-  objectResultFunction(arg: TestObject): TestObject!
-  nestedObjectArgFunction(arg: ObjectWithChildren): string!
-  nestedObjectResultFunction(arg: ObjectWithChildren): ObjectWithChildren!
+  stringArgFunction(arg: string): string! @fn
+  objectArgFunction(arg: TestObject): string! @fn
+  objectResultFunction(arg: TestObject): TestObject! @fn
+  nestedObjectArgFunction(arg: ObjectWithChildren): string! @fn
+  nestedObjectResultFunction(arg: ObjectWithChildren): ObjectWithChildren! @fn
 }
 
-type TestObject {
+type TestObject @struct {
   str: string!
   num: u32!
 }
 
-type ObjectWithChildren {
+type ObjectWithChildren @struct {
   obj1: TestObject!
   obj2: TestObject2!
 }
 
-type TestObject2 {
+type TestObject2 @struct {
   str2: string!
   num2: u32!
 }

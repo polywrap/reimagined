@@ -1,0 +1,22 @@
+type Module {
+  stringArgFunction(arg: string): string! @externalFn
+  objectArgFunction(arg: TestObject): string! @externalFn
+  objectResultFunction(arg: TestObject): TestObject! @externalFn
+  nestedObjectArgFunction(arg: ObjectWithChildren): string! @externalFn
+  nestedObjectResultFunction(arg: ObjectWithChildren): ObjectWithChildren! @externalFn
+}
+
+type TestObject @struct {
+  str: string!
+  num: u32!
+}
+
+type ObjectWithChildren @struct {
+  obj1: TestObject!
+  obj2: TestObject2!
+}
+
+type TestObject2 @struct {
+  str2: string!
+  num2: u32!
+}
