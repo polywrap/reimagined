@@ -1,1 +1,1 @@
-export * from './WrapModule';
+export * from './wrap/WrapModule';

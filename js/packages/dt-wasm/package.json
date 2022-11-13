@@ -18,7 +18,7 @@
     "test": "jest --passWithNoTests --runInBand --verbose=true --detectOpenHandles --forceExit"
   },
   "dependencies": {
-    "@polywrap/result": "0.1.0",
+    "@polywrap/result": "0.9.0",
     "@polywrap/asyncify-js": "0.4.1",
     "@polywrap/reim-dt": "0.1.0"
   },
