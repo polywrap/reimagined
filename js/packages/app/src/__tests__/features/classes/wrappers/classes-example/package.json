@@ -5,7 +5,7 @@
     "prebuild": "rimraf ./build && mkdir ./build && yarn codegen",
     "build": "docker container prune -f && docker build -f Dockerfile -t reim-new-wrapper . && docker run --rm reim-new-wrapper /bin/bash -c \"ls /project/build\" && docker create -ti --name root-reim-new-wrapper reim-new-wrapper && docker cp root-reim-new-wrapper:/project/build/wrap.wasm build/wrap.wasm",
     "postbuild": "reim_cli manifest",
-    "codegen": "reim_cli wrapper as host",
+    "codegen": "reim_cli wrapper as wrapper"
   },
   "dependencies": {
     "@nerfzael/reim-wrap-as": "0.1.6",

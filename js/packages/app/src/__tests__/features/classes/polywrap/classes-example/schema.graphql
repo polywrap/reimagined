@@ -1,0 +1,20 @@
+type TestObject {
+  str: string!
+  num: u32!
+}
+
+type ObjectWithChildren {
+  obj1: TestObject!
+  obj2: TestObject2!
+}
+
+type TestObject2 {
+  str2: string!
+  num2: u32!
+}
+
+type TestClass @class @external {
+  create(arg: string!): TestClass @staticFn
+  testInstanceMethod(arg: string!): string! @fn
+  testStaticMethod(arg: string!): string! @staticFn
+}
