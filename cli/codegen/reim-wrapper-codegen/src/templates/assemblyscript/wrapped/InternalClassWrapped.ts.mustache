@@ -1,0 +1,83 @@
+import { stringify } from "@serial-as/json";
+import { parse } from '@serial-as/json'
+import { IExternalWrapInstance } from "@nerfzael/reim-wrap-as";
+import { {{name}} } from "../../..";
+{{#relatedTypes}}
+{{#isClass}}
+import { {{nativeTypeNameWrapped}} } from "..";
+{{#isExternal}}
+import { {{nativeTypeName}} } from "../../external";
+{{/isExternal}}
+{{^isExternal}}
+import { {{nativeTypeName}} } from "../../..";
+{{/isExternal}}
+{{/isClass}}
+{{#isStruct}}
+import { {{nativeTypeName}} } from "../../..";
+{{/isStruct}}
+{{/relatedTypes}}
+import { invoke } from './invoke';
+
+const CLASS_NAME = "{{name}}";
+
+export class {{name}}Wrapped {
+  constructor(
+    public __referencePtr: u32,
+    {{#fields}}
+    public {{model.name}}: {{model.typeInfo.nativeTypeNameWrapped}},
+    {{/fields}}
+  ) {
+  }
+
+  static referenceMap: Map<u32, {{name}}> = new Map<u32, {{name}}>();
+  static referenceCount: u32 = 0;
+
+  static dereference(referencePtr: u32): {{name}} {
+    const object = {{name}}Wrapped.referenceMap.get(referencePtr);
+
+    if (!object) {
+      throw new Error(`Reference {{name}}(${referencePtr}) not found on class: ${CLASS_NAME}`);
+    }
+
+    return object;
+  }
+
+  static invokeMethod(buffer: ArrayBuffer, wrapInstance: IExternalWrapInstance): ArrayBuffer {  
+    return invoke(buffer, wrapInstance);
+  }
+  
+  static mapToSerializable(value: {{name}}): {{name}}Wrapped {
+    const referencePtr = ++{{name}}Wrapped.referenceCount;
+    {{name}}Wrapped.referenceMap.set(referencePtr, value);
+  
+    return new {{name}}Wrapped(
+      referencePtr,
+      {{#fields}}
+      {{#model.typeInfo.isClass}}
+      {{model.typeInfo.nativeTypeNameWrapped}}.mapToSerializable(value.{{model.name}}),
+      {{/model.typeInfo.isClass}}
+      {{^model.typeInfo.isClass}}
+      value.{{model.name}},
+      {{/model.typeInfo.isClass}}
+      {{/fields}}
+    );
+  }
+
+  static serialize(value: {{name}}): ArrayBuffer {
+    return String.UTF8.encode(
+      stringify<{{name}}Wrapped>(
+        {{name}}Wrapped.mapToSerializable(value)
+      )
+    );
+  }
+
+  static deserialize(buffer: ArrayBuffer, wrapInstance: IExternalWrapInstance): {{name}} {
+    const object = parse<{{name}}Wrapped>(String.UTF8.decode(buffer));
+  
+    return {{name}}Wrapped.mapFromSerializable(object, wrapInstance);
+  }
+
+  static mapFromSerializable(value: {{name}}Wrapped, wrapInstance: IExternalWrapInstance): {{name}} {
+    return TestExternalClassWrapped.dereference(value.__referencePtr);
+  }
+}

@@ -1,0 +1,3 @@
+export { TestObjectGetter } from "./TestObjectGetter";
+
+

@@ -1,5 +1,4 @@
-import { testExternalGlobalFunction } from "./polywrap/host";
-import { TestExternalClass } from "./polywrap/host/classes";
+import { testExternalGlobalFunction, TestExternalClass } from "./polywrap/external";
 
 export function testReceiveReference(arg: TestExternalClass): string {
   return arg.testInstanceMethod("test");

@@ -1,0 +1,27 @@
+import { bufferToU32, IExternalWrapInstance } from "@polywrap/reim-wrap-js";
+import { WrapManifest } from '../../WrapManifest';
+{{#types}}
+{{#model.isClass}}
+{{^model.isExternal}}
+import { {{model.name}}Wrapped } from "../../wrapped";
+{{/model.isExternal}}
+{{/model.isClass}}
+{{/types}}
+
+export function invokeClassMethod(buffer: Uint8Array, wrapInstance: IExternalWrapInstance): Promise<Uint8Array> {
+  const classId = bufferToU32(buffer);
+  const dataBuffer = buffer.slice(4);
+
+  switch (classId) {
+    {{#types}}
+    {{#model.isClass}}
+    {{^model.isExternal}}
+    case WrapManifest.Internal.Class.{{model.name}}:
+      return {{model.name}}Wrapped.invokeMethod(dataBuffer, wrapInstance);
+    {{/model.isExternal}}
+    {{/model.isClass}}
+    {{/types}}
+    default:
+      throw new Error("Unknown class ID: " + classId.toString());
+  }
+}

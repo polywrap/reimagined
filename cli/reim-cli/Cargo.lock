@@ -115,21 +115,9 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a3f87b73ce11b1619a3c6332f45341e0047173771e8b8b73f87bfeefb7b56244"
 
 [[package]]
-name = "reim_app_codegen"
-version = "0.1.0"
-dependencies = [
- "mustache",
- "reim_schema",
- "serde",
- "serde_derive",
- "serde_json",
-]
-
-[[package]]
 name = "reim_cli"
 version = "0.1.0"
 dependencies = [
- "reim_app_codegen",
  "reim_wrapper_codegen",
 ]
 

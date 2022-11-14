@@ -1,6 +1,7 @@
-import { IWrapPackage, IWrapper} from "@polywrap/reim-wrap";
-import { FileSystemLoader } from "../../FileSystemLoader";
-import { GlobalFunctionExample } from "./polywrap/global-function-example";
+import { WrapperWrapInstance } from "@polywrap/reim-wrap-js";
+import { DtLoader } from "../../DtLoader";
+import { InternalWrapInstance } from "./polywrap/global-function-example/src/polywrap/external/module/InternalWrapInstance";
+import { WrapModule } from "./polywrap/global-function-example/src/polywrap/external/module/WrapModule";
 
 jest.setTimeout(200000);
 
@@ -9,18 +10,14 @@ const wrapperPath = `${__dirname}/wrappers/global-function-example/build`;
 
 describe("Global functions", () => {
   it("can invoke a global function with string arg", async () => {
-    const loader = new FileSystemLoader();
-    
-    const loadResult = await loader.load(wrapperPath);
+    const dtInstance = await new DtLoader().load(wrapperPath);
 
-    if (!loadResult.ok) {
-      throw loadResult.error;
-    }
-
-    const wrapPackage: IWrapPackage = loadResult.value;
-    const wrapper: IWrapper = await wrapPackage.createWrapper();
-
-    const { stringArgFunction } = GlobalFunctionExample.from(wrapper);
+    const { stringArgFunction } = WrapModule.import(
+      new WrapperWrapInstance(
+        dtInstance, 
+        new InternalWrapInstance()
+      )
+    );
 
     const result = await stringArgFunction("test");
 
@@ -28,18 +25,14 @@ describe("Global functions", () => {
   });
 
   it("can invoke a global function with object arg", async () => {
-    const loader = new FileSystemLoader();
-    
-    const loadResult = await loader.load(wrapperPath);
+    const dtInstance = await new DtLoader().load(wrapperPath);
 
-    if (!loadResult.ok) {
-      throw loadResult.error;
-    }
-
-    const wrapPackage: IWrapPackage = loadResult.value;
-    const wrapper: IWrapper = await wrapPackage.createWrapper();
-
-    const { objectArgFunction } = GlobalFunctionExample.from(wrapper);
+    const { objectArgFunction } = WrapModule.import(
+      new WrapperWrapInstance(
+        dtInstance, 
+        new InternalWrapInstance()
+      )
+    );
 
     const result = await objectArgFunction({
       str: "test",
@@ -50,18 +43,14 @@ describe("Global functions", () => {
   });
 
   it("can invoke a global function with object result", async () => {
-    const loader = new FileSystemLoader();
-    
-    const loadResult = await loader.load(wrapperPath);
+    const dtInstance = await new DtLoader().load(wrapperPath);
 
-    if (!loadResult.ok) {
-      throw loadResult.error;
-    }
-
-    const wrapPackage: IWrapPackage = loadResult.value;
-    const wrapper: IWrapper = await wrapPackage.createWrapper();
-
-    const { objectResultFunction } = GlobalFunctionExample.from(wrapper);
+    const { objectResultFunction } = WrapModule.import(
+      new WrapperWrapInstance(
+        dtInstance, 
+        new InternalWrapInstance()
+      )
+    );
 
     const result = await objectResultFunction({
       str: "test",
@@ -75,18 +64,14 @@ describe("Global functions", () => {
   });
 
   it("can invoke a global function with nested object arg", async () => {
-    const loader = new FileSystemLoader();
-    
-    const loadResult = await loader.load(wrapperPath);
+    const dtInstance = await new DtLoader().load(wrapperPath);
 
-    if (!loadResult.ok) {
-      throw loadResult.error;
-    }
-
-    const wrapPackage: IWrapPackage = loadResult.value;
-    const wrapper: IWrapper = await wrapPackage.createWrapper();
-
-    const { nestedObjectArgFunction } = GlobalFunctionExample.from(wrapper);
+    const { nestedObjectArgFunction } = WrapModule.import(
+      new WrapperWrapInstance(
+        dtInstance, 
+        new InternalWrapInstance()
+      )
+    );
 
     const result = await nestedObjectArgFunction({
       obj1: {
@@ -103,18 +88,14 @@ describe("Global functions", () => {
   });
 
   it("can invoke a global function with nested object result", async () => {
-    const loader = new FileSystemLoader();
-    
-    const loadResult = await loader.load(wrapperPath);
+    const dtInstance = await new DtLoader().load(wrapperPath);
 
-    if (!loadResult.ok) {
-      throw loadResult.error;
-    }
-
-    const wrapPackage: IWrapPackage = loadResult.value;
-    const wrapper: IWrapper = await wrapPackage.createWrapper();
-
-    const { nestedObjectResultFunction } = GlobalFunctionExample.from(wrapper);
+    const { nestedObjectResultFunction } = WrapModule.import(
+      new WrapperWrapInstance(
+        dtInstance, 
+        new InternalWrapInstance()
+      )
+    );
 
     const result = await nestedObjectResultFunction({
       obj1: {

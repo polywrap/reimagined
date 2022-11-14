@@ -1,10 +1,10 @@
 import { IDtInstance } from "@polywrap/reim-dt";
-import { IHost } from "./IHost";
+import { IWrapInstance } from "./IWrapInstance";
 import { IWrapper } from "./IWrapper";
 import { IWrapManifest } from "./manifest";
 
 export interface IWrapPackage {
   getManifest(): Promise<IWrapManifest>;
-  createWrapper(host?: IHost): Promise<IWrapper>;
+  createWrapper(internalInstance?: IWrapInstance): Promise<IWrapper>;
   createInstance(): Promise<IDtInstance>;
 }

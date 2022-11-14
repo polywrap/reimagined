@@ -15,15 +15,15 @@
   "scripts": {
     "reset": "yarn clean && yarn && yarn build",
     "clean": "npx rimraf ./**/node_modules ./**/yarn.lock ./**/build ./**/coverage ./**/.polywrap",
-    "build": "yarn build:result && yarn build:wrap && yarn build:dt && yarn build:dt-wasm && yarn build:wrap-dt && yarn build:loader",
-    "build:result": "lerna run build --scope @polywrap/result",
+    "build": "yarn build:wrap-as && yarn build:wrap-js && yarn build:wrap && yarn build:dt && yarn build:dt-wasm && yarn build:wrap-dt && yarn build:loader && yarn build:app",
+    "build:wrap-as": "lerna run build --scope @nerfzael/reim-wrap-as",
     "build:wrap": "lerna run build --scope @polywrap/reim-wrap",
+    "build:wrap-js": "lerna run build --scope @polywrap/reim-wrap-js",
     "build:dt": "lerna run build --scope @polywrap/reim-dt",
     "build:dt-wasm": "lerna run build --scope @polywrap/reim-dt-wasm",
     "build:wrap-dt": "lerna run build --scope @polywrap/reim-wrap-dt",
     "build:loader": "lerna run build --scope @polywrap/reim-loader",
     "build:app": "lerna run build --scope @polywrap/reim-app",
-    "build:new-app": "lerna run build --scope @polywrap/reim-new-app",
     "test": "lerna run test"
   },
   "devDependencies": {

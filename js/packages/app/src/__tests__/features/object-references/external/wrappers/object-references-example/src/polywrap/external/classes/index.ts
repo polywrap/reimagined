@@ -1,0 +1,3 @@
+
+export { TestExternalClass } from "./TestExternalClass";
+

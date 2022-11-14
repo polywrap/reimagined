@@ -4,5 +4,3 @@ language: wasm/assemblyscript
 build: ./polywrap.build.yaml
 schema: ./schema.graphql
 module: ./src/index.ts
-deps:
-  "polywrap-interface": "ens/polywrap.eth"

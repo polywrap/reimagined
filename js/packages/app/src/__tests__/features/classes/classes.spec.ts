@@ -1,6 +1,7 @@
-import { IWrapPackage, IWrapper} from "@polywrap/reim-wrap";
-import { FileSystemLoader } from "../../FileSystemLoader";
-import { ClassesExample } from "./polywrap/classes-example";
+import { WrapperWrapInstance } from "@polywrap/reim-wrap-js";
+import { DtLoader } from "../../DtLoader";
+import { InternalWrapInstance } from "./polywrap/classes-example/src/polywrap/external/module/InternalWrapInstance";
+import { WrapModule } from "./polywrap/classes-example/src/polywrap/external/module/WrapModule";
 
 jest.setTimeout(200000);
 
@@ -9,18 +10,14 @@ const wrapperPath = `${__dirname}/wrappers/classes-example/build`;
 
 describe("Classes", () => {
   it("can invoke a static method with string arg", async () => {
-    const loader = new FileSystemLoader();
-    
-    const loadResult = await loader.load(wrapperPath);
+    const dtInstance = await new DtLoader().load(wrapperPath);
 
-    if (!loadResult.ok) {
-      throw loadResult.error;
-    }
-
-    const wrapPackage: IWrapPackage = loadResult.value;
-    const wrapper: IWrapper = await wrapPackage.createWrapper();
-
-    const { TestClass } = ClassesExample.from(wrapper);
+    const { TestClass } = WrapModule.import(
+      new WrapperWrapInstance(
+        dtInstance, 
+        new InternalWrapInstance()
+      )
+    );
 
     const result = await TestClass.testStaticMethod("test");
 
@@ -28,18 +25,14 @@ describe("Classes", () => {
   });
 
   it("can initialize an instance of a class with string ctor arg", async () => {
-    const loader = new FileSystemLoader();
-    
-    const loadResult = await loader.load(wrapperPath);
+    const dtInstance = await new DtLoader().load(wrapperPath);
 
-    if (!loadResult.ok) {
-      throw loadResult.error;
-    }
-
-    const wrapPackage: IWrapPackage = loadResult.value;
-    const wrapper: IWrapper = await wrapPackage.createWrapper();
-
-    const { TestClass } = ClassesExample.from(wrapper);
+    const { TestClass } = WrapModule.import(
+      new WrapperWrapInstance(
+        dtInstance, 
+        new InternalWrapInstance()
+      )
+    );
 
     const test = await TestClass.create("test 1");
 
@@ -47,18 +40,14 @@ describe("Classes", () => {
   });
 
   it("can invoke an instance of method with string arg", async () => {
-    const loader = new FileSystemLoader();
-    
-    const loadResult = await loader.load(wrapperPath);
+    const dtInstance = await new DtLoader().load(wrapperPath);
 
-    if (!loadResult.ok) {
-      throw loadResult.error;
-    }
-
-    const wrapPackage: IWrapPackage = loadResult.value;
-    const wrapper: IWrapper = await wrapPackage.createWrapper();
-
-    const { TestClass } = ClassesExample.from(wrapper);
+    const { TestClass } = WrapModule.import(
+      new WrapperWrapInstance(
+        dtInstance, 
+        new InternalWrapInstance()
+      )
+    );
 
     const test = await TestClass.create("test 1");
 

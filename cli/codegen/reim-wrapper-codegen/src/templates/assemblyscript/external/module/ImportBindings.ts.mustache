@@ -1,0 +1,34 @@
+//{{#types}}
+//{{#model.isClass}}
+//{{#model.isExternal}}
+//import { {{model.name}}Import } from "../classes/{{model.name}}";
+//import { {{model.name}} } from "../classes";
+//{{/model.isExternal}}
+//{{^model.isExternal}}
+//import { {{model.name}} } from "../../..";
+//{{/model.isExternal}}
+//{{/model.isClass}}
+//{{#model.isStruct}}
+//import { {{model.name}} } from "../../..";
+//{{/model.isStruct}}
+//{{/types}}
+//
+//export class ImportBindings {
+//  constructor(
+//    {{#globalFunctions.list}}
+//    {{#model.isExternal}}
+//    public {{model.name}}: (
+//      {{#model.args}}
+//      {{model.name}}: {{model.typeInfo.nativeTypeName}},
+//      {{/model.args}}
+//    ) => {{model.result.nativeTypeName}},
+//    {{/model.isExternal}}
+//    {{/globalFunctions.list}}
+//    {{#types}}
+//    {{#model.isExternal}}
+//    public {{model.name}}: {{model.name}}Import,
+//    {{/model.isExternal}}
+//    {{/types}}
+//  ) {
+//  }
+//}

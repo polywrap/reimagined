@@ -1,0 +1,116 @@
+import { concat, u32ToBuffer, IExternalWrapInstance, BaseTypeSerialization } from '@polywrap/reim-wrap-js';
+import { WrapModule } from '../module/WrapModule';
+import { WrapManifest } from '../../WrapManifest';
+import { ExternalResource } from '../../dt/ExternalResource';
+{{#relatedTypes}}
+{{#isClass}}
+import { {{nativeTypeNameWrapped}} } from "../../wrapped";
+{{#isExternal}}
+import { {{nativeTypeName}} } from "../classes";
+{{/isExternal}}
+{{^isExternal}}
+import { {{nativeTypeName}} } from "../../..";
+{{/isExternal}}
+{{/isClass}}
+{{#isStruct}}
+import { {{nativeTypeName}} } from "../../..";
+{{/isStruct}}
+{{/relatedTypes}}
+
+export function {{name}}(
+  {{#args}}
+  {{model.name}}: {{model.typeInfo.nativeTypeName}},
+  {{/args}}
+): Promise<{{result.nativeTypeName}}> {
+  return {{name}}FromInstance(
+    WrapModule.wrapInstance,
+    {{#args}}
+    {{model.name}},
+    {{/args}}
+  );
+};
+
+export const create = (instance: IExternalWrapInstance) => {
+  return (
+    {{#args}}
+    {{model.name}}: {{model.typeInfo.nativeTypeName}},
+    {{/args}}
+  ): Promise<{{result.nativeTypeName}}> => {
+    return {{name}}FromInstance(
+      instance, 
+      {{#args}}
+      {{model.name}},
+      {{/args}}
+    );
+  };
+};
+
+export const {{name}}FromInstance = async (
+  instance: IExternalWrapInstance | null, 
+  {{#args}}
+  {{model.name}}: {{model.typeInfo.nativeTypeName}},
+  {{/args}}
+): Promise<{{result.nativeTypeName}}> => {
+  if (instance == null) {
+    throw new Error("connect() or import() must be called before using this module");
+  }
+
+  const args = new {{namePascalCase}}Args(
+    {{#args}}
+    {{model.name}},
+    {{/args}}
+  );
+
+  const buffer = concat([
+    u32ToBuffer(WrapManifest.External.GlobalFunction.{{namePascalCase}}),
+    {{namePascalCase}}ArgsWrapped.serialize(args),
+  ]);
+
+  const result = await instance.invokeResource(ExternalResource.InvokeGlobalFunction, buffer);
+
+  {{#result.isClass}}
+  return {{result.nativeTypeNameWrapped}}.deserialize(result, instance);
+  {{/result.isClass}}
+  {{^result.isClass}}
+  return BaseTypeSerialization.deserialize<{{result.nativeTypeName}}>(result);
+  {{/result.isClass}}
+}
+
+export class {{namePascalCase}}ArgsWrapped {
+  constructor(
+    {{#args}}
+    public {{model.name}}: {{model.typeInfo.nativeTypeNameWrapped}},
+    {{/args}}
+  ) {
+  }
+
+  static serialize(value: {{namePascalCase}}Args): Uint8Array {
+    return new TextEncoder().encode(
+      JSON.stringify(
+        {{namePascalCase}}ArgsWrapped.mapToSerializable(value)
+      )
+    );
+  }
+
+  static mapToSerializable(value: {{namePascalCase}}Args): {{namePascalCase}}ArgsWrapped {
+    return new {{namePascalCase}}ArgsWrapped(
+      {{#args}}
+      {{#model.typeInfo.isClass}}
+      {{model.typeInfo.nativeTypeNameWrapped}}.mapToSerializable(value.{{model.name}}),
+      {{/model.typeInfo.isClass}}
+      {{^model.typeInfo.isClass}}
+      value.{{model.name}},
+      {{/model.typeInfo.isClass}}
+      {{/args}}
+    );
+  }
+}
+
+export class {{namePascalCase}}Args {
+  constructor(
+    {{#args}}
+    public {{model.name}}: {{model.typeInfo.nativeTypeName}},
+    {{/args}}
+  ) {
+  }
+}

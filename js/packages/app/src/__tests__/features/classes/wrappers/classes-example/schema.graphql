@@ -13,8 +13,8 @@ type TestObject2 {
   num2: u32!
 }
 
-type TestClass {
-  create(arg: string!): void
-  testInstanceMethod(arg: string!): string! @instance
-  testStaticMethod(arg: string!): string!
+type TestClass @class {
+  create(arg: string!): TestClass @staticFn
+  testInstanceMethod(arg: string!): string! @fn
+  testStaticMethod(arg: string!): string! @staticFn
 }

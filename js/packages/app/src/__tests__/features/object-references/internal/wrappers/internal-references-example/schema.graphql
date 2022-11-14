@@ -1,14 +1,14 @@
 type Module {
-  testReturnReference(arg: string): TestInternalClass!
+  testReturnReference(arg: string): TestInternalClass! @fn
 }
 
-type TestInternalClass @reference {
-  create(arg: string!): void
-  testInstanceMethod(arg: string!): string! @instance
+type TestInternalClass @class {
+  create(arg: string!): TestInternalClass @staticFn
+  testInstanceMethod(arg: string!): string! @fn
 }
 
-type TestObjectGetter {
-  create(arg: string!): void
-  testInstanceMethod(arg: string!): TestInternalClass! @instance
-  testStaticMethod(arg: string!): TestInternalClass!
+type TestObjectGetter @class {
+  create(arg: string!): TestObjectGetter @staticFn
+  testInstanceMethod(arg: string!): TestInternalClass! @fn
+  testStaticMethod(arg: string!): TestInternalClass! @staticFn
 }

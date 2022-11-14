@@ -1,27 +1,24 @@
-import { IWrapPackage, IWrapper} from "@polywrap/reim-wrap";
-import { FileSystemLoader } from "../../../FileSystemLoader";
-import { InternalReferencesExample } from "./polywrap/internal-references-example";
+import { WrapperWrapInstance } from "@polywrap/reim-wrap-js";
+import { DtLoader } from "../../../DtLoader";
+import { WrapModule } from "./polywrap/internal-references-example/src/polywrap/external/module/WrapModule";
+import { InternalWrapInstance } from "./polywrap/internal-references-example/src/polywrap/external/module/InternalWrapInstance";
 
 jest.setTimeout(200000);
 
 //TODO: build this before the tests (currently needs to be manually built)
-const wrapperPath = `${__dirname}/wrappers/object-references-example/build`;
+const wrapperPath = `${__dirname}/wrappers/internal-references-example/build`;
 
 describe("Object references", () => {
   describe("Internal references", () => {
     it("can return an object reference from a global function", async () => {
-      const loader = new FileSystemLoader();
-      
-      const loadResult = await loader.load(wrapperPath);
+      const dtInstance = await new DtLoader().load(wrapperPath);
 
-      if (!loadResult.ok) {
-        throw loadResult.error;
-      }
-
-      const wrapPackage: IWrapPackage = loadResult.value;
-      const wrapper: IWrapper = await wrapPackage.createWrapper();
-
-      const { testReturnReference } = InternalReferencesExample.from(wrapper);
+      const { testReturnReference } = WrapModule.import(
+        new WrapperWrapInstance(
+          dtInstance, 
+          new InternalWrapInstance()
+        )
+      );
 
       const object = await testReturnReference("test");
 
@@ -29,18 +26,14 @@ describe("Object references", () => {
     });
 
     it("can invoke an instance method on a returned object reference from a global function", async () => {
-      const loader = new FileSystemLoader();
-      
-      const loadResult = await loader.load(wrapperPath);
-
-      if (!loadResult.ok) {
-        throw loadResult.error;
-      }
-
-      const wrapPackage: IWrapPackage = loadResult.value;
-      const wrapper: IWrapper = await wrapPackage.createWrapper();
-
-      const { testReturnReference } = InternalReferencesExample.from(wrapper);
+      const dtInstance = await new DtLoader().load(wrapperPath);
+   
+      const { testReturnReference } = WrapModule.import(
+        new WrapperWrapInstance(
+          dtInstance, 
+          new InternalWrapInstance()
+        )
+      );
 
       const object = await testReturnReference("test 1");
 
@@ -50,18 +43,14 @@ describe("Object references", () => {
     });
 
     it("can invoke an instance method on a returned object reference from a static method", async () => {
-      const loader = new FileSystemLoader();
-      
-      const loadResult = await loader.load(wrapperPath);
-
-      if (!loadResult.ok) {
-        throw loadResult.error;
-      }
-
-      const wrapPackage: IWrapPackage = loadResult.value;
-      const wrapper: IWrapper = await wrapPackage.createWrapper();
-
-      const { TestObjectGetter } = InternalReferencesExample.from(wrapper);
+      const dtInstance = await new DtLoader().load(wrapperPath);
+   
+      const { TestObjectGetter } = WrapModule.import(
+        new WrapperWrapInstance(
+          dtInstance, 
+          new InternalWrapInstance()
+        )
+      );
 
       const object = await TestObjectGetter.testStaticMethod("test 1");
 
@@ -71,18 +60,14 @@ describe("Object references", () => {
     });
 
     it("can invoke an instance method on a returned object reference from an instance method", async () => {
-      const loader = new FileSystemLoader();
-      
-      const loadResult = await loader.load(wrapperPath);
-
-      if (!loadResult.ok) {
-        throw loadResult.error;
-      }
-
-      const wrapPackage: IWrapPackage = loadResult.value;
-      const wrapper: IWrapper = await wrapPackage.createWrapper();
-
-      const { TestObjectGetter } = InternalReferencesExample.from(wrapper);
+      const dtInstance = await new DtLoader().load(wrapperPath);
+   
+      const { TestObjectGetter } = WrapModule.import(
+        new WrapperWrapInstance(
+          dtInstance, 
+          new InternalWrapInstance()
+        )
+      );
 
       const objectGetter = await TestObjectGetter.create("test 1");
 

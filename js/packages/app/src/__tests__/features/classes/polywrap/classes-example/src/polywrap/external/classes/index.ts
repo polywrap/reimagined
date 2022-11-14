@@ -1,0 +1,5 @@
+
+
+
+export { TestClass } from "./TestClass";
+

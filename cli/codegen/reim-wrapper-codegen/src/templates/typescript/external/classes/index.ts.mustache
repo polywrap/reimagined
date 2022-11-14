@@ -1,0 +1,7 @@
+{{#types}}
+{{#model.isClass}}
+{{#model.isExternal}}
+export { {{model.name}} } from "./{{model.name}}";
+{{/model.isExternal}}
+{{/model.isClass}}
+{{/types}}

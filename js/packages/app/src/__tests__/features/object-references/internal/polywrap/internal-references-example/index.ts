@@ -1,1 +1,1 @@
-export * from './InternalReferencesExample';
+export * from './wrap/WrapModule';

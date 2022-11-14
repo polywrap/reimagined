@@ -1,0 +1,2 @@
+export { testExternalGlobalFunction } from "./testExternalGlobalFunction";
+

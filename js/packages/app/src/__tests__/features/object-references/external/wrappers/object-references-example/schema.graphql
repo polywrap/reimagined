@@ -1,22 +1,19 @@
 type Module {
-  testReceiveReference(arg: TestExternalClass): string!
-  testInvokeExternalGlobalFunction(arg: string!): string!
-  testInvokeExternalStaticMethod(arg: string!): string!
-  testInvokeExternalInstanceMethod(arg: string!): string!
+  testReceiveReference(arg: TestExternalClass): string! @fn
+  testInvokeExternalGlobalFunction(arg: string!): string! @fn
+  testInvokeExternalStaticMethod(arg: string!): string! @fn
+  testInvokeExternalInstanceMethod(arg: string!): string! @fn
+  testExternalGlobalFunction(arg: string): string! @externalFn
 }
 
-type Host {
-  testExternalGlobalFunction(arg: TestExternalClass): string!
+type TestObjectGetter @class {
+  create(arg: string!): TestObjectGetter @staticFn
+  testInstanceReceiveReference(arg: TestExternalClass): string! @fn
+  testStaticReceiveReference(arg: TestExternalClass): string! @staticFn
 }
 
-type TestObjectGetter {
-  create(arg: string!): void
-  testInstanceReceiveReference(arg: TestExternalClass): string! @instance
-  testStaticReceiveReference(arg: TestExternalClass): string!
-}
-
-type TestExternalClass @external {
-  create(arg: string!): void
-  testInstanceMethod(arg: string!): string! @instance
-  testStaticMethod(arg: string!): string!
+type TestExternalClass @external @class {
+  create(arg: string!): TestExternalClass @staticFn
+  testInstanceMethod(arg: string!): string! @fn
+  testStaticMethod(arg: string!): string! @staticFn
 }

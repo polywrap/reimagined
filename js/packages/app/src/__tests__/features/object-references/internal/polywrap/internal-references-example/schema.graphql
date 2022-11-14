@@ -1,0 +1,14 @@
+type Module {
+  testReturnReference(arg: string): TestInternalClass! @externalFn
+}
+
+type TestInternalClass @class @external {
+  create(arg: string!): TestInternalClass @staticFn
+  testInstanceMethod(arg: string!): string! @fn
+}
+
+type TestObjectGetter @class @external {
+  create(arg: string!): TestObjectGetter @staticFn
+  testInstanceMethod(arg: string!): TestInternalClass! @fn
+  testStaticMethod(arg: string!): TestInternalClass! @staticFn
+}
