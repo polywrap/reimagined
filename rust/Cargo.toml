@@ -1,6 +1,7 @@
 [workspace]
 members = [
     "reim_dt",
+    "reim_dt_wasm",
     "reim_wrap", 
     "reim_cli", 
     "reim_codegen", 
