@@ -134,6 +134,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "reim_dt"
+version = "0.1.0"
+
+[[package]]
 name = "reim_schema"
 version = "0.1.0"
 dependencies = [
@@ -141,6 +145,13 @@ dependencies = [
  "serde_derive",
  "tree-sitter",
  "tree_sitter_wrap",
+]
+
+[[package]]
+name = "reim_wrap"
+version = "0.1.0"
+dependencies = [
+ "reim_dt",
 ]
 
 [[package]]

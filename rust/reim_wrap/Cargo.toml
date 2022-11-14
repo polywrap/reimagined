@@ -1,0 +1,7 @@
+[package]
+name = "reim_wrap"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+reim_dt = { path = "../reim_dt" }
