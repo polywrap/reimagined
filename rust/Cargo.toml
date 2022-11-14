@@ -1,0 +1,2 @@
+[workspace]
+members = ["reim_cli", "reim_codegen", "wrap_schema/tree_sitter_wrap", "wrap_schema/reim_schema"]
