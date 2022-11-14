@@ -30,11 +30,11 @@ export function invoke(buffer: Uint8Array, wrapInstance: IExternalWrapInstance):
 }
 
 {{#list}}
-const invoke{{model.namePascalCase}}Wrapped = (buffer: Uint8Array, wrapInstance: IExternalWrapInstance): Promise<Uint8Array> => {
+const invoke{{model.namePascalCase}}Wrapped = async (buffer: Uint8Array, wrapInstance: IExternalWrapInstance): Promise<Uint8Array> => {
   {{#model.isStatic}}
   const args = {{model.namePascalCase}}ArgsWrapped.deserialize(buffer, wrapInstance);
 
-  const result = {{model.className}}.{{model.name}}(
+  const result = await {{model.className}}.{{model.name}}(
     {{#model.args}}
     args.{{model.name}},
     {{/model.args}}
@@ -48,7 +48,7 @@ const invoke{{model.namePascalCase}}Wrapped = (buffer: Uint8Array, wrapInstance:
 
   const object = {{model.className}}Wrapped.dereference(referencePtr);
 
-  const result = object.{{model.name}}(
+  const result = await object.{{model.name}}(
     {{#model.args}}
     args.{{model.name}},
     {{/model.args}}

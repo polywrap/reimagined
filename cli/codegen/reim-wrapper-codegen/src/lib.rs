@@ -421,6 +421,8 @@ fn render_external_global_functions(wrapper: &WrapperModel, output_path: &str, t
     fs::create_dir_all(&base_dir_path)?;
 
     for func in wrapper.global_functions.list.iter().filter(|x| x.model.is_external) {
+        println!("Rendering global function: {}", func.model.name);
+        println!("{:?}", func.model);
         render_template(
             &templates.external.global_functions.function_name, 
             &func.model, 

@@ -40,12 +40,12 @@ export function invoke(buffer: Uint8Array, wrapInstance: IExternalWrapInstance):
 
 {{#list}}
 {{^model.isExternal}}
-const invoke{{model.namePascalCase}}Wrapped = (buffer: Uint8Array, wrapInstance: IExternalWrapInstance): Promise<Uint8Array> => {
+const invoke{{model.namePascalCase}}Wrapped = async (buffer: Uint8Array, wrapInstance: IExternalWrapInstance): Promise<Uint8Array> => {
   const argsBuffer = buffer;
 
   const args = {{model.namePascalCase}}ArgsWrapped.deserialize(argsBuffer, wrapInstance);
 
-  const result = {{model.name}}(
+  const result = await {{model.name}}(
     {{#model.args}}
     args.{{model.name}},
     {{/model.args}}

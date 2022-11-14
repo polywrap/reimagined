@@ -78,18 +78,6 @@ export class {{name}}Wrapped {
   }
 
   static mapFromSerializable(value: {{name}}Wrapped, wrapInstance: IExternalWrapInstance): {{name}} {
-    const object = new {{name}}(
-      value.__referencePtr,
-      {{#fields}}
-      {{#model.isClass}}
-      {{model.typeInfo.nativeTypeNameWrapped}}.mapFromSerializable(value.{{model.name}}, wrapInstance),
-      {{/model.isClass}}
-      {{^model.isClass}}
-      value.{{model.name}},
-      {{/model.isClass}}
-      {{/fields}}
-    );
-
-    return object;
+    return TestExternalClassWrapped.dereference(value.__referencePtr);
   }
 }

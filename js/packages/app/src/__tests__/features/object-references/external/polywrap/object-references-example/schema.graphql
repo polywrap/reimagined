@@ -6,7 +6,7 @@ type Module {
   testExternalGlobalFunction(arg: string): string! @fn
 }
 
-type TestObjectGetter @class @external {
+type TestObjectGetter @external @class {
   create(arg: string!): TestObjectGetter @staticFn
   testInstanceReceiveReference(arg: TestExternalClass): string! @fn
   testStaticReceiveReference(arg: TestExternalClass): string! @staticFn

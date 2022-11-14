@@ -1,7 +1,11 @@
 import { IHost, IWrapPackage, IWrapper} from "@polywrap/reim-wrap";
 import { bufferToU32 } from "@polywrap/reim-wrap-dt";
+import { WrapperWrapInstance } from "@polywrap/reim-wrap-js";
+import { DtLoader } from "../../../DtLoader";
 import { FileSystemLoader } from "../../../FileSystemLoader";
-import { ObjectReferencesExample } from "./polywrap/object-references-example";
+import { TestExternalClass } from "./polywrap/object-references-example/src";
+import { InternalWrapInstance } from "./polywrap/object-references-example/src/polywrap/external/module/InternalWrapInstance";
+import { WrapModule } from "./polywrap/object-references-example/src/polywrap/external/module/WrapModule";
 
 jest.setTimeout(200000);
 
@@ -11,18 +15,14 @@ const wrapperPath = `${__dirname}/wrappers/object-references-example/build`;
 describe("Object references", () => {
   describe("External references", () => {
     it("can receive an object reference in a global function", async () => {
-      const loader = new FileSystemLoader();
-      
-      const loadResult = await loader.load(wrapperPath);
+      const dtInstance = await new DtLoader().load(wrapperPath);
 
-      if (!loadResult.ok) {
-        throw loadResult.error;
-      }
-
-      const wrapPackage: IWrapPackage = loadResult.value;
-      const wrapper: IWrapper = await wrapPackage.createWrapper(new ObjectReferencesExampleHost());
-
-      const { testReceiveReference } = ObjectReferencesExample.from(wrapper);
+      const { testReceiveReference } = WrapModule.import(
+        new WrapperWrapInstance(
+          dtInstance, 
+          new InternalWrapInstance()
+        )
+      );
 
       const externalObject = new TestExternalClass("test");
 
@@ -32,18 +32,14 @@ describe("Object references", () => {
     });
 
     it("can receive an object reference in a static method", async () => {
-      const loader = new FileSystemLoader();
-      
-      const loadResult = await loader.load(wrapperPath);
+      const dtInstance = await new DtLoader().load(wrapperPath);
 
-      if (!loadResult.ok) {
-        throw loadResult.error;
-      }
-
-      const wrapPackage: IWrapPackage = loadResult.value;
-      const wrapper: IWrapper = await wrapPackage.createWrapper(new ObjectReferencesExampleHost());
-
-      const { TestObjectGetter } = ObjectReferencesExample.from(wrapper);
+      const { TestObjectGetter } = WrapModule.import(
+        new WrapperWrapInstance(
+          dtInstance, 
+          new InternalWrapInstance()
+        )
+      );
 
       const externalObject = new TestExternalClass("test");
 
@@ -53,18 +49,14 @@ describe("Object references", () => {
     });
 
     it("can receive an object reference in an instance method", async () => {
-      const loader = new FileSystemLoader();
-      
-      const loadResult = await loader.load(wrapperPath);
+      const dtInstance = await new DtLoader().load(wrapperPath);
 
-      if (!loadResult.ok) {
-        throw loadResult.error;
-      }
-
-      const wrapPackage: IWrapPackage = loadResult.value;
-      const wrapper: IWrapper = await wrapPackage.createWrapper(new ObjectReferencesExampleHost());
-
-      const { TestObjectGetter } = ObjectReferencesExample.from(wrapper);
+      const { TestObjectGetter } = WrapModule.import(
+        new WrapperWrapInstance(
+          dtInstance, 
+          new InternalWrapInstance()
+        )
+      );
 
       const objectGetter = await TestObjectGetter.create("test 1");
       
@@ -76,18 +68,14 @@ describe("Object references", () => {
     });
 
     it("can invoke an external global function", async () => {
-      const loader = new FileSystemLoader();
-      
-      const loadResult = await loader.load(wrapperPath);
+      const dtInstance = await new DtLoader().load(wrapperPath);
 
-      if (!loadResult.ok) {
-        throw loadResult.error;
-      }
-
-      const wrapPackage: IWrapPackage = loadResult.value;
-      const wrapper: IWrapper = await wrapPackage.createWrapper(new ObjectReferencesExampleHost());
-
-      const { testInvokeExternalGlobalFunction } = ObjectReferencesExample.from(wrapper);
+      const { testInvokeExternalGlobalFunction } = WrapModule.import(
+        new WrapperWrapInstance(
+          dtInstance, 
+          new InternalWrapInstance()
+        )
+      );
 
       const result = await testInvokeExternalGlobalFunction("test");
 
@@ -95,18 +83,14 @@ describe("Object references", () => {
     });
 
     it("can invoke an external static method", async () => {
-      const loader = new FileSystemLoader();
-      
-      const loadResult = await loader.load(wrapperPath);
+      const dtInstance = await new DtLoader().load(wrapperPath);
 
-      if (!loadResult.ok) {
-        throw loadResult.error;
-      }
-
-      const wrapPackage: IWrapPackage = loadResult.value;
-      const wrapper: IWrapper = await wrapPackage.createWrapper(new ObjectReferencesExampleHost());
-
-      const { testInvokeExternalStaticMethod } = ObjectReferencesExample.from(wrapper);
+      const { testInvokeExternalStaticMethod } = WrapModule.import(
+        new WrapperWrapInstance(
+          dtInstance, 
+          new InternalWrapInstance()
+        )
+      );
 
       const result = await testInvokeExternalStaticMethod("test");
 
@@ -114,18 +98,14 @@ describe("Object references", () => {
     });
 
     it("can invoke an external instance method", async () => {
-      const loader = new FileSystemLoader();
-      
-      const loadResult = await loader.load(wrapperPath);
+      const dtInstance = await new DtLoader().load(wrapperPath);
 
-      if (!loadResult.ok) {
-        throw loadResult.error;
-      }
-
-      const wrapPackage: IWrapPackage = loadResult.value;
-      const wrapper: IWrapper = await wrapPackage.createWrapper(new ObjectReferencesExampleHost());
-
-      const { testInvokeExternalInstanceMethod } = ObjectReferencesExample.from(wrapper);
+      const { testInvokeExternalInstanceMethod } = WrapModule.import(
+        new WrapperWrapInstance(
+          dtInstance, 
+          new InternalWrapInstance()
+        )
+      );
 
       const result = await testInvokeExternalInstanceMethod("test");
 
@@ -134,183 +114,183 @@ describe("Object references", () => {
   });
 });
 
-export const testInvokeExternalGlobalFunction = async (arg: string): Promise<string> => {
-  return arg + " function";
-};
+// export const testInvokeExternalGlobalFunction = async (arg: string): Promise<string> => {
+//   return arg + " function";
+// };
 
-export class TestExternalClass {
-  constructor(arg: string) {
-    console.log("Created external TestExternalClass with arg: " + arg);
-  }
+// export class TestExternalClass {
+//   constructor(arg: string) {
+//     console.log("Created external TestExternalClass with arg: " + arg);
+//   }
 
-  async testInstanceMethod(arg: string): Promise<string> {
-    return arg + " instance";
-  }
-  static async testStaticMethod(arg: string): Promise<string> {
-    return arg + " static";
-  }
-}
+//   async testInstanceMethod(arg: string): Promise<string> {
+//     return arg + " instance";
+//   }
+//   static async testStaticMethod(arg: string): Promise<string> {
+//     return arg + " static";
+//   }
+// }
 
-export enum HostGlobalFunction {
-  TestInvokeExternalGlobalFunction = 0
-}
+// export enum HostGlobalFunction {
+//   TestInvokeExternalGlobalFunction = 0
+// }
 
-export enum ClassList {
-  TestExternalClass = 0,
-}
+// export enum ClassList {
+//   TestExternalClass = 0,
+// }
 
-export enum TestExternalClassMethod {
-  Constructor = 0,
-  TestInstanceMethod = 1,
-  TestStaticMethod = 2,
-}
+// export enum TestExternalClassMethod {
+//   Constructor = 0,
+//   TestInstanceMethod = 1,
+//   TestStaticMethod = 2,
+// }
 
-export class Args {
-  constructor(
-    public __objectReferencePtr: number,
-    public args: MethodArgs
-  ) {}
-}
+// export class Args {
+//   constructor(
+//     public __objectReferencePtr: number,
+//     public args: MethodArgs
+//   ) {}
+// }
 
-export class MethodArgs {
-  constructor(
-    public arg: string
-  ) {}
-}
+// export class MethodArgs {
+//   constructor(
+//     public arg: string
+//   ) {}
+// }
 
-export const deserializeType = (buffer: Uint8Array): Args => {
-  return JSON.parse(new TextDecoder().decode(buffer)) as Args;
-};
+// export const deserializeType = (buffer: Uint8Array): Args => {
+//   return JSON.parse(new TextDecoder().decode(buffer)) as Args;
+// };
 
-export function serializeResult(result: string): Uint8Array {
-  return new TextEncoder().encode(JSON.stringify(result));
-};
+// export function serializeResult(result: string): Uint8Array {
+//   return new TextEncoder().encode(JSON.stringify(result));
+// };
 
-export function serializeTestExternalClassResult(result: number): Uint8Array {
-  return new TextEncoder().encode(JSON.stringify(result));
-};
+// export function serializeTestExternalClassResult(result: number): Uint8Array {
+//   return new TextEncoder().encode(JSON.stringify(result));
+// };
 
-export const deserializeSimpleType = (buffer: Uint8Array): MethodArgs => {
-  return JSON.parse(new TextDecoder().decode(buffer)) as MethodArgs;
-};
+// export const deserializeSimpleType = (buffer: Uint8Array): MethodArgs => {
+//   return JSON.parse(new TextDecoder().decode(buffer)) as MethodArgs;
+// };
 
-export const invokeConstructor = async (buffer: Uint8Array, trackedReferenceMap: Map<number, unknown>): Promise<Uint8Array> => {
-  console.log("invokeConstructor");
-  const args = deserializeSimpleType(buffer);
+// export const invokeConstructor = async (buffer: Uint8Array, trackedReferenceMap: Map<number, unknown>): Promise<Uint8Array> => {
+//   console.log("invokeConstructor");
+//   const args = deserializeSimpleType(buffer);
 
-  const result = new TestExternalClass(args.arg);
+//   const result = new TestExternalClass(args.arg);
 
-  trackedReferenceMap.set(1, result);
+//   trackedReferenceMap.set(1, result);
 
-  return serializeTestExternalClassResult(1);
-};
+//   return serializeTestExternalClassResult(1);
+// };
 
-export const invokeTestInstanceMethod = async (buffer: Uint8Array, trackedReferenceMap: Map<number, unknown>): Promise<Uint8Array> => {
-  const args = deserializeType(buffer);
+// export const invokeTestInstanceMethod = async (buffer: Uint8Array, trackedReferenceMap: Map<number, unknown>): Promise<Uint8Array> => {
+//   const args = deserializeType(buffer);
 
-  const object = trackedReferenceMap.get(args.__objectReferencePtr) as TestExternalClass;
-  const result = await object.testInstanceMethod(args.args.arg);
+//   const object = trackedReferenceMap.get(args.__objectReferencePtr) as TestExternalClass;
+//   const result = await object.testInstanceMethod(args.args.arg);
 
-  return serializeResult(result);
-};
+//   return serializeResult(result);
+// };
 
-// TODO
-export const invokeTestStaticMethod = async (buffer: Uint8Array, trackedReferenceMap: Map<number, unknown>): Promise<Uint8Array> => {
-  const args = deserializeSimpleType(buffer);
+// // TODO
+// export const invokeTestStaticMethod = async (buffer: Uint8Array, trackedReferenceMap: Map<number, unknown>): Promise<Uint8Array> => {
+//   const args = deserializeSimpleType(buffer);
 
-  const result = await TestExternalClass.testStaticMethod(args.arg);
+//   const result = await TestExternalClass.testStaticMethod(args.arg);
 
-  return serializeResult(result);
-};
+//   return serializeResult(result);
+// };
 
-export const invokeTestInvokeExternalGlobalFunction = async (buffer: Uint8Array, trackedReferenceMap: Map<number, unknown>): Promise<Uint8Array> => {
-  const args = deserializeSimpleType(buffer);
+// export const invokeTestInvokeExternalGlobalFunction = async (buffer: Uint8Array, trackedReferenceMap: Map<number, unknown>): Promise<Uint8Array> => {
+//   const args = deserializeSimpleType(buffer);
 
-  const result = await testInvokeExternalGlobalFunction(args.arg);
+//   const result = await testInvokeExternalGlobalFunction(args.arg);
 
-  return serializeResult(result);
-};
+//   return serializeResult(result);
+// };
 
-export const invokeTestExternalClassMethod = (method: TestExternalClassMethod, buffer: Uint8Array, trackedReferenceMap: Map<number, unknown>): Promise<Uint8Array> => {
-  switch(method) {
-    case TestExternalClassMethod.Constructor: 
-      return invokeConstructor(buffer, trackedReferenceMap);
-    case TestExternalClassMethod.TestInstanceMethod: 
-      return invokeTestInstanceMethod(buffer, trackedReferenceMap);
-    case TestExternalClassMethod.TestStaticMethod: 
-      return invokeTestStaticMethod(buffer, trackedReferenceMap);
-    default:
-      throw new Error(`Unknown method: ${method}`);
-  }
-};
+// export const invokeTestExternalClassMethod = (method: TestExternalClassMethod, buffer: Uint8Array, trackedReferenceMap: Map<number, unknown>): Promise<Uint8Array> => {
+//   switch(method) {
+//     case TestExternalClassMethod.Constructor: 
+//       return invokeConstructor(buffer, trackedReferenceMap);
+//     case TestExternalClassMethod.TestInstanceMethod: 
+//       return invokeTestInstanceMethod(buffer, trackedReferenceMap);
+//     case TestExternalClassMethod.TestStaticMethod: 
+//       return invokeTestStaticMethod(buffer, trackedReferenceMap);
+//     default:
+//       throw new Error(`Unknown method: ${method}`);
+//   }
+// };
 
-export class ObjectReferencesExampleHost implements IHost {
-  async invokeGlobalFunction(buffer: Uint8Array, trackedReferenceMap: Map<number, unknown>): Promise<Uint8Array> {
-    console.log("ObjectReferencesExampleHost invokeGlobalFunction " + buffer);
-    const functionId = bufferToU32(buffer);
-    const dataBuffer = buffer.slice(4);
-    console.log("ObjectReferencesExampleHost functionId " + functionId);
+// export class ObjectReferencesExampleHost implements IHost {
+//   async invokeGlobalFunction(buffer: Uint8Array, trackedReferenceMap: Map<number, unknown>): Promise<Uint8Array> {
+//     console.log("ObjectReferencesExampleHost invokeGlobalFunction " + buffer);
+//     const functionId = bufferToU32(buffer);
+//     const dataBuffer = buffer.slice(4);
+//     console.log("ObjectReferencesExampleHost functionId " + functionId);
 
-    switch(functionId) {
-      case HostGlobalFunction.TestInvokeExternalGlobalFunction: 
-        return await invokeTestInvokeExternalGlobalFunction(dataBuffer, trackedReferenceMap);
-      default:
-        throw new Error(`Unknown function: ${functionId}`);
-    }
-  }
+//     switch(functionId) {
+//       case HostGlobalFunction.TestInvokeExternalGlobalFunction: 
+//         return await invokeTestInvokeExternalGlobalFunction(dataBuffer, trackedReferenceMap);
+//       default:
+//         throw new Error(`Unknown function: ${functionId}`);
+//     }
+//   }
  
-  async invokeClassMethod(buffer: Uint8Array, trackedReferenceMap: Map<number, unknown>): Promise<Uint8Array> {
-    const classId = bufferToU32(buffer);
-    const method = bufferToU32(buffer, 4);
-    const dataBuffer = buffer.slice(8);
+//   async invokeClassMethod(buffer: Uint8Array, trackedReferenceMap: Map<number, unknown>): Promise<Uint8Array> {
+//     const classId = bufferToU32(buffer);
+//     const method = bufferToU32(buffer, 4);
+//     const dataBuffer = buffer.slice(8);
 
-    switch(classId) {
-      case ClassList.TestExternalClass: 
-        return await invokeTestExternalClassMethod(method, dataBuffer, trackedReferenceMap);
-      default:
-        throw new Error(`Unknown class: ${classId}`);
-    }
-  }
-}
+//     switch(classId) {
+//       case ClassList.TestExternalClass: 
+//         return await invokeTestExternalClassMethod(method, dataBuffer, trackedReferenceMap);
+//       default:
+//         throw new Error(`Unknown class: ${classId}`);
+//     }
+//   }
+// }
 
-export class InternalWrapInstance extends WrapInstance {
-  constructor() {
-    super();
-  }
+// export class InternalWrapInstance extends WrapInstance {
+//   constructor() {
+//     super();
+//   }
 
-  invokeResource(resource: u32, buffer: ArrayBuffer): ArrayBuffer {
-    switch(resource) {
-      case InternalResource.InvokeGlobalFunction: 
-        return this.invokeGlobalFunction(buffer);
-      case InternalResource.InvokeClassMethod: 
-        return this.invokeClassMethod(buffer);
-      default: 
-        throw new Error("Unknown function");
-    }
-  }
+//   invokeResource(resource: u32, buffer: ArrayBuffer): ArrayBuffer {
+//     switch(resource) {
+//       case InternalResource.InvokeGlobalFunction: 
+//         return this.invokeGlobalFunction(buffer);
+//       case InternalResource.InvokeClassMethod: 
+//         return this.invokeClassMethod(buffer);
+//       default: 
+//         throw new Error("Unknown function");
+//     }
+//   }
 
-  private async invokeGlobalFunction(buffer: Uint8Array): Promise<Uint8Array> {
-    const functionId = bufferToU32(buffer);
-    const dataBuffer = buffer.slice(4);
+//   private async invokeGlobalFunction(buffer: Uint8Array): Promise<Uint8Array> {
+//     const functionId = bufferToU32(buffer);
+//     const dataBuffer = buffer.slice(4);
 
-    switch(functionId) {
-      case HostGlobalFunction.TestInvokeExternalGlobalFunction: 
-        return await invokeTestInvokeExternalGlobalFunction(dataBuffer);
-      default:
-        throw new Error(`Unknown function: ${functionId}`);
-    }
-  }
+//     switch(functionId) {
+//       case HostGlobalFunction.TestInvokeExternalGlobalFunction: 
+//         return await invokeTestInvokeExternalGlobalFunction(dataBuffer);
+//       default:
+//         throw new Error(`Unknown function: ${functionId}`);
+//     }
+//   }
  
-  private async invokeClassMethod(buffer: Uint8Array): Promise<Uint8Array> {
-    const classId = bufferToU32(buffer);
-    const method = bufferToU32(buffer, 4);
-    const dataBuffer = buffer.slice(8);
+//   private async invokeClassMethod(buffer: Uint8Array): Promise<Uint8Array> {
+//     const classId = bufferToU32(buffer);
+//     const method = bufferToU32(buffer, 4);
+//     const dataBuffer = buffer.slice(8);
 
-    switch(classId) {
-      case ClassList.TestExternalClass: 
-        return await invokeTestExternalClassMethod(method, dataBuffer);
-      default:
-        throw new Error(`Unknown class: ${classId}`);
-    }
-  }
-}
+//     switch(classId) {
+//       case ClassList.TestExternalClass: 
+//         return await invokeTestExternalClassMethod(method, dataBuffer);
+//       default:
+//         throw new Error(`Unknown class: ${classId}`);
+//     }
+//   }
+// }

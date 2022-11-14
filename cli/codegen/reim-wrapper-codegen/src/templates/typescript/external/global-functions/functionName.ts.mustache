@@ -95,12 +95,12 @@ export class {{namePascalCase}}ArgsWrapped {
   static mapToSerializable(value: {{namePascalCase}}Args): {{namePascalCase}}ArgsWrapped {
     return new {{namePascalCase}}ArgsWrapped(
       {{#args}}
-      {{#model.isClass}}
+      {{#model.typeInfo.isClass}}
       {{model.typeInfo.nativeTypeNameWrapped}}.mapToSerializable(value.{{model.name}}),
-      {{/model.isClass}}
-      {{^model.isClass}}
+      {{/model.typeInfo.isClass}}
+      {{^model.typeInfo.isClass}}
       value.{{model.name}},
-      {{/model.isClass}}
+      {{/model.typeInfo.isClass}}
       {{/args}}
     );
   }
