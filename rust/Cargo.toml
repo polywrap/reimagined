@@ -1,2 +1,10 @@
 [workspace]
-members = ["reim_cli", "reim_codegen", "wrap_schema/tree_sitter_wrap", "wrap_schema/reim_schema"]
+members = [
+    "reim_dt",
+    "reim_dt_wasm",
+    "reim_wrap", 
+    "reim_cli", 
+    "reim_codegen", 
+    "wrap_schema/tree_sitter_wrap", 
+    "wrap_schema/reim_schema"
+]
