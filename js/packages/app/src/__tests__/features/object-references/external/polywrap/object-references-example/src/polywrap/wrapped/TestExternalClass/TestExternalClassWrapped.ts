@@ -1,18 +1,9 @@
-import { IExternalWrapInstance } from "@nerfzael/reim-wrap-js";
-import { WrapManifest } from '../../WrapManifest';
-import { WrapModule } from "../../external/module/WrapModule";
-import { TestExternalClass } from "../../external/classes/TestExternalClass";
+import { IExternalWrapInstance } from "@polywrap/reim-wrap-js";
+import { TestExternalClass } from "../../..";
 
+import { invoke } from './invoke';
 
 const CLASS_NAME = "TestExternalClass";
-
-class InstanceWithExternalReferencePtr {
-  constructor(
-    public externalReferencePtr: number,
-    public instance: TestExternalClass
-  ) {
-  }
-}
 
 export class TestExternalClassWrapped {
   constructor(
@@ -20,24 +11,32 @@ export class TestExternalClassWrapped {
   ) {
   }
 
-  static referenceMap: Map<u32, InstanceWithExternalReferencePtr> = new Map<u32, InstanceWithExternalReferencePtr>();
+  static referenceMap: Map<number, TestExternalClass> = new Map<number, TestExternalClass>();
+  static referenceCount: number = 0;
 
   static dereference(referencePtr: number): TestExternalClass {
     const object = TestExternalClassWrapped.referenceMap.get(referencePtr);
 
     if (!object) {
-      throw new Error(`Could not dereference ${CLASS_NAME}(${referencePtr}). Not found`);
+      throw new Error(`Reference TestExternalClass(${referencePtr}) not found on class: ${CLASS_NAME}`);
     }
 
-    return object.instance;
+    return object;
   }
 
-  static deleteReference(referencePtr: number): void {
-    const success = TestExternalClassWrapped.referenceMap.delete(referencePtr);
+  static invokeMethod(buffer: Uint8Array, wrapInstance: IExternalWrapInstance): Promise<Uint8Array> {  
+    return invoke(buffer, wrapInstance);
+  }
+  
+  static mapToSerializable(value: TestExternalClass): TestExternalClassWrapped {
+    const referencePtr = ++TestExternalClassWrapped.referenceCount;
 
-    if (!success) {
-      throw new Error(`Could not delete reference ${CLASS_NAME}(${referencePtr}). Not found`);
-    }
+    TestExternalClassWrapped.referenceMap.set(referencePtr, value);
+  
+    return new TestExternalClassWrapped(
+      referencePtr,
+
+    );
   }
 
   static serialize(value: TestExternalClass): Uint8Array {
@@ -48,43 +47,13 @@ export class TestExternalClassWrapped {
     );
   }
 
-  static mapToSerializable(value: TestExternalClass): TestExternalClassWrapped {
-    const referencePtr = changetype<u32>(value);
-    const existingReference = this.referenceMap.get(referencePtr);
-
-    if (!existingReference) {
-      throw new Error(`Could not find external reference of ${CLASS_NAME}(${referencePtr}).`);
-    }
-  
-    return new TestExternalClassWrapped(
-      existingReference.externalReferencePtr,
-
-    );
-  }
-
-  static deserialize(buffer: Uint8Array, wrapInstance: IExternalWrapInstance): TestExternalClass {
+  static deserialize(buffer: Uint8Array): TestExternalClass {
     const object = JSON.parse(new TextDecoder().decode(buffer));
   
-    return TestExternalClassWrapped.mapFromSerializable(object, wrapInstance);
+    return TestExternalClassWrapped.mapFromSerializable(object);
   }
 
-  static mapFromSerializable(value: TestExternalClassWrapped, wrapInstance: IExternalWrapInstance): TestExternalClass {
-    const object = new TestExternalClass(
-      value.__referencePtr,
-      wrapInstance,
-
-    );
-
-    const referencePtr = changetype<u32>(value);
-  
-    this.referenceMap.set(
-      referencePtr, 
-      new InstanceWithExternalReferencePtr(
-        value.__referencePtr, 
-        object
-      )
-    );  
-
-    return object;
+  static mapFromSerializable(value: TestExternalClassWrapped): TestExternalClass {
+    return TestExternalClassWrapped.dereference(value.__referencePtr);
   }
 }

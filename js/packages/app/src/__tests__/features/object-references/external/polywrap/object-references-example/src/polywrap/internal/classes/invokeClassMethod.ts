@@ -1,10 +1,10 @@
-import { bufferToU32, IExternalWrapInstance } from "@nerfzael/reim-wrap-js";
+import { bufferToU32, IExternalWrapInstance } from "@polywrap/reim-wrap-js";
 import { WrapManifest } from '../../WrapManifest';
 
 import { TestExternalClassWrapped } from "../../wrapped";
 
 
-export function invokeClassMethod(buffer: Uint8Array, wrapInstance: IExternalWrapInstance): Uint8Array {
+export function invokeClassMethod(buffer: Uint8Array, wrapInstance: IExternalWrapInstance): Promise<Uint8Array> {
   const classId = bufferToU32(buffer);
   const dataBuffer = buffer.slice(4);
 

@@ -1,4 +1,4 @@
-import { concat, u32ToBuffer, IExternalWrapInstance, BaseTypeSerialization } from '@nerfzael/reim-wrap-js';
+import { concat, u32ToBuffer, IExternalWrapInstance, BaseTypeSerialization } from '@polywrap/reim-wrap-js';
 import { WrapModule } from '../module/WrapModule';
 import { WrapManifest } from '../../WrapManifest';
 import { ExternalResource } from '../../dt/ExternalResource';
@@ -6,7 +6,7 @@ import { ExternalResource } from '../../dt/ExternalResource';
 
 export function testInvokeExternalStaticMethod(
   arg: string,
-): string {
+): Promise<string> {
   return testInvokeExternalStaticMethodFromInstance(
     WrapModule.wrapInstance,
     arg,
@@ -16,7 +16,7 @@ export function testInvokeExternalStaticMethod(
 export const create = (instance: IExternalWrapInstance) => {
   return (
     arg: string,
-  ): string => {
+  ): Promise<string> => {
     return testInvokeExternalStaticMethodFromInstance(
       instance, 
       arg,
@@ -24,10 +24,10 @@ export const create = (instance: IExternalWrapInstance) => {
   };
 };
 
-export const testInvokeExternalStaticMethodFromInstance = (
+export const testInvokeExternalStaticMethodFromInstance = async (
   instance: IExternalWrapInstance | null, 
   arg: string,
-): string => {
+): Promise<string> => {
   if (instance == null) {
     throw new Error("connect() or import() must be called before using this module");
   }
@@ -41,13 +41,12 @@ export const testInvokeExternalStaticMethodFromInstance = (
     TestInvokeExternalStaticMethodArgsWrapped.serialize(args),
   ]);
 
-  const result = instance.invokeResource(ExternalResource.InvokeGlobalFunction, buffer);
+  const result = await instance.invokeResource(ExternalResource.InvokeGlobalFunction, buffer);
 
   
   return BaseTypeSerialization.deserialize<string>(result);
 }
 
-@serializable
 export class TestInvokeExternalStaticMethodArgsWrapped {
   constructor(
     public arg: string,

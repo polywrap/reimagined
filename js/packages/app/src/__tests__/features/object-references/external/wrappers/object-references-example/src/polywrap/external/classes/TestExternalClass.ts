@@ -23,6 +23,7 @@ export class TestExternalClassImport {
     );
 
     const buffer = concat([
+      u32ToBuffer(WrapManifest.External.Class.TestExternalClass),
       u32ToBuffer(WrapManifest.External.Classes.TestExternalClassMethod.Create),
       CreateArgsWrapped.serialize(args),
     ]);
@@ -41,6 +42,7 @@ export class TestExternalClassImport {
     );
 
     const buffer = concat([
+      u32ToBuffer(WrapManifest.External.Class.TestExternalClass),
       u32ToBuffer(WrapManifest.External.Classes.TestExternalClassMethod.TestStaticMethod),
       TestStaticMethodArgsWrapped.serialize(args),
     ]);
@@ -86,6 +88,7 @@ export class TestExternalClass {
     );
 
     const buffer = concat([
+      u32ToBuffer(WrapManifest.External.Class.TestExternalClass),
       u32ToBuffer(WrapManifest.External.Classes.TestExternalClassMethod.TestInstanceMethod),
       u32ToBuffer(this.__referencePtr),
       TestInstanceMethodArgsWrapped.serialize(args),

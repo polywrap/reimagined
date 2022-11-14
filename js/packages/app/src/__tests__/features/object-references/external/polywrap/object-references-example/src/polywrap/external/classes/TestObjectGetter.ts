@@ -1,4 +1,4 @@
-import { IExternalWrapInstance, BaseTypeSerialization, u32ToBuffer, concat } from "@nerfzael/reim-wrap-js";
+import { IExternalWrapInstance, BaseTypeSerialization, u32ToBuffer, concat } from "@polywrap/reim-wrap-js";
 import { WrapManifest } from '../../WrapManifest';
 import { ExternalResource } from "../../dt/ExternalResource";
 import { WrapModule } from "../module/WrapModule";
@@ -17,38 +17,40 @@ export class TestObjectGetterImport {
   constructor(private readonly wrapInstance: IExternalWrapInstance) {}
 
   
-  create(
+  async create(
     arg: string,
-  ): TestObjectGetter {
+  ): Promise<TestObjectGetter> {
     const args = new CreateArgs( 
       arg,
        
     );
 
     const buffer = concat([
+      u32ToBuffer(WrapManifest.External.Class.TestObjectGetter),
       u32ToBuffer(WrapManifest.External.Classes.TestObjectGetterMethod.Create),
       CreateArgsWrapped.serialize(args),
     ]);
 
-    const result = this.wrapInstance.invokeResource(ExternalResource.InvokeClassMethod, buffer);
+    const result = await this.wrapInstance.invokeResource(ExternalResource.InvokeClassMethod, buffer);
 
     return TestObjectGetterWrapped.deserialize(result, this.wrapInstance);
       }
         
-  testStaticReceiveReference(
+  async testStaticReceiveReference(
     arg: TestExternalClass,
-  ): string {
+  ): Promise<string> {
     const args = new TestStaticReceiveReferenceArgs( 
       arg,
        
     );
 
     const buffer = concat([
+      u32ToBuffer(WrapManifest.External.Class.TestObjectGetter),
       u32ToBuffer(WrapManifest.External.Classes.TestObjectGetterMethod.TestStaticReceiveReference),
       TestStaticReceiveReferenceArgsWrapped.serialize(args),
     ]);
 
-    const result = this.wrapInstance.invokeResource(ExternalResource.InvokeClassMethod, buffer);
+    const result = await this.wrapInstance.invokeResource(ExternalResource.InvokeClassMethod, buffer);
 
     
     return BaseTypeSerialization.deserialize<string>(result);
@@ -65,7 +67,7 @@ export class TestObjectGetter {
   
   static create(
     arg: string,
-  ): TestObjectGetter {
+  ): Promise<TestObjectGetter> {
     if (WrapModule.wrapInstance == null) {
       throw new Error("connect() or import() must be called before using this module");
     }
@@ -76,9 +78,9 @@ export class TestObjectGetter {
       );
   }
         
-  testInstanceReceiveReference(
+  async testInstanceReceiveReference(
     arg: TestExternalClass,
-  ): string {
+  ): Promise<string> {
     if (this.__wrapInstance == null) {
       throw new Error("connect() or import() must be called before using this module");
     }
@@ -89,12 +91,13 @@ export class TestObjectGetter {
     );
 
     const buffer = concat([
+      u32ToBuffer(WrapManifest.External.Class.TestObjectGetter),
       u32ToBuffer(WrapManifest.External.Classes.TestObjectGetterMethod.TestInstanceReceiveReference),
       u32ToBuffer(this.__referencePtr),
       TestInstanceReceiveReferenceArgsWrapped.serialize(args),
     ]);
 
-    const result = this.__wrapInstance.invokeResource(ExternalResource.InvokeClassMethod, buffer);
+    const result = await this.__wrapInstance.invokeResource(ExternalResource.InvokeClassMethod, buffer);
 
     
     return BaseTypeSerialization.deserialize<string>(result);
@@ -102,7 +105,7 @@ export class TestObjectGetter {
     
   static testStaticReceiveReference(
     arg: TestExternalClass,
-  ): string {
+  ): Promise<string> {
     if (WrapModule.wrapInstance == null) {
       throw new Error("connect() or import() must be called before using this module");
     }
@@ -123,7 +126,6 @@ class CreateArgs {
   }
 }
 
-@serializable
 class CreateArgsWrapped {
   constructor(
     public arg: string,
@@ -154,7 +156,6 @@ class TestInstanceReceiveReferenceArgs {
   }
 }
 
-@serializable
 class TestInstanceReceiveReferenceArgsWrapped {
   constructor(
     public arg: TestExternalClassWrapped,
@@ -185,7 +186,6 @@ class TestStaticReceiveReferenceArgs {
   }
 }
 
-@serializable
 class TestStaticReceiveReferenceArgsWrapped {
   constructor(
     public arg: TestExternalClassWrapped,

@@ -17,6 +17,7 @@ export class TestObjectGetterWrapped {
   }
 
   static referenceMap: Map<u32, TestObjectGetter> = new Map<u32, TestObjectGetter>();
+  static referenceCount: u32 = 0;
 
   static dereference(referencePtr: u32): TestObjectGetter {
     const object = TestObjectGetterWrapped.referenceMap.get(referencePtr);
@@ -33,8 +34,8 @@ export class TestObjectGetterWrapped {
   }
   
   static mapToSerializable(value: TestObjectGetter): TestObjectGetterWrapped {
-    const referencePtr = changetype<u32>(value);
-    this.referenceMap.set(referencePtr, value);
+    const referencePtr = ++TestObjectGetterWrapped.referenceCount;
+    TestObjectGetterWrapped.referenceMap.set(referencePtr, value);
   
     return new TestObjectGetterWrapped(
       referencePtr,
@@ -50,18 +51,13 @@ export class TestObjectGetterWrapped {
     );
   }
 
-  static deserialize(buffer: ArrayBuffer): TestObjectGetter {
+  static deserialize(buffer: ArrayBuffer, wrapInstance: IExternalWrapInstance): TestObjectGetter {
     const object = parse<TestObjectGetterWrapped>(String.UTF8.decode(buffer));
   
-    return TestObjectGetterWrapped.mapFromSerializable(object);
+    return TestObjectGetterWrapped.mapFromSerializable(object, wrapInstance);
   }
 
-  static mapFromSerializable(value: TestObjectGetterWrapped): TestObjectGetter {
-    const object = new TestObjectGetter(
-      value.__referencePtr,
-
-    );
-
-    return object;
+  static mapFromSerializable(value: TestObjectGetterWrapped, wrapInstance: IExternalWrapInstance): TestObjectGetter {
+    return TestExternalClassWrapped.dereference(value.__referencePtr);
   }
 }

@@ -1,4 +1,4 @@
-import { concat, u32ToBuffer, IExternalWrapInstance, BaseTypeSerialization } from '@nerfzael/reim-wrap-js';
+import { concat, u32ToBuffer, IExternalWrapInstance, BaseTypeSerialization } from '@polywrap/reim-wrap-js';
 import { WrapModule } from '../module/WrapModule';
 import { WrapManifest } from '../../WrapManifest';
 import { ExternalResource } from '../../dt/ExternalResource';
@@ -10,7 +10,7 @@ import { TestExternalClass } from "../../..";
 
 export function testReceiveReference(
   arg: TestExternalClass,
-): string {
+): Promise<string> {
   return testReceiveReferenceFromInstance(
     WrapModule.wrapInstance,
     arg,
@@ -20,7 +20,7 @@ export function testReceiveReference(
 export const create = (instance: IExternalWrapInstance) => {
   return (
     arg: TestExternalClass,
-  ): string => {
+  ): Promise<string> => {
     return testReceiveReferenceFromInstance(
       instance, 
       arg,
@@ -28,10 +28,10 @@ export const create = (instance: IExternalWrapInstance) => {
   };
 };
 
-export const testReceiveReferenceFromInstance = (
+export const testReceiveReferenceFromInstance = async (
   instance: IExternalWrapInstance | null, 
   arg: TestExternalClass,
-): string => {
+): Promise<string> => {
   if (instance == null) {
     throw new Error("connect() or import() must be called before using this module");
   }
@@ -45,13 +45,12 @@ export const testReceiveReferenceFromInstance = (
     TestReceiveReferenceArgsWrapped.serialize(args),
   ]);
 
-  const result = instance.invokeResource(ExternalResource.InvokeGlobalFunction, buffer);
+  const result = await instance.invokeResource(ExternalResource.InvokeGlobalFunction, buffer);
 
   
   return BaseTypeSerialization.deserialize<string>(result);
 }
 
-@serializable
 export class TestReceiveReferenceArgsWrapped {
   constructor(
     public arg: TestExternalClassWrapped,
@@ -68,9 +67,9 @@ export class TestReceiveReferenceArgsWrapped {
 
   static mapToSerializable(value: TestReceiveReferenceArgs): TestReceiveReferenceArgsWrapped {
     return new TestReceiveReferenceArgsWrapped(
-            
-      value.arg,
       
+      TestExternalClassWrapped.mapToSerializable(value.arg),
+            
     );
   }
 }

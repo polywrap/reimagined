@@ -1,6 +1,4 @@
-import { IWrapPackage, IWrapper} from "@polywrap/reim-wrap";
 import { WrapperWrapInstance } from "@polywrap/reim-wrap-js";
-import { FileSystemLoader } from "../../../FileSystemLoader";
 import { DtLoader } from "../../../DtLoader";
 import { WrapModule } from "./polywrap/internal-references-example/src/polywrap/external/module/WrapModule";
 import { InternalWrapInstance } from "./polywrap/internal-references-example/src/polywrap/external/module/InternalWrapInstance";

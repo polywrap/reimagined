@@ -1,4 +1,4 @@
-import { bufferToU32, BaseTypeSerialization, IExternalWrapInstance } from "@nerfzael/reim-wrap-js";
+import { bufferToU32, BaseTypeSerialization, IExternalWrapInstance } from "@polywrap/reim-wrap-js";
 import { WrapManifest } from '../../WrapManifest';
 import { 
                   
@@ -11,7 +11,7 @@ import { TestExternalClass } from "../../..";
 
 
 
-export function invoke(buffer: Uint8Array, wrapInstance: IExternalWrapInstance): Uint8Array {
+export function invoke(buffer: Uint8Array, wrapInstance: IExternalWrapInstance): Promise<Uint8Array> {
   const funcId = bufferToU32(buffer);
   const dataBuffer = buffer.slice(4);
 
@@ -25,12 +25,12 @@ export function invoke(buffer: Uint8Array, wrapInstance: IExternalWrapInstance):
   }
 }
 
-const invokeTestExternalGlobalFunctionWrapped = (buffer: Uint8Array, wrapInstance: IExternalWrapInstance): Uint8Array => {
+const invokeTestExternalGlobalFunctionWrapped = async (buffer: Uint8Array, wrapInstance: IExternalWrapInstance): Promise<Uint8Array> => {
   const argsBuffer = buffer;
 
   const args = TestExternalGlobalFunctionArgsWrapped.deserialize(argsBuffer, wrapInstance);
 
-  const result = testExternalGlobalFunction(
+  const result = await testExternalGlobalFunction(
     args.arg,
   );
 

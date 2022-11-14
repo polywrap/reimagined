@@ -1,4 +1,4 @@
-import { bufferToU32, BaseTypeSerialization, IExternalWrapInstance } from "@nerfzael/reim-wrap-js";
+import { bufferToU32, BaseTypeSerialization, IExternalWrapInstance } from "@polywrap/reim-wrap-js";
 import { WrapManifest } from '../../WrapManifest';
 import { TestObjectGetterWrapped } from "..";
 import { TestObjectGetter } from "../../external/classes";
@@ -9,7 +9,7 @@ import { TestExternalClass } from "../../..";
 
 
 
-export function invoke(buffer: Uint8Array, wrapInstance: IExternalWrapInstance): Uint8Array {
+export function invoke(buffer: Uint8Array, wrapInstance: IExternalWrapInstance): Promise<Uint8Array> {
   const funcId = bufferToU32(buffer);
   const dataBuffer = buffer.slice(4);
 
@@ -25,10 +25,10 @@ export function invoke(buffer: Uint8Array, wrapInstance: IExternalWrapInstance):
   }
 }
 
-const invokeCreateWrapped = (buffer: Uint8Array, wrapInstance: IExternalWrapInstance): Uint8Array => {
+const invokeCreateWrapped = async (buffer: Uint8Array, wrapInstance: IExternalWrapInstance): Promise<Uint8Array> => {
   const args = CreateArgsWrapped.deserialize(buffer, wrapInstance);
 
-  const result = TestObjectGetter.create(
+  const result = await TestObjectGetter.create(
     args.arg,
   );
   
@@ -58,7 +58,7 @@ class CreateArgsWrapped {
     );
   }  
 }
-const invokeTestInstanceReceiveReferenceWrapped = (buffer: Uint8Array, wrapInstance: IExternalWrapInstance): Uint8Array => {
+const invokeTestInstanceReceiveReferenceWrapped = async (buffer: Uint8Array, wrapInstance: IExternalWrapInstance): Promise<Uint8Array> => {
   
   const referencePtr = bufferToU32(buffer);
   const dataBuffer = buffer.slice(4);
@@ -67,7 +67,7 @@ const invokeTestInstanceReceiveReferenceWrapped = (buffer: Uint8Array, wrapInsta
 
   const object = TestObjectGetterWrapped.dereference(referencePtr);
 
-  const result = object.testInstanceReceiveReference(
+  const result = await object.testInstanceReceiveReference(
     args.arg,
   );
 
@@ -98,10 +98,10 @@ class TestInstanceReceiveReferenceArgsWrapped {
     );
   }  
 }
-const invokeTestStaticReceiveReferenceWrapped = (buffer: Uint8Array, wrapInstance: IExternalWrapInstance): Uint8Array => {
+const invokeTestStaticReceiveReferenceWrapped = async (buffer: Uint8Array, wrapInstance: IExternalWrapInstance): Promise<Uint8Array> => {
   const args = TestStaticReceiveReferenceArgsWrapped.deserialize(buffer, wrapInstance);
 
-  const result = TestObjectGetter.testStaticReceiveReference(
+  const result = await TestObjectGetter.testStaticReceiveReference(
     args.arg,
   );
   

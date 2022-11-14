@@ -1,13 +1,19 @@
-import { IExternalWrapInstance } from "@nerfzael/reim-wrap-js";
-import { TestObjectGetter } from "../../..";
+import { IExternalWrapInstance } from "@polywrap/reim-wrap-js";
+import { WrapManifest } from '../../WrapManifest';
+import { WrapModule } from "../../external/module/WrapModule";
+import { TestObjectGetter } from "../../external/classes/TestObjectGetter";
 import { TestExternalClassWrapped } from "..";
 
-import { TestExternalClass } from "../..";
-
-
-import { invoke } from './invoke';
 
 const CLASS_NAME = "TestObjectGetter";
+
+class InstanceWithExternalReferencePtr {
+  constructor(
+    public externalReferencePtr: number,
+    public instance: TestObjectGetter
+  ) {
+  }
+}
 
 export class TestObjectGetterWrapped {
   constructor(
@@ -15,30 +21,25 @@ export class TestObjectGetterWrapped {
   ) {
   }
 
-  static referenceMap: Map<u32, TestObjectGetter> = new Map<u32, TestObjectGetter>();
+  static referenceMap: Map<TestObjectGetter, InstanceWithExternalReferencePtr> = new Map<TestObjectGetter, InstanceWithExternalReferencePtr>();
+  static referenceCount: number = 0;
 
-  static dereference(referencePtr: number): TestObjectGetter {
+  static dereference(referencePtr: TestObjectGetter): TestObjectGetter {
     const object = TestObjectGetterWrapped.referenceMap.get(referencePtr);
 
     if (!object) {
-      throw new Error(`Reference TestObjectGetter(${referencePtr}) not found on class: ${CLASS_NAME}`);
+      throw new Error(`Could not dereference ${CLASS_NAME}. Not found`);
     }
 
-    return object;
+    return object.instance;
   }
 
-  static invokeMethod(buffer: Uint8Array, wrapInstance: IExternalWrapInstance): Uint8Array {  
-    return invoke(buffer, wrapInstance);
-  }
-  
-  static mapToSerializable(value: TestObjectGetter): TestObjectGetterWrapped {
-    const referencePtr = changetype<u32>(value);
-    this.referenceMap.set(referencePtr, value);
-  
-    return new TestObjectGetterWrapped(
-      referencePtr,
+  static deleteReference(referencePtr: TestObjectGetter): void {
+    const success = TestObjectGetterWrapped.referenceMap.delete(referencePtr);
 
-    );
+    if (!success) {
+      throw new Error(`Could not delete reference ${CLASS_NAME}. Not found`);
+    }
   }
 
   static serialize(value: TestObjectGetter): Uint8Array {
@@ -49,17 +50,42 @@ export class TestObjectGetterWrapped {
     );
   }
 
-  static deserialize(buffer: Uint8Array): TestObjectGetter {
-    const object = JSON.parse(new TextDecoder().decode(buffer));
-  
-    return TestObjectGetterWrapped.mapFromSerializable(object);
-  }
+  static mapToSerializable(value: TestObjectGetter): TestObjectGetterWrapped {
+    const referencePtr = value;
+    const existingReference = TestObjectGetterWrapped.referenceMap.get(referencePtr);
 
-  static mapFromSerializable(value: TestObjectGetterWrapped): TestObjectGetter {
-    const object = new TestObjectGetter(
-      value.__referencePtr,
+    if (!existingReference) {
+      throw new Error(`Could not dereference ${CLASS_NAME}. Not found`);
+    }
+  
+    return new TestObjectGetterWrapped(
+      existingReference.externalReferencePtr,
 
     );
+  }
+
+  static deserialize(buffer: Uint8Array, wrapInstance: IExternalWrapInstance): TestObjectGetter {
+    const object = JSON.parse(new TextDecoder().decode(buffer));
+  
+    return TestObjectGetterWrapped.mapFromSerializable(object, wrapInstance);
+  }
+
+  static mapFromSerializable(value: TestObjectGetterWrapped, wrapInstance: IExternalWrapInstance): TestObjectGetter {
+    const object = new TestObjectGetter(
+      value.__referencePtr,
+      wrapInstance,
+
+    );
+
+    const referencePtr = object;
+  
+    this.referenceMap.set(
+      referencePtr, 
+      new InstanceWithExternalReferencePtr(
+        value.__referencePtr, 
+        object
+      )
+    );  
 
     return object;
   }

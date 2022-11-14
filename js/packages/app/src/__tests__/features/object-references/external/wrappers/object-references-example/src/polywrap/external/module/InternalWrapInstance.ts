@@ -2,7 +2,6 @@ import { IExternalWrapInstance, IInternalWrapInstance } from "@nerfzael/reim-wra
 import { invoke as invokeGlobalFunction } from "../../internal/global-functions/invokeGlobalFunction";
 import { invokeClassMethod } from "../../internal/classes/invokeClassMethod";
 import { InternalResource } from "../../dt/InternalResource";
-import { ExternalResource } from "../../dt/ExternalResource";
 
 export class InternalWrapInstance extends IInternalWrapInstance {
   constructor() {
@@ -11,12 +10,12 @@ export class InternalWrapInstance extends IInternalWrapInstance {
 
   invokeResource(resource: u32, buffer: ArrayBuffer, externalWrapInstance: IExternalWrapInstance): ArrayBuffer {
     switch (resource) {
-      case ExternalResource.InvokeGlobalFunction:
+      case InternalResource.InvokeGlobalFunction:
         return invokeGlobalFunction(buffer, externalWrapInstance);
       case InternalResource.InvokeClassMethod: 
         return invokeClassMethod(buffer, externalWrapInstance);
       default:
-        throw new Error("Unknown resource");
+        throw new Error("Unknown resource: " + resource.toString());
     }
   }
 }
