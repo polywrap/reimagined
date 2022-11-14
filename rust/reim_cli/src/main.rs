@@ -1,6 +1,6 @@
 use std::env;
 
-use reim_wrapper_codegen::*;
+use reim_codegen::*;
 
 fn main() -> Result<(), std::io::Error> {
     let args: Vec<String> = env::args().collect();

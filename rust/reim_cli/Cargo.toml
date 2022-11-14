@@ -4,4 +4,4 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-reim_wrapper_codegen = { path = "../codegen/reim-wrapper-codegen" }
+reim_codegen = { path = "../reim_codegen" }
