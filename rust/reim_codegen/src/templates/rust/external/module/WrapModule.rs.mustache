@@ -1,0 +1,38 @@
+use reim_wrap::{ ExternalWrapModule };
+use ImportBindings;
+
+{{#globalFunctions.list}}
+{{#model.isExternal}}
+use external::global_functions::{{model.name}}::{ create as create{{model.namePascalCase}} };
+{{/model.isExternal}}
+{{/globalFunctions.list}}
+{{#types}}
+{{#model.isExternal}}
+use external::classes::{{model.name}}::{ create as create{{model.name}} };
+{{/model.isExternal}}
+{{/types}}
+
+struct WrapModule {}
+
+impl WrapModule {
+  static wrapInstance: Option<Box<dyn ExternalWrapModule>>;
+
+  pub fn connect(instance: dyn ExternalWrapModule) {
+    WrapModule.wrapInstance = Box::new(instance);
+  }
+
+  pub fn import(instance: dyn ExternalWrapModule) -> ImportBindings {
+    ImportBindings.new(
+      {{#globalFunctions.list}}
+      {{#model.isExternal}}
+      create{{model.namePascalCase}}(instance),
+      {{/model.isExternal}}
+      {{/globalFunctions.list}}
+      {{#types}}
+      {{#model.isExternal}}
+      create{{model.name}}(instance),
+      {{/model.isExternal}}
+      {{/types}}
+    )
+  }
+}

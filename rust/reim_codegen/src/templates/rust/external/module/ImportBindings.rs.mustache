@@ -1,0 +1,63 @@
+{{#types}}
+{{#model.isClass}}
+{{#model.isExternal}}
+use external::classes::{{model.name}}::{ {{model.name}}Import };
+use external::{ {{model.name}} };
+{{/model.isExternal}}
+{{^model.isExternal}}
+use create::{ {{model.name}} };
+{{/model.isExternal}}
+{{/model.isClass}}
+{{#model.isStruct}}
+use create::{ {{model.name}} };
+{{/model.isStruct}}
+{{/types}}
+
+struct ImportBindings {
+    {{#globalFunctions.list}}
+    {{#model.isExternal}}
+    pub {{model.name}}: Fn(
+      {{#model.args}}
+      {{model.typeInfo.nativeTypeName}},
+      {{/model.args}}
+    ) -> {{model.result.nativeTypeName}},
+    {{/model.isExternal}}
+    {{/globalFunctions.list}}
+    {{#types}}
+    {{#model.isExternal}}
+    pub {{model.name}}: {{model.name}}Import,
+    {{/model.isExternal}}
+    {{/types}}
+}
+
+impl ImportBindings {
+    pub fn new(
+        {{#globalFunctions.list}}
+        {{#model.isExternal}}
+        {{model.name}}: (
+        {{#model.args}}
+        {{model.name}}: {{model.typeInfo.nativeTypeName}},
+        {{/model.args}}
+        ) -> {{model.result.nativeTypeName}},
+        {{/model.isExternal}}
+        {{/globalFunctions.list}}
+        {{#types}}
+        {{#model.isExternal}}
+        {{model.name}}: {{model.name}}Import,
+        {{/model.isExternal}}
+        {{/types}}
+    ) -> Self {
+        Self {
+            {{#globalFunctions.list}}
+            {{#model.isExternal}}
+            {{model.name}}: {{model.name}},
+            {{/model.isExternal}}
+            {{/globalFunctions.list}}
+            {{#types}}
+            {{#model.isExternal}}
+            {{model.name}}: {{model.name}},
+            {{/model.isExternal}}
+            {{/types}}
+        }
+    }
+}

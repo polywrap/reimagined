@@ -1,0 +1,138 @@
+use std::{sync::{Arc, Mutex}};
+use reim_wrap::{ ExternalWrapModule };
+use module::{ WrapManifest };
+use external_module::{ WrapModule };
+use external::{ {{name}} };
+{{#relatedTypes}}
+{{#isClass}}
+use wrapped::{ {{nativeTypeNameWrapped}} };
+{{/isClass}}
+{{#isStruct}}
+use create::{ {{nativeTypeName}} };
+{{/isStruct}}
+{{/relatedTypes}}
+
+const CLASS_NAME: str = "{{name}}";
+
+struct InstanceWithExternalReferencePtr {
+    pub external_reference_ptr: u32,
+    pub instance: {{name}}
+}
+
+impl InstanceWithExternalReferencePtr {
+    pub fn new(external_reference_ptr: u32, instance: {{name}}) -> Self {
+        Self {
+            external_reference_ptr,
+            instance,
+        }
+    }
+}
+
+struct {{name}}Wrapped {
+    pub __referencePtr: u32,
+    {{#fields}}
+    pub {{model.name}}: {{model.typeInfo.nativeTypeNameWrapped}},
+    {{/fields}}
+}
+
+
+static reference_map: Arc<Mutex<HashMap<{{name}}, InstanceWithExternalReferencePtr>>> = Arc::new(Mutex::new(HashMap<{{name}}, InstanceWithExternalReferencePtr>::new()));
+
+impl {{name}}Wrapped {
+    pub fn new(
+        __referencePtr: u32,
+        {{#fields}}
+        {{model.name}}: {{model.typeInfo.nativeTypeNameWrapped}},
+        {{/fields}}
+    ) -> Self {
+        Self {
+            __referencePtr,
+            {{#fields}}
+            {{model.name}},
+            {{/fields}}
+        }
+    }
+
+    pub fn dereference(reference_ptr: {{name}}) -> {{name}} {
+        let reference_map = reference_map.lock().unwrap();
+        let object = reference_map.get(reference_ptr);
+
+        if object.is_none() {
+            panic!(format!("Could not dereference {}. Not found", CLASS_NAME));
+        }
+
+        object.instance
+    }
+
+    pub fn delete_reference(reference_ptr: {{name}}) {
+        let reference_map = reference_map.lock().unwrap();
+        let success = reference_map.delete(reference_ptr);
+
+        if success.is_none() {
+        panic!(format!("Could not delete reference for {}. Not found", CLASS_NAME));
+        }
+    }
+
+    pub fn serialize(value: {{name}}) -> Vec<u8> {
+        json!(
+            {{name}}Wrapped.map_from_serializable(value)
+        ).as_bytes()
+    }
+
+    pub fn map_to_serializable(value: {{name}}) -> {{name}}Wrapped {
+        let reference_ptr = value;
+        let reference_map = reference_map.lock().unwrap();
+        let existing_reference = reference_map.get(reference_ptr);
+
+        if existing_reference.is_none() {
+            panic!(format!("Could not dereference {}. Not found", CLASS_NAME));
+        }
+    
+        {{name}}Wrapped.new(
+            existing_reference.external_reference_ptr,
+            {{#fields}}
+            {{#model.typeInfo.isClass}}
+            {{model.typeInfo.nativeTypeNameWrapped}}.map_to_serializable(value.{{model.name}}),
+            {{/model.typeInfo.isClass}}
+            {{^model.typeInfo.isClass}}
+            value.{{model.name}},
+            {{/model.typeInfo.isClass}}
+            {{/fields}}
+        )
+    }
+
+    pub fn deserialize(buffer: &[u8], external_module: &dyn ExternalWrapModule) -> {{name}} {
+        let object = serde_json::from_str(
+            str::from_utf8(buf).expect("Could not convert buffer to string")
+        ).expect("JSON was not well-formatted");
+    
+        {{name}}Wrapped.map_from_serializable(object, external_module, external_module)
+    }
+
+    pub fn map_from_serializable(value: {{name}}Wrapped, external_module: &dyn ExternalWrapModule) -> {{name}} {
+        let object = {{name}}.new(
+            value.__referencePtr,
+            external_module,
+            {{#fields}}
+            {{#model.isClass}}
+            {{model.typeInfo.nativeTypeNameWrapped}}.map_from_serializable(value.{{model.name}}, external_module),
+            {{/model.isClass}}
+            {{^model.isClass}}
+            value.{{model.name}},
+            {{/model.isClass}}
+            {{/fields}}
+        );
+
+        let reference_ptr = object;
+    
+        {{name}}Wrapped.reference_map.set(
+            reference_ptr, 
+            InstanceWithExternalReferencePtr.new (
+                value.__reference_ptr, 
+                object
+            )
+        );  
+
+        object
+    }
+}
