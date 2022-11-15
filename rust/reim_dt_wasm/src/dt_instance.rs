@@ -1,8 +1,6 @@
-use std::future::Future;
-use std::pin::Pin;
-
 use async_trait::async_trait;
 use reim_dt::DtInstance;
+use reim_dt::OnReceiveFn;
 use wasmtime::AsContextMut;
 use wasmtime::Val;
 
@@ -28,7 +26,7 @@ impl DtWasmInstance {
 
 #[async_trait]
 impl DtInstance for DtWasmInstance {
-    async fn send(&mut self, buffer: &[u8], on_receive: Box<dyn Fn(Vec<u8>) -> Pin<Box<dyn Future<Output = Vec<u8>> + Send + Sync>> + Send + Sync>) -> Vec<u8> {
+    async fn send(&mut self, buffer: &[u8], on_receive: OnReceiveFn) -> Vec<u8> {
         let buffer_len = buffer.len() as i32;
 
         let params = &[
@@ -45,7 +43,6 @@ impl DtInstance for DtWasmInstance {
             .call_export("_dt_receive", params, &mut result)
             .await
             .map_err(|e| WrapperError::InvokeError(e.to_string())).unwrap();
-
 
         let len_and_result_ptr = result[0].unwrap_i32();
 

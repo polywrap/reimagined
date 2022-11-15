@@ -1,5 +1,6 @@
 use std::{sync::{Arc, Mutex}, future::Future, pin::Pin};
 
+use reim_dt::OnReceiveFn;
 use wasmtime::{
     AsContextMut, Config, Engine, Extern, Instance, Memory, MemoryType, Module, Store, Val,
 };
@@ -28,7 +29,7 @@ pub struct InvokeState {
 
 pub struct State {
     pub input_buffer: Vec<u8>,
-    pub on_receive: Box<dyn Fn(Vec<u8>) -> Pin<Box<dyn Future<Output = Vec<u8>> + Send + Sync>> + Send + Sync>,
+    pub on_receive: OnReceiveFn,
     pub send_result: Vec<u8>,
 }
 
