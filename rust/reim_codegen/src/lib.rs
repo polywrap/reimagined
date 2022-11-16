@@ -12,6 +12,7 @@ use serde_json::{ to_string_pretty};
 pub enum Language {
     AssemblyScript,
     TypeScript,
+    Rust,
 }
 
 pub enum ModuleType {
@@ -188,13 +189,50 @@ pub fn generate_bindings(input_path: String, output_path: String, language: &Lan
                 global_function_invoke: String::from_utf8_lossy(include_bytes!("templates/typescript/global-function-invoke.ts.mustache")).to_string(),
                 wrap_manifest: String::from_utf8_lossy(include_bytes!("templates/typescript/WrapManifest.ts.mustache")).to_string(),
             }
+        },
+        Language::Rust => {
+            Templates {
+                wrapped: WrappedTemplates {
+                    internal_class: String::from_utf8_lossy(include_bytes!("templates/rust/wrapped/InternalClassWrapped.rs.mustache")).to_string(),
+                    external_class: String::from_utf8_lossy(include_bytes!("templates/rust/wrapped/ExternalClassWrapped.rs.mustache")).to_string(),
+                    index: String::from_utf8_lossy(include_bytes!("templates/rust/wrapped/index.rs.mustache")).to_string(),
+                },
+                internal: InternalTemplates {
+                    global_functions: InternalGlobalFunctionsTemplates {
+                        index: String::from_utf8_lossy(include_bytes!("templates/rust/internal/global-functions/index.rs.mustache")).to_string(),
+                    },
+                    classes: InternalClassesTemplates {
+                        invoke_class_method: String::from_utf8_lossy(include_bytes!("templates/rust/internal/classes/invoke_class_method.rs.mustache")).to_string(),
+                    },
+                },
+                external: ExternalTemplates {
+                    global_functions: ExternalGlobalFunctionsTemplates { 
+                        function_name: String::from_utf8_lossy(include_bytes!("templates/rust/external/global_functions/functionName.rs.mustache")).to_string(),
+                        index: String::from_utf8_lossy(include_bytes!("templates/rust/external/global_functions/index.rs.mustache")).to_string(),
+                    },
+                    classes: ExternalClassesTemplates {
+                        class_name: String::from_utf8_lossy(include_bytes!("templates/rust/external/classes/ClassName.rs.mustache")).to_string(),
+                        index: String::from_utf8_lossy(include_bytes!("templates/rust/external/classes/index.rs.mustache")).to_string(),
+                    },
+                    module: ExternalModuleTemplates {
+                        wrap_module: String::from_utf8_lossy(include_bytes!("templates/rust/external/module/WrapModule.rs.mustache")).to_string(),
+                        import_bindings: String::from_utf8_lossy(include_bytes!("templates/rust/external/module/ImportBindings.rs.mustache")).to_string(),
+                        internal_wrap_instance: String::from_utf8_lossy(include_bytes!("templates/rust/external/module/InternalWrapInstance.rs.mustache")).to_string(),
+                        host_wrap_instance: String::from_utf8_lossy(include_bytes!("templates/rust/external/module/HostWrapInstance.rs.wrapper.mustache")).to_string(),
+                    },
+                    index: String::from_utf8_lossy(include_bytes!("templates/rust/external/index.rs.mustache")).to_string(),
+                },
+                method_invoke: String::from_utf8_lossy(include_bytes!("templates/rust/method_invoke.rs.mustache")).to_string(),
+                global_function_invoke: String::from_utf8_lossy(include_bytes!("templates/rust/global_function_invoke.rs.mustache")).to_string(),
+                wrap_manifest: String::from_utf8_lossy(include_bytes!("templates/rust/WrapManifest.rs.mustache")).to_string(),
+            }
         }
     };
 
-    render_wrapped(&wrapper, output_path.clone(), &templates, &module_type)?;
-    render_internal(&wrapper, output_path.clone(), &templates, &module_type)?;
-    render_external(&wrapper, output_path.clone(), &templates, &module_type)?;
-    render_wrap_manifest(&wrapper, &output_path.clone(), &templates, &module_type)?;
+    render_wrapped(&wrapper, output_path.clone(), &language, &templates, &module_type)?;
+    render_internal(&wrapper, output_path.clone(), &language, &templates, &module_type)?;
+    render_external(&wrapper, output_path.clone(), &language, &templates, &module_type)?;
+    render_wrap_manifest(&wrapper, &output_path.clone(), &language, &templates, &module_type)?;
     
     Ok(())
 }
@@ -289,7 +327,13 @@ struct ExternalClassesTemplates {
     index: String,
 }
 
-fn render_wrapped(wrapper: &WrapperModel, output_path: String, templates: &Templates, module_type: &ModuleType) -> Result<(), std::io::Error> {
+fn render_wrapped(wrapper: &WrapperModel, output_path: String, language: &Language, templates: &Templates, module_type: &ModuleType) -> Result<(), std::io::Error> {
+    let lang_extension = match language {
+        Language::AssemblyScript => "ts",
+        Language::TypeScript => "ts",
+        Language::Rust => "rs",
+    };
+   
     let base_dir_path = output_path + "/polywrap/wrapped";
     fs::create_dir_all(&base_dir_path)?;
 
@@ -305,7 +349,7 @@ fn render_wrapped(wrapper: &WrapperModel, output_path: String, templates: &Templ
         render_template(
             &template_str, 
             &class_type.model, 
-            &format!("{}/{}/{}Wrapped.ts", base_dir_path.clone(), class_type.model.name, class_type.model.name)
+            &format!("{}/{}/{}Wrapped.{}", base_dir_path.clone(), class_type.model.name, class_type.model.name, lang_extension)
         )?;
 
         let methods_model = MethodsModel {
@@ -321,85 +365,103 @@ fn render_wrapped(wrapper: &WrapperModel, output_path: String, templates: &Templ
         render_template(
             &templates.method_invoke, 
             &methods_model, 
-            &format!("{}/{}/invoke.ts", base_dir_path.clone(), class_type.model.name)
+            &format!("{}/{}/invoke.{}", base_dir_path.clone(), class_type.model.name, lang_extension)
         )?;
     }
 
     render_template(
         &templates.wrapped.index, 
         &wrapper, 
-        &format!("{}/index.ts", base_dir_path.clone())
+        &format!("{}/index.{}", base_dir_path.clone(), lang_extension)
     )?;
 
     Ok(())
 }
 
-fn render_internal(wrapper: &WrapperModel, output_path: String, templates: &Templates, module_type: &ModuleType) -> Result<(), std::io::Error> {
-    render_internal_global_functions(wrapper, &output_path, templates, module_type)?;
-    render_internal_classes(wrapper, &output_path, templates, module_type)?;
+fn render_internal(wrapper: &WrapperModel, output_path: String, language: &Language, templates: &Templates, module_type: &ModuleType) -> Result<(), std::io::Error> {
+    render_internal_global_functions(wrapper, &output_path, language, templates, module_type)?;
+    render_internal_classes(wrapper, &output_path, language, templates, module_type)?;
     Ok(())
 }
 
-fn render_internal_global_functions(wrapper: &WrapperModel, output_path: &str, templates: &Templates, module_type: &ModuleType) -> Result<(), std::io::Error> {
+fn render_internal_global_functions(wrapper: &WrapperModel, output_path: &str, language: &Language, templates: &Templates, module_type: &ModuleType) -> Result<(), std::io::Error> {
+    let lang_extension = match language {
+        Language::AssemblyScript => "ts",
+        Language::TypeScript => "ts",
+        Language::Rust => "rs",
+    };
+   
     let base_dir_path = output_path.to_string() + "/polywrap/internal/global-functions";
     fs::create_dir_all(&base_dir_path)?;
 
     render_template(
         &templates.global_function_invoke, 
         &wrapper.global_functions, 
-        &format!("{}/invokeGlobalFunction.ts", base_dir_path.clone())
+        &format!("{}/invokeGlobalFunction.{}", base_dir_path.clone(), lang_extension)
     )?;
     
     render_template(
         &templates.internal.global_functions.index, 
         &wrapper, 
-        &format!("{}/index.ts", base_dir_path.clone())
+        &format!("{}/index.{}", base_dir_path.clone(), lang_extension)
     )?;
     
     Ok(())
 }
 
-fn render_internal_classes(wrapper: &WrapperModel, output_path: &str, templates: &Templates, module_type: &ModuleType) -> Result<(), std::io::Error> {
+fn render_internal_classes(wrapper: &WrapperModel, output_path: &str, language: &Language, templates: &Templates, module_type: &ModuleType) -> Result<(), std::io::Error> {
+    let lang_extension = match language {
+        Language::AssemblyScript => "ts",
+        Language::TypeScript => "ts",
+        Language::Rust => "rs",
+    };
+    
     let base_dir_path = output_path.to_string() + "/polywrap/internal/classes";
     fs::create_dir_all(&base_dir_path)?;
 
     render_template(
         &templates.internal.classes.invoke_class_method, 
         &wrapper, 
-        &format!("{}/invokeClassMethod.ts", base_dir_path.clone())
+        &format!("{}/invokeClassMethod.{}", base_dir_path.clone(), lang_extension)
     )?;
 
     Ok(())
 }
 
-fn render_external(wrapper: &WrapperModel, output_path: String, templates: &Templates, module_type: &ModuleType) -> Result<(), std::io::Error> {
-    render_module(wrapper, &output_path, templates, module_type)?;
-    render_external_global_functions(wrapper, &output_path, templates, module_type)?;
-    render_external_classes(wrapper, &output_path, templates, module_type)?;
-    render_external_index(wrapper, &output_path, templates, module_type)?;
+fn render_external(wrapper: &WrapperModel, output_path: String, language: &Language, templates: &Templates, module_type: &ModuleType) -> Result<(), std::io::Error> {
+    render_module(wrapper, &output_path, language, templates, module_type)?;
+    render_external_global_functions(wrapper, &output_path, language, templates, module_type)?;
+    render_external_classes(wrapper, &output_path, language, templates, module_type)?;
+    render_external_index(wrapper, &output_path, language, templates, module_type)?;
     Ok(())
 }
 
-fn render_module(wrapper: &WrapperModel, output_path: &str, templates: &Templates, module_type: &ModuleType) -> Result<(), std::io::Error> {
+fn render_module(wrapper: &WrapperModel, output_path: &str, language: &Language, templates: &Templates, module_type: &ModuleType) -> Result<(), std::io::Error> {
+    let lang_extension = match language {
+        Language::AssemblyScript => "ts",
+        Language::TypeScript => "ts",
+        Language::Rust => "rs",
+    };
+    
     let base_dir_path = output_path.to_string() + "/polywrap/external/module";
     fs::create_dir_all(&base_dir_path)?;
 
     render_template(
         &templates.external.module.wrap_module, 
         &wrapper, 
-        &format!("{}/WrapModule.ts", base_dir_path.clone())
+        &format!("{}/WrapModule.{}", base_dir_path.clone(), lang_extension)
     )?;
 
     render_template(
         &templates.external.module.import_bindings, 
         &wrapper, 
-        &format!("{}/ImportBindings.ts", base_dir_path.clone())
+        &format!("{}/ImportBindings.{}", base_dir_path.clone(), lang_extension)
     )?;
 
     render_template(
         &templates.external.module.internal_wrap_instance, 
         &wrapper, 
-        &format!("{}/InternalWrapInstance.ts", base_dir_path.clone())
+        &format!("{}/InternalWrapInstance.{}", base_dir_path.clone(), lang_extension)
     )?;
 
     match module_type {
@@ -407,7 +469,7 @@ fn render_module(wrapper: &WrapperModel, output_path: &str, templates: &Template
             render_template(
                 &templates.external.module.host_wrap_instance, 
                 &wrapper, 
-                &format!("{}/HostWrapInstance.ts", base_dir_path.clone())
+                &format!("{}/HostWrapInstance.{}", base_dir_path.clone(), lang_extension)
             )?;
         },
         ModuleType::Host => {}
@@ -416,7 +478,13 @@ fn render_module(wrapper: &WrapperModel, output_path: &str, templates: &Template
     Ok(())
 }
 
-fn render_external_global_functions(wrapper: &WrapperModel, output_path: &str, templates: &Templates, module_type: &ModuleType) -> Result<(), std::io::Error> {
+fn render_external_global_functions(wrapper: &WrapperModel, output_path: &str, language: &Language, templates: &Templates, module_type: &ModuleType) -> Result<(), std::io::Error> {
+    let lang_extension = match language {
+        Language::AssemblyScript => "ts",
+        Language::TypeScript => "ts",
+        Language::Rust => "rs",
+    };
+    
     let base_dir_path = output_path.to_string() + "/polywrap/external/global-functions";
     fs::create_dir_all(&base_dir_path)?;
 
@@ -426,20 +494,26 @@ fn render_external_global_functions(wrapper: &WrapperModel, output_path: &str, t
         render_template(
             &templates.external.global_functions.function_name, 
             &func.model, 
-            &format!("{}/{}.ts", base_dir_path.clone(), func.model.name)
+            &format!("{}/{}.{}", base_dir_path.clone(), func.model.name, lang_extension)
         )?;
     }
 
     render_template(
         &templates.external.global_functions.index, 
         &wrapper, 
-        &format!("{}/index.ts", base_dir_path.clone())
+        &format!("{}/index.{}", base_dir_path.clone(), lang_extension)
     )?;
 
     Ok(())
 }
 
-fn render_external_classes(wrapper: &WrapperModel, output_path: &str, templates: &Templates, module_type: &ModuleType) -> Result<(), std::io::Error> {
+fn render_external_classes(wrapper: &WrapperModel, output_path: &str, language: &Language, templates: &Templates, module_type: &ModuleType) -> Result<(), std::io::Error> {
+    let lang_extension = match language {
+        Language::AssemblyScript => "ts",
+        Language::TypeScript => "ts",
+        Language::Rust => "rs",
+    };
+    
     let base_dir_path = output_path.to_string() + "/polywrap/external/classes";
     fs::create_dir_all(&base_dir_path)?;
     
@@ -447,40 +521,52 @@ fn render_external_classes(wrapper: &WrapperModel, output_path: &str, templates:
         render_template(
             &templates.external.classes.class_name, 
             &class_type.model, 
-            &format!("{}/{}.ts", base_dir_path.clone(), class_type.model.name)
+            &format!("{}/{}.{}", base_dir_path.clone(), class_type.model.name, lang_extension)
         )?;
     }
 
     render_template(
         &templates.external.classes.index, 
         &wrapper, 
-        &format!("{}/index.ts", base_dir_path.clone())
+        &format!("{}/index.{}", base_dir_path.clone(), lang_extension)
     )?;
 
     Ok(())
 }
 
-fn render_external_index(wrapper: &WrapperModel, output_path: &str, templates: &Templates, module_type: &ModuleType) -> Result<(), std::io::Error> {
+fn render_external_index(wrapper: &WrapperModel, output_path: &str, language: &Language, templates: &Templates, module_type: &ModuleType) -> Result<(), std::io::Error> {
+    let lang_extension = match language {
+        Language::AssemblyScript => "ts",
+        Language::TypeScript => "ts",
+        Language::Rust => "rs",
+    };
+    
     let base_dir_path = output_path.to_string() + "/polywrap/external";
     fs::create_dir_all(&base_dir_path)?;
 
     render_template(
         &templates.external.index, 
         &wrapper, 
-        &format!("{}/index.ts", base_dir_path.clone())
+        &format!("{}/index.{}", base_dir_path.clone(), lang_extension)
     )?;
 
     Ok(())
 }
 
-fn render_wrap_manifest(wrapper: &WrapperModel, output_path: &str, templates: &Templates, module_type: &ModuleType) -> Result<(), std::io::Error> {
+fn render_wrap_manifest(wrapper: &WrapperModel, output_path: &str, language: &Language, templates: &Templates, module_type: &ModuleType) -> Result<(), std::io::Error> {
+    let lang_extension = match language {
+        Language::AssemblyScript => "ts",
+        Language::TypeScript => "ts",
+        Language::Rust => "rs",
+    };
+
     let base_dir_path = output_path.to_string() + "/polywrap";
     fs::create_dir_all(&base_dir_path)?;
 
     render_template(
         &templates.wrap_manifest, 
         &wrapper, 
-        &format!("{}/WrapManifest.ts", base_dir_path.clone())
+        &format!("{}/WrapManifest.{}", base_dir_path.clone(), lang_extension)
     )?;
 
     Ok(())
@@ -508,7 +594,7 @@ mod tests {
     #[test]
     fn internal_function() -> Result<(), std::io::Error> {
         generate_wrap_manifest("./test/in".to_string(), "./test/out".to_string())?;
-        generate_bindings("./test/in".to_string(), "./test/out".to_string(), &Language::AssemblyScript, &ModuleType::Host)?;
+        generate_bindings("./test/in".to_string(), "./test/out".to_string(), &Language::Rust, &ModuleType::Host)?;
         panic!("TODO");
         Ok(())
     }

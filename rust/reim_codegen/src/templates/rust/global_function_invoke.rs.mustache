@@ -1,0 +1,118 @@
+use reim_wrap::{ ExternalWrapModule };
+use module::{ WrapManifest };
+use crate::{ 
+  {{#list}}
+  {{^model.isExternal}}
+  {{model.name}},
+  {{/model.isExternal}}
+  {{/list}} 
+};
+{{#relatedTypes}}
+{{#isClass}}
+use wrapped::{ {{nativeTypeNameWrapped}} };
+{{#isExternal}}
+use external::{ {{nativeTypeName}} };
+{{/isExternal}}
+{{^isExternal}}
+use crate::{ {{nativeTypeName}} };
+{{/isExternal}}
+{{/isClass}}
+{{#isStruct}}
+use crate::{ {{nativeTypeName}} };
+{{/isStruct}}
+{{/relatedTypes}}
+
+async fn invoke(buffer: &[u8], external_module: dyn ExternalWrapModule) -> Vec<u8> {
+  let func_id = u32::from_be_bytes(buffer.try_into().expect("Function ID must be 4 bytes"));
+  let data_buffer = &buffer[4..];
+
+  match func_id {
+    {{#list}}
+    {{^model.isExternal}}
+    WrapManifest::Internal::GlobalFunction::{{model.namePascalCase}} =>
+        invoke{{model.namePascalCase}}Wrapped(data_buffer, external_module),
+    {{/model.isExternal}}
+    {{/list}}
+    _ => panic!("Unknown function/method: ".to_string() + &func_id.to_string()),
+  }
+}
+
+{{#list}}
+{{^model.isExternal}}
+async fn invoke{{model.namePascalCase}}Wrapped(buffer: &[u8], external_module: dyn ExternalWrapModule) -> Vec<u8> {
+  let args_buffer = buffer;
+
+  let args = {{model.namePascalCase}}ArgsWrapped.deserialize(args_buffer, external_module);
+
+  let result = {{model.name}}(
+    {{#model.args}}
+    args.{{model.name}},
+    {{/model.args}}
+  ).await;
+
+  {{#model.result.isClass}}
+  {{model.result.nativeTypeNameWrapped}}.serialize(result)
+  {{/model.result.isClass}}
+  {{^model.result.isClass}}
+  BaseTypeSerialization.serialize<{{model.result.nativeTypeName}}>(result)
+  {{/model.result.isClass}}
+};
+
+struct {{model.namePascalCase}}Args {
+    {{#model.args}}
+    pub {{model.name}}: {{model.typeInfo.nativeTypeName}},
+    {{/model.args}}
+}
+ 
+impl {{model.namePascalCase}}Args {
+    pub fn new(
+        {{#model.args}}
+        {{model.name}}: {{model.typeInfo.nativeTypeName}},
+        {{/model.args}}
+    ) -> Self {
+        Self {
+            {{#model.args}}
+            {{model.name}},
+            {{/model.args}}
+        }
+    }
+}
+
+struct {{model.namePascalCase}}ArgsWrapped {
+    {{#model.args}}
+    pub {{model.name}}: {{model.typeInfo.nativeTypeNameWrapped}},
+    {{/model.args}}
+}
+
+impl {{model.namePascalCase}}ArgsWrapped {
+    pub fn new(
+        {{#model.args}}
+        {{model.name}}: {{model.typeInfo.nativeTypeNameWrapped}},
+        {{/model.args}}
+    ) -> Self {
+        Self {
+            {{#model.args}}
+            {{model.name}},
+            {{/model.args}}
+        }
+    }
+
+    pub fn deserialize(buffer: &[u8], external_module: dyn ExternalWrapModule) -> {{model.namePascalCase}}Args {
+        let args: {{model.namePascalCase}}ArgsWrapped = serde_json::from_str(
+            str::from_utf8(buffer).expect("Could not convert buffer to string")
+        ).expect("JSON was not well-formatted");
+       
+        {{model.namePascalCase}}Args.new(
+            {{#model.args}}
+            {{#model.typeInfo.isClass}}
+            {{model.typeInfo.nativeTypeNameWrapped}}.map_from_serializable(args.{{model.name}}, external_module),
+            {{/model.typeInfo.isClass}}
+            {{^model.typeInfo.isClass}}
+            args.{{model.name}},
+            {{/model.typeInfo.isClass}}
+            {{/model.args}}
+        )
+    }  
+}
+{{/model.isExternal}}
+{{/list}}

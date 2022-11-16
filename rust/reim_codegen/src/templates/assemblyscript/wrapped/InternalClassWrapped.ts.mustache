@@ -78,6 +78,6 @@ export class {{name}}Wrapped {
   }
 
   static mapFromSerializable(value: {{name}}Wrapped, wrapInstance: IExternalWrapInstance): {{name}} {
-    return TestExternalClassWrapped.dereference(value.__referencePtr);
+    return {{name}}Wrapped.dereference(value.__referencePtr);
   }
 }

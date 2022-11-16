@@ -1,0 +1,97 @@
+use reim_wrap::{ ExternalWrapModule };
+use crate::{ {{name}} };
+{{#relatedTypes}}
+{{#isClass}}
+use wrapped::{ {{nativeTypeNameWrapped}} };
+{{#isExternal}}
+use external::{ {{nativeTypeName}} };
+{{/isExternal}}
+{{^isExternal}}
+use create::{ {{nativeTypeName}} };
+{{/isExternal}}
+{{/isClass}}
+{{#isStruct}}
+use create::{ {{nativeTypeName}} };
+{{/isStruct}}
+{{/relatedTypes}}
+use invoke::{ invoke };
+
+const CLASS_NAME: str = "{{name}}";
+
+struct {{name}}Wrapped {
+    pub __referencePtr: u32,
+    {{#fields}}
+    pub {{model.name}}: {{model.typeInfo.nativeTypeNameWrapped}},
+    {{/fields}}
+} 
+
+static reference_map: Arc<Mutex<HashMap<u32, {{name}}>>> = Arc::new(Mutex::new(HashMap<u32, {{name}}>::new()));
+static reference_count: Arc<Mutex<u32>> = Arc::new(Mutex::new(0));
+
+impl {{name}}Wrapped {
+    pub fn new(
+         __referencePtr: u32,
+        {{#fields}}
+        {{model.name}}: {{model.typeInfo.nativeTypeNameWrapped}},
+        {{/fields}}
+    ) -> Self {
+        Self {
+            __referencePtr,
+            {{#fields}}
+            {{model.name}},
+            {{/fields}}
+        }
+    }
+
+    pub fn dereference(reference_ptr: u32) -> {{name}} {
+        let reference_map = reference_map.lock().unwrap();
+        let object = reference_map.get(reference_ptr);
+
+        match object {
+            Some(object) => object,
+            None => panic!(format!("Reference not found for class: {}", CLASS_NAME)),
+        }
+    }
+
+    pub fn invoke_method(buffer: &[u8], external_module: dyn ExternalWrapModule) -> Vec<u8> {  
+        invoke(buffer, external_module)
+    }
+    
+    pub fn map_to_serializable(value: {{name}}) -> {{name}}Wrapped {
+        let mut reference_count = reference_count.lock().unwrap();
+        let reference_ptr = reference_count;
+        *reference_count += 1;
+
+        reference_map.set(reference_ptr, value);
+    
+        {{name}}Wrapped.new(
+            reference_ptr,
+            {{#fields}}
+            {{#model.typeInfo.isClass}}
+            {{model.typeInfo.nativeTypeNameWrapped}}.map_to_serializable(value.{{model.name}}),
+            {{/model.typeInfo.isClass}}
+            {{^model.typeInfo.isClass}}
+            value.{{model.name}},
+            {{/model.typeInfo.isClass}}
+            {{/fields}}
+        )
+    }
+
+    pub fn serialize(value: {{name}}) -> Vec<u8> {
+        json!(
+            {{name}}Wrapped.map_to_serializable(value)
+        ).as_bytes()
+    }
+
+    pub fn deserialize(buffer: &[u8]) -> {{name}} {
+        let object = serde_json::from_str(
+            str::from_utf8(buffer).expect("Could not convert buffer to string")
+        ).expect("JSON was not well-formatted");
+
+        {{name}}Wrapped.map_from_serializable(object)
+    }
+
+    pub fn map_from_serializable(value: {{name}}Wrapped) -> {{name}} {
+        {{name}}Wrapped.dereference(value.__referencePtr)
+    }
+}

@@ -80,19 +80,19 @@ export class {{name}}Wrapped {
     );
   }
 
-  static deserialize(buffer: ArrayBuffer, wrapInstance: IExternalWrapInstance): {{name}} {
+  static deserialize(buffer: ArrayBuffer, externalModule: IExternalWrapInstance): {{name}} {
     const object = parse<{{name}}Wrapped>(String.UTF8.decode(buffer));
   
-    return {{name}}Wrapped.mapFromSerializable(object, wrapInstance);
+    return {{name}}Wrapped.mapFromSerializable(object, externalModule);
   }
 
-  static mapFromSerializable(value: {{name}}Wrapped, wrapInstance: IExternalWrapInstance): {{name}} {
+  static mapFromSerializable(value: {{name}}Wrapped, externalModule: IExternalWrapInstance): {{name}} {
     const object = new {{name}}(
       value.__referencePtr,
-      wrapInstance,
+      externalModule,
       {{#fields}}
       {{#model.isClass}}
-      {{model.typeInfo.nativeTypeNameWrapped}}.mapFromSerializable(value.{{model.name}}, wrapInstance),
+      {{model.typeInfo.nativeTypeNameWrapped}}.mapFromSerializable(value.{{model.name}}, externalModule),
       {{/model.isClass}}
       {{^model.isClass}}
       value.{{model.name}},
