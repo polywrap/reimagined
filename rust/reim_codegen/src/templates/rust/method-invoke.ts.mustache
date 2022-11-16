@@ -1,35 +1,35 @@
-use reim_wrap::{ ExternalModule };
-use module::{ WrapManifest };
+import { bufferToU32, BaseTypeSerialization, IExternalWrapInstance } from "@polywrap/reim-wrap-js";
+import { WrapManifest } from '../../WrapManifest';
 {{#relatedTypes}}
 {{#isClass}}
-use internal::classes::{ {{nativeTypeNameWrapped}} };
+import { {{nativeTypeNameWrapped}} } from "..";
 {{#isExternal}}
-use external::classes::{ {{nativeTypeName}} };
+import { {{nativeTypeName}} } from "../../external/classes";
 {{/isExternal}}
 {{^isExternal}}
-use crate::{ {{nativeTypeName}} };
+import { {{nativeTypeName}} } from "../../..";
 {{/isExternal}}
 {{/isClass}}
 {{#isStruct}}
-use crate::{ {{nativeTypeName}} };
+import { {{nativeTypeName}} } from "../../..";
 {{/isStruct}}
 {{/relatedTypes}}
 
-pub async fn invoke(buffer: &[u8], external_module: dyn ExternalModule) -> Vec<u8> {
-  let func_id = u32::from_be_bytes(buffer.try_into().expect("Method ID must be 4 bytes"));
-  let data_buffer = &buffer[4..];
+pub fn async invoke(buffer: &[u8], external_module: dyn ExternalModule) -> Vec<u8> {
+  const func_id = u32::from_be_bytes(buffer.try_into().expect("Method ID must be 4 bytes"));
+  const data_buffer = &buffer[4..];
 
   match func_id {
     {{#list}}
     WrapManifest::Internal::Classes::{{model.className}}Method::{{model.namePascalCase}} =>
-        invoke{{model.namePascalCase}}Wrapped(data_buffer, external_module),
+        invoke{{model.namePascalCase}}Wrapped(data_buffer, external_module)
     {{/list}}
-    _ => panic!(format!("Unknown method: {} on class {}", func_id.to_string(), model.class_name))
+    _ => panic!(format!("Unknown method: {} on class {}", func_id.to_string(), model.class_name));
   }
 }
 
 {{#list}}
-async fn invoke{{model.namePascalCase}}Wrapped(buffer: &[u8], external_module: dyn ExternalModule) -> Vec<u8> {
+fn async invoke{{model.namePascalCase}}Wrapped = async (buffer: &[u8], external_module: dyn ExternalModule) -> Vec<u8> => {
     {{#model.isStatic}}
     let args = {{model.namePascalCase}}ArgsWrapped.deserialize(buffer, external_module);
 
@@ -69,7 +69,7 @@ struct {{model.namePascalCase}}Args {
 }
 
 impl {{model.namePascalCase}}Args {
-    pub fn new(
+    static new(
         {{#model.args}}
         {{model.name}}: {{model.typeInfo.nativeTypeName}},
         {{/model.args}}
@@ -89,33 +89,29 @@ struct {{model.namePascalCase}}ArgsWrapped {
 }
 
 impl {{model.namePascalCase}}ArgsWrapped {
-    pub fn new(
-        {{#model.args}}
-        {{model.name}}: {{model.typeInfo.nativeTypeNameWrapped}},
-        {{/model.args}}
-    ) {
-        Self {
-        {{#model.args}}
-        {{model.name}},
-        {{/model.args}}
-        }
-    }
+  static new(
+    {{#model.args}}
+    {{model.name}}: {{model.typeInfo.nativeTypeNameWrapped}},
+    {{/model.args}}
+  ) {
 
-    pub fn deserialize(buffer: Uint8Array, external_module: dyn ExternalModule) -> {{model.namePascalCase}}Args {
-        let args = serde_json::from_str(
-            str::from_utf8(buffer).expect("Could not convert buffer to string")
-        ).expect("JSON was not well-formatted");
-    
-        {{model.namePascalCase}}Args.new(
-        {{#model.args}}
-        {{#model.typeInfo.isClass}}
-        {{model.typeInfo.nativeTypeNameWrapped}}.map_from_serializable(args.{{model.name}}, external_module),
-        {{/model.typeInfo.isClass}}
-        {{^model.typeInfo.isClass}}
-        args.{{model.name}},
-        {{/model.typeInfo.isClass}}
-        {{/model.args}}
-        )
-    }  
+  }
+
+  static deserialize(buffer: Uint8Array, external_module: dyn ExternalModule) -> {{model.namePascalCase}}Args {
+    let args = serde_json::from_str(
+        str::from_utf8(buffer).expect("Could not convert buffer to string")
+    ).expect("JSON was not well-formatted");
+  
+    {{model.namePascalCase}}Args.new(
+      {{#model.args}}
+      {{#model.typeInfo.isClass}}
+      {{model.typeInfo.nativeTypeNameWrapped}}.map_from_serializable(args.{{model.name}}, external_module),
+      {{/model.typeInfo.isClass}}
+      {{^model.typeInfo.isClass}}
+      args.{{model.name}},
+      {{/model.typeInfo.isClass}}
+      {{/model.args}}
+    )
+  }  
 }
 {{/list}}

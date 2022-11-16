@@ -3,12 +3,12 @@ use ImportBindings;
 
 {{#globalFunctions.list}}
 {{#model.isExternal}}
-use external::global_functions::{{model.name}}::{ create as create{{model.namePascalCase}} };
+import { create as create{{model.namePascalCase}} } from "../global-functions/{{model.name}}";
 {{/model.isExternal}}
 {{/globalFunctions.list}}
 {{#types}}
 {{#model.isExternal}}
-use external::classes::{{model.name}}::{ create as create{{model.name}} };
+import { create as create{{model.name}} } from "../classes/{{model.name}}";
 {{/model.isExternal}}
 {{/types}}
 
@@ -17,11 +17,11 @@ struct WrapModule {}
 impl WrapModule {
   static wrapInstance: Option<Box<dyn ExternalModule>>;
 
-  pub fn connect(instance: dyn ExternalModule) {
+  static connect(instance: dyn ExternalModule) {
     WrapModule.wrapInstance = Box::new(instance);
   }
 
-  pub fn import(instance: dyn ExternalModule) -> ImportBindings {
+  static import(instance: dyn ExternalModule) -> ImportBindings {
     ImportBindings.new(
       {{#globalFunctions.list}}
       {{#model.isExternal}}

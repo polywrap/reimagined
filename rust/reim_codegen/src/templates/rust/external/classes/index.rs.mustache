@@ -2,6 +2,7 @@
 {{#model.isClass}}
 {{#model.isExternal}}
 pub mod {{model.name}};
+pub use {{model.name}}::{{model.name}};
 {{/model.isExternal}}
 {{/model.isClass}}
 {{/types}}

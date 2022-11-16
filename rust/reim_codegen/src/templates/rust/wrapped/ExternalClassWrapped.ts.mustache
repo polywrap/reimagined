@@ -1,46 +1,42 @@
-use std::{sync::{Arc, Mutex}};
-use reim_wrap::{ ExternalModule };
-use module::{ WrapManifest };
-use external_module::{ WrapModule };
-use external::{ {{name}} };
+import { IExternalWrapInstance } from "@polywrap/reim-wrap-js";
+import { WrapManifest } from '../../WrapManifest';
+import { WrapModule } from "../../external/module/WrapModule";
+import { {{name}} } from "../../external/classes/{{name}}";
 {{#relatedTypes}}
 {{#isClass}}
-use wrapped::{ {{nativeTypeNameWrapped}} };
+import { {{nativeTypeNameWrapped}} } from "..";
 {{/isClass}}
 {{#isStruct}}
-use create::{ {{nativeTypeName}} };
+import { {{nativeTypeName}} } from "../../..";
 {{/isStruct}}
 {{/relatedTypes}}
 
-const CLASS_NAME: str = "{{name}}";
+const CLASS_NAME = "{{name}}";
 
 struct InstanceWithExternalReferencePtr {
-    pub external_reference_ptr: u32,
+    pub externalReferencePtr: u32,
     pub instance: {{name}}
 }
 
 impl InstanceWithExternalReferencePtr {
-    pub fn new(external_reference_ptr: u32, instance: {{name}}) -> Self {
+    pub fn new(externalReferencePtr: u32, instance: {{name}}) -> Self {
         Self {
-            external_reference_ptr,
+            externalReferencePtr,
             instance,
         }
     }
 }
 
 struct {{name}}Wrapped {
-    pub __referencePtr: u32,
+    pub __referencePtr: number,
     {{#fields}}
     pub {{model.name}}: {{model.typeInfo.nativeTypeNameWrapped}},
     {{/fields}}
 }
 
-
-static reference_map: Arc<Mutex<HashMap<{{name}}, InstanceWithExternalReferencePtr>>> = Arc::new(Mutex::new(HashMap<{{name}}, InstanceWithExternalReferencePtr>::new()));
-
 impl {{name}}Wrapped {
     pub fn new(
-        __referencePtr: u32,
+        __referencePtr: number,
         {{#fields}}
         {{model.name}}: {{model.typeInfo.nativeTypeNameWrapped}},
         {{/fields}}
@@ -53,36 +49,36 @@ impl {{name}}Wrapped {
         }
     }
 
-    pub fn dereference(reference_ptr: {{name}}) -> {{name}} {
-        let reference_map = reference_map.lock().unwrap();
-        let object = reference_map.get(reference_ptr);
+    static reference_map: HashMap<{{name}}, InstanceWithExternalReferencePtr> = HashMap<{{name}}, InstanceWithExternalReferencePtr>.new();
+    static reference_count: u32 = 0;
+
+    static dereference(reference_ptr: {{name}}) -. {{name}} {
+        let object = {{name}}Wrapped.reference_map.get(reference_ptr);
 
         if object.is_none() {
-            panic!(format!("Could not dereference {}. Not found", CLASS_NAME));
+        panic!(format!("Could not dereference {}. Not found", CLASS_NAME));
         }
 
         object.instance
     }
 
-    pub fn delete_reference(reference_ptr: {{name}}) {
-        let reference_map = reference_map.lock().unwrap();
-        let success = reference_map.delete(reference_ptr);
+    static delete_reference(reference_ptr: {{name}}) {
+        let success = {{name}}Wrapped.reference_map.delete(reference_ptr);
 
         if success.is_none() {
         panic!(format!("Could not delete reference for {}. Not found", CLASS_NAME));
         }
     }
 
-    pub fn serialize(value: {{name}}) -> Vec<u8> {
+    static serialize(value: {{name}}) -> Vec<u8> {
         json!(
             {{name}}Wrapped.map_from_serializable(value)
         ).as_bytes()
     }
 
-    pub fn map_to_serializable(value: {{name}}) -> {{name}}Wrapped {
-        let reference_ptr = value;
-        let reference_map = reference_map.lock().unwrap();
-        let existing_reference = reference_map.get(reference_ptr);
+    static mapToSerializable(value: {{name}}): {{name}}Wrapped {
+        const reference_ptr = value;
+        const existing_reference = {{name}}Wrapped.reference_map.get(reference_ptr);
 
         if existing_reference.is_none() {
             panic!(format!("Could not dereference {}. Not found", CLASS_NAME));
@@ -92,7 +88,7 @@ impl {{name}}Wrapped {
             existing_reference.external_reference_ptr,
             {{#fields}}
             {{#model.typeInfo.isClass}}
-            {{model.typeInfo.nativeTypeNameWrapped}}.map_to_serializable(value.{{model.name}}),
+            {{model.typeInfo.nativeTypeNameWrapped}}.map_from_serializable(value.{{model.name}}),
             {{/model.typeInfo.isClass}}
             {{^model.typeInfo.isClass}}
             value.{{model.name}},
@@ -101,15 +97,15 @@ impl {{name}}Wrapped {
         )
     }
 
-    pub fn deserialize(buffer: &[u8], external_module: &dyn ExternalModule) -> {{name}} {
+    static deserialize(buffer: &[u8], external_module: ExternalModule) -> {{name}} {
         let object = serde_json::from_str(
-            str::from_utf8(buf).expect("Could not convert buffer to string")
+            str::from_utf8(buffer).expect("Could not convert buffer to string")
         ).expect("JSON was not well-formatted");
     
-        {{name}}Wrapped.map_from_serializable(object, external_module, external_module)
+        {{name}}Wrapped.map_from_serializable(object, external_module)
     }
 
-    pub fn map_from_serializable(value: {{name}}Wrapped, external_module: &dyn ExternalModule) -> {{name}} {
+    static map_from_serializable(value: {{name}}Wrapped, external_module: ExternalModule) -> {{name}} {
         let object = {{name}}.new(
             value.__referencePtr,
             external_module,

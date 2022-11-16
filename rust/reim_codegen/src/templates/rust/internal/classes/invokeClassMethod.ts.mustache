@@ -3,24 +3,24 @@ use module::{ WrapManifest };
 {{#types}}
 {{#model.isClass}}
 {{^model.isExternal}}
-use wrapped::{ {{model.name}}Wrapped };
+import { {{model.name}}Wrapped } from "../../wrapped";
 {{/model.isExternal}}
 {{/model.isClass}}
 {{/types}}
 
-pub async fn invoke_class_method(buffer: &[u8], external_module: dyn ExternalModule) -> Vec<u8> {
-  let class_id = u32::from_be_bytes(buffer.try_into().expect("Class ID must be 4 bytes"));
-  let data_buffer = &buffer[4..];
+pub fn invoke_class_method(buffer: &[u8], external_module: dyn ExternalModule) -> Vec<u8> {
+  const class_id = u32::from_be_bytes(buffer.try_into().expect("Class ID must be 4 bytes"));
+  const data_buffer = &buffer[4..];
 
   match class_id {
     {{#types}}
     {{#model.isClass}}
     {{^model.isExternal}}
-    WrapManifest::Internal::Class::{{model.name}} =>
+    WrapManifest.Internal.Class.{{model.name}} =>
         {{model.name}}Wrapped.invoke_method(data_buffer, external_module),
     {{/model.isExternal}}
     {{/model.isClass}}
     {{/types}}
-    _ => panic!("Unknown class ID: ".to_string() + &class_id.to_string()),
+    _ => panic!("Unknown class ID: " + classId.toString()),
   }
 }

@@ -18,7 +18,7 @@ use crate::{ {{nativeTypeName}} };
 {{/isStruct}}
 {{/relatedTypes}}
 
-pub async fn {{name}}(
+pub fn async {{name}}(
   {{#args}}
   {{model.name}}: {{model.typeInfo.nativeTypeName}},
   {{/args}}
@@ -29,9 +29,9 @@ pub async fn {{name}}(
     {{model.name}},
     {{/args}}
   )
-}
+};
 
-pub fn create(instance: dyn ExternalModule) {
+pub fn create = (instance: dyn ExternalModule) {
   |
     {{#args}}
     {{model.name}}: {{model.typeInfo.nativeTypeName}},
@@ -44,19 +44,19 @@ pub fn create(instance: dyn ExternalModule) {
       {{/args}}
     )
   }
-}
+};
 
 pub async fn {{name}}FromInstance (
   instance: Option<ExternalModule>, 
   {{#args}}
   {{model.name}}: {{model.typeInfo.nativeTypeName}},
   {{/args}}
-) -> {{result.nativeTypeName}} {
+) -> {{result.nativeTypeName}} => {
   if instance.is_none() {
     panic!("connect() or import() must be called before using this module");
   }
 
-  let args = {{namePascalCase}}Args::new(
+  let args = {{namePascalCase}}Args.new(
     {{#args}}
     {{model.name}},
     {{/args}}
@@ -64,7 +64,7 @@ pub async fn {{name}}FromInstance (
 
   let buffer = [
     WrapManifest.External.GlobalFunction.{{namePascalCase}}.to_be_bytes(),
-    {{namePascalCase}}ArgsWrapped::serialize(args),
+    {{namePascalCase}}ArgsWrapped.serialize(args),
   ].concat();
 
   let result = instance.invokeResource(ExternalResource.InvokeGlobalFunction, buffer).await;
@@ -83,7 +83,7 @@ struct {{namePascalCase}}ArgsWrapped {
     {{/args}}
 }
 impl {{namePascalCase}}ArgsWrapped {
-    pub fn new(
+    static new(
       {{#args}}
       {{model.name}}: {{model.typeInfo.nativeTypeName}},
       {{/args}}
@@ -95,14 +95,14 @@ impl {{namePascalCase}}ArgsWrapped {
       }
     }
 
-    pub fn serialize(value: {{namePascalCase}}Args) -> Vec<u8> {
+    static serialize(value: {{namePascalCase}}Args) -> Vec<u8> {
         json!(
-            {{namePascalCase}}ArgsWrapped::mapToSerializable(value)
+            {{namePascalCase}}ArgsWrapped.mapToSerializable(value)
         ).as_bytes()
     }
 
-    pub fn mapToSerializable(value: {{namePascalCase}}Args) -> {{namePascalCase}}ArgsWrapped {
-        {{namePascalCase}}ArgsWrapped::new(
+    static mapToSerializable(value: {{namePascalCase}}Args) -> {{namePascalCase}}ArgsWrapped {
+        {{namePascalCase}}ArgsWrapped.new(
             {{#args}}
             {{#model.typeInfo.isClass}}
             {{model.typeInfo.nativeTypeNameWrapped}}.mapToSerializable(value.{{model.name}}),
@@ -122,15 +122,15 @@ struct {{namePascalCase}}Args {
 }
 
 impl {{namePascalCase}}Args {
-  pub fn new(
+  static new(
     {{#args}}
     {{model.name}}: {{model.typeInfo.nativeTypeName}},
     {{/args}}
   ) -> {{namePascalCase}}Args {
-    {{namePascalCase}}Args::new (
+    {{namePascalCase}}Args {
       {{#args}}
-      {{model.name}},
+      {{model.name}}: {{model.name}},
       {{/args}}
-    )
+    }
   }
 }

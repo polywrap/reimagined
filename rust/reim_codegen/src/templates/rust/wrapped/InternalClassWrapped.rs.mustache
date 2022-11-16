@@ -1,4 +1,4 @@
-use reim_wrap::{ ExternalWrapModule };
+use reim_wrap::{ ExternalModule };
 use crate::{ {{name}} };
 {{#relatedTypes}}
 {{#isClass}}
@@ -53,7 +53,7 @@ impl {{name}}Wrapped {
         }
     }
 
-    pub fn invoke_method(buffer: &[u8], external_module: dyn ExternalWrapModule) -> Vec<u8> {  
+    pub fn invoke_method(buffer: &[u8], external_module: dyn ExternalModule) -> Vec<u8> {  
         invoke(buffer, external_module)
     }
     

@@ -1,5 +1,6 @@
+pub mod global_functions;
 {{#globalFunctions.list}}
 {{#model.isExternal}}
-pub mod {{model.name}};
+pub use global_functions::{{model.name}};
 {{/model.isExternal}}
 {{/globalFunctions.list}}

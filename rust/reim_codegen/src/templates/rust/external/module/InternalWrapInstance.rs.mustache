@@ -1,4 +1,4 @@
-use reim_wrap::{ ExternalWrapModule, InternalWrapModule };
+use reim_wrap::{ ExternalModule, InternalModule };
 use internal::global_functions::{ invoke as invoke_global_function };
 use internal::classes::{ invoke_class_method };
 use dt::{ InternalResource };
@@ -11,8 +11,8 @@ impl InternalModule {
     }
 }
 
-impl InternalWrapModule for InternalModule {
-  async fn invoke_resource(&self, resource: u32, buffer: &[u8], external_module: dyn ExternalWrapModule) -> Vec<u8> {
+impl InternalModule for InternalModule {
+  async fn invoke_resource(&self, resource: u32, buffer: &[u8], external_module: dyn ExternalModule) -> Vec<u8> {
     match resource {
       InternalResource::InvokeGlobalFunction => invoke_global_function(buffer, external_module),
       InternalResource::InvokeClassMethod => invoke_class_method(buffer, external_module),
