@@ -383,6 +383,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "external_references_test"
+version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "reim_wrap",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "fallible-iterator"
 version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -946,6 +956,15 @@ name = "regex-syntax"
 version = "0.6.28"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "456c603be3e8d448b072f410900c09faf164fbce2d480456f50eea6e25f9c848"
+
+[[package]]
+name = "reim_app"
+version = "0.1.0"
+dependencies = [
+ "reim_codegen",
+ "reim_dt_wasm",
+ "reim_wrap",
+]
 
 [[package]]
 name = "reim_cli"
