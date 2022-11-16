@@ -9,22 +9,21 @@ use crate::{ TestObjectGetter };
 
 use crate::polywrap::wrapped::{ TestObjectGetterWrapped };
 use crate::polywrap::wrapped::{ TestExternalClassWrapped };
+use crate::polywrap::wrapped::test_object_getter::test_object_getter_wrapped::CLASS_NAME;
 use crate::polywrap::external::classes::{ TestExternalClass };
-
-
 
 pub async fn invoke(buffer: &[u8], external_module: Arc<dyn ExternalModule>) -> Vec<u8> {
   let func_id = u32::from_be_bytes(buffer.try_into().expect("Method ID must be 4 bytes"));
   let data_buffer = &buffer[4..];
 
   match func_id {
-    WrapManifest::Internal::Classes::TestObjectGetterMethod::Create =>
+    x if x == WrapManifest::Internal::Classes::TestObjectGetterMethod::Create as u32 =>
         invokeCreateWrapped(data_buffer, external_module).await,
-    WrapManifest::Internal::Classes::TestObjectGetterMethod::TestInstanceReceiveReference =>
+    x if x == WrapManifest::Internal::Classes::TestObjectGetterMethod::TestInstanceReceiveReference as u32 =>
         invokeTestInstanceReceiveReferenceWrapped(data_buffer, external_module).await,
-    WrapManifest::Internal::Classes::TestObjectGetterMethod::TestStaticReceiveReference =>
+    x if x == WrapManifest::Internal::Classes::TestObjectGetterMethod::TestStaticReceiveReference as u32 =>
         invokeTestStaticReceiveReferenceWrapped(data_buffer, external_module).await,
-    _ => panic!("Unknown method: {} on class {}", func_id, model.class_name)
+    _ => panic!("Unknown method: {} on class {}", func_id, CLASS_NAME)
   }
 }
 
@@ -35,8 +34,8 @@ async fn invokeCreateWrapped(buffer: &[u8], external_module: Arc<dyn ExternalMod
         args.arg,
     ).await;
     
-    TestObjectGetterWrapped.serialize(result)
-    };
+    TestObjectGetterWrapped::serialize(&result).to_vec()
+}
 
 struct CreateArgs {
     pub arg: String,
@@ -126,13 +125,13 @@ impl TestInstanceReceiveReferenceArgsWrapped {
     }
 
     pub fn deserialize(buffer: &[u8], external_module: Arc<dyn ExternalModule>) -> TestInstanceReceiveReferenceArgs {
-        let args = serde_json::from_str(
+        let args: TestInstanceReceiveReferenceArgsWrapped = serde_json::from_str(
             str::from_utf8(buffer).expect("Could not convert buffer to string")
         ).expect("JSON was not well-formatted");
     
         TestInstanceReceiveReferenceArgs::new(
         
-            TestExternalClassWrapped::map_from_serializable(args.arg, external_module),
+            TestExternalClassWrapped::map_from_serializable(&args.arg, external_module),
                 
         )
     }  

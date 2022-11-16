@@ -11,31 +11,48 @@ use crate::polywrap::external::module::{ external_wrap_module };
 pub async fn testExternalGlobalFunction(
   arg: String,
 ) -> String {
-  testExternalGlobalFunctionFromInstance(
-    external_wrap_module,
-    arg,
-  )
+    if external_wrap_module.is_none() {
+        panic!("connect() or import() must be called before using this module");
+    }
+
+    let external_module = Arc::clone(external_wrap_module.as_ref().unwrap());
+  
+    testExternalGlobalFunctionFromInstance(
+        external_module,
+        arg,
+    ).await
 }
 
-pub fn create(instance: Arc<dyn ExternalModule>) -> impl FnMut(String) -> dyn Future<Output = String> {
-  async |
-    arg: String,
-  | {
-    testExternalGlobalFunctionFromInstance(
-      Some(instance), 
-      arg,
-    ).await
-  }
+pub fn create(instance: Arc<dyn ExternalModule>) -> MockClosure {
+    MockClosure::new(instance)
+}
+
+struct MockClosure {
+    instance: Arc<dyn ExternalModule>,
+}
+
+impl MockClosure {
+    pub fn new(instance: Arc<dyn ExternalModule>) -> Self {
+        Self {
+            instance,
+        }
+    }
+
+    pub async fn call(
+        &self,
+        arg: String,
+    ) -> String {
+        testExternalGlobalFunctionFromInstance(
+            Arc::clone(&self.instance),
+            arg,
+        ).await
+    }
 }
 
 pub async fn testExternalGlobalFunctionFromInstance (
-  instance: Option<Arc<dyn ExternalModule>>, 
+  instance: Arc<dyn ExternalModule>, 
   arg: String,
 ) -> String {
-  if instance.is_none() {
-    panic!("connect() or import() must be called before using this module");
-  }
-
   let args = TestExternalGlobalFunctionArgs::new(
     arg,
   );
@@ -45,7 +62,7 @@ pub async fn testExternalGlobalFunctionFromInstance (
     TestExternalGlobalFunctionArgsWrapped::serialize(&args),
   ].concat();
 
-  let result = instance.unwrap().invoke_resource(ExternalResource::InvokeGlobalFunction as u32, &buffer).await;
+  let result = instance.invoke_resource(ExternalResource::InvokeGlobalFunction as u32, &buffer).await;
   
   BaseTypeSerialization.deserialize<String>(result)
 }

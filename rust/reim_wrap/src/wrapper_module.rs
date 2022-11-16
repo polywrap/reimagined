@@ -52,16 +52,17 @@ impl Receiver for ReceiverWithModule {
 #[async_trait]
 impl ExternalModule for WrapperModule {
     async fn invoke_resource(self: Arc<Self>, resource: u32, buffer: &[u8]) -> Vec<u8> {
-        let x = self.internal_module.clone();
+        let internal_module = self.internal_module.clone();
         let mut dt_instance = self.dt_instance.lock().await;
         
-        let y = Arc::clone(&self);
+        let external_module = Arc::clone(&self);
+        
         dt_instance.send(
             &[&resource.to_be_bytes(), buffer].concat(),
             Arc::new(
                 ReceiverWithModule::new(
-                    x,
-                    y
+                    internal_module,
+                    external_module
                 )
             )
         )

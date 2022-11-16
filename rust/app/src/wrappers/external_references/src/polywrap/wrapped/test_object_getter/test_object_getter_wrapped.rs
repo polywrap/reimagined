@@ -10,7 +10,7 @@ use crate::polywrap::external::{ TestExternalClass };
 
 use crate::polywrap::wrapped::test_object_getter::invoke::{ invoke };
 
-const CLASS_NAME: &str = "TestObjectGetter";
+pub const CLASS_NAME: &str = "TestObjectGetter";
 
 #[derive(Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]

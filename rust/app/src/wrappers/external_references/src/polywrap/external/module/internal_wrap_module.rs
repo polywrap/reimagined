@@ -6,11 +6,11 @@ use crate::polywrap::internal::global_functions::{ invoke as invoke_global_funct
 use crate::polywrap::internal::classes::{ invoke_class_method };
 use crate::polywrap::dt::{ InternalResource };
 
-struct InternalWrapModule {}
+pub struct InternalWrapModule {}
 
 impl InternalWrapModule {
     pub fn new() -> Self {
-        InternalWrapModule {}
+        Self {}
     }
 }
 
@@ -18,8 +18,8 @@ impl InternalWrapModule {
 impl InternalModule for InternalWrapModule {
   async fn invoke_resource(&self, resource: u32, buffer: &[u8], external_module: Arc<dyn ExternalModule>) -> Vec<u8> {
     match resource {
-      x if x == InternalResource::InvokeGlobalFunction as u32 => invoke_global_function(buffer, external_module),
-      x if x == InternalResource::InvokeClassMethod as u32 => invoke_class_method(buffer, external_module),
+      x if x == InternalResource::InvokeGlobalFunction as u32 => invoke_global_function(buffer, external_module).await,
+      x if x == InternalResource::InvokeClassMethod as u32 => invoke_class_method(buffer, external_module).await,
       _ => panic!("Unknown resource: {}", resource.to_string()),
     }
   }

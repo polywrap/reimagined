@@ -19,7 +19,7 @@ use crate::polywrap::wrapped::{ TestExternalClassWrapped };
 use crate::polywrap::external::{ TestExternalClass };
 
 
-async fn invoke(buffer: &[u8], external_module: Arc<dyn ExternalModule>) -> Vec<u8> {
+pub async fn invoke(buffer: &[u8], external_module: Arc<dyn ExternalModule>) -> Vec<u8> {
   let func_id = u32::from_be_bytes(buffer.try_into().expect("Function ID must be 4 bytes"));
   let data_buffer = &buffer[4..];
 

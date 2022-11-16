@@ -42,8 +42,9 @@ impl TestExternalClassImport {
         ].concat();
 
         let external_module = Arc::clone(&self.external_module);
-
         let result = external_module.invoke_resource(ExternalResource::InvokeClassMethod as u32, &buffer).await;
+
+        let external_module = Arc::clone(&self.external_module);
 
         TestExternalClassWrapped::deserialize(&result, external_module)
     }
@@ -63,8 +64,10 @@ impl TestExternalClassImport {
             TestStaticMethodArgsWrapped::serialize(&args),
         ].concat();
 
+        let external_module = Arc::clone(&self.external_module);
         let result = self.external_module.invoke_resource(ExternalResource::InvokeClassMethod as u32, &buffer).await;
 
+        let external_module = Arc::clone(&self.external_module);
         
         BaseTypeSerialization.deserialize<String>(result)
     }
@@ -91,7 +94,7 @@ impl TestExternalClass {
         arg: String,
     ) -> TestExternalClass {
         if external_wrap_module.is_none() {
-        panic!("connect() or import() must be called before using this module");
+            panic!("connect() or import() must be called before using this module");
         }
 
         let external_module = Arc::clone(external_wrap_module.as_ref().unwrap());
@@ -120,6 +123,8 @@ impl TestExternalClass {
 
         let external_module = Arc::clone(&self.__external_module);
         let result = external_module.invoke_resource(ExternalResource::InvokeClassMethod as u32, &buffer).await;
+      
+        let external_module = Arc::clone(&self.__external_module);
         
         // BaseTypeSerialization.deserialize<String>(result)
         "test".to_string()
@@ -128,11 +133,12 @@ impl TestExternalClass {
     pub async fn testStaticMethod(
         arg: String,
     ) -> String {
-        if WrapModule.wrapInstance.is_none() {
-        panic!("connect() or import() must be called before using this module");
+        if external_wrap_module.is_none() {
+            panic!("connect() or import() must be called before using this module");
         }
 
-        TestExternalClassImport::new(WrapModule.wrapInstance.unwrap())
+        let external_module = Arc::clone(external_wrap_module.as_ref().unwrap());
+        TestExternalClassImport::new(external_module)
         .testStaticMethod(
             arg,
         ).await

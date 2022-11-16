@@ -16,9 +16,9 @@ pub async fn testInvokeExternalStaticMethod(arg: String) -> String {
 }
 
 pub async fn testInvokeExternalInstanceMethod(arg: String) -> String {
-    let object = TestExternalClass::create(arg);
+    let object = TestExternalClass::create(arg.clone()).await;
 
-    object.testInstanceMethod(arg).await
+    object.testInstanceMethod(arg.clone()).await
 }
 
 pub struct TestObjectGetter {
