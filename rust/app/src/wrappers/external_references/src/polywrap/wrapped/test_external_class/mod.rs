@@ -1,0 +1,1 @@
+pub mod test_external_class_wrapped;
