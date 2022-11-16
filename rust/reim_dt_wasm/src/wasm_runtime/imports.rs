@@ -43,22 +43,26 @@ pub fn create_imports(
                 let memory = memory.lock().unwrap();
                 let async_memory = Arc::new(tokio::sync::Mutex::new(*memory));
 
-                let a = Box::new(async move {
+                Box::new(async move {
                     let memory = async_memory.lock().await;
                     let (memory_buffer, state) = memory.data_and_store_mut(caller.as_context_mut());
                     let buffer =
                         read_from_memory(memory_buffer, buffer_ptr as usize, buffer_len as usize);
 
-                    let result = (state.on_receive)(buffer).await;
+         
+                    let receiver = match state.receiver.as_ref() {
+                        Some(r) => r,
+                        None => panic!("No receiver"),
+                    };
+
+                    let result = receiver.receive(&buffer[..]).await;
 
                     let result_len = result.len() as u32;
 
                     state.send_result = result;
 
                     result_len
-                });
-
-                a
+                })
             },
         )
         .map_err(|e| WrapperError::WasmRuntimeError(e.to_string()))?;

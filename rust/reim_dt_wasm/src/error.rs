@@ -15,5 +15,7 @@ pub enum WrapperError {
   #[error("`{0}`")]
   WasmRuntimeError(String),
   #[error("`{0}`")]
-  ExportError(String)
+  ExportError(String),
+  #[error("`{0}`")]
+  NoReceiverError(String),
 }

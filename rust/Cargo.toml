@@ -1,8 +1,8 @@
 [workspace]
 members = [
     "reim_dt",
-    "reim_dt_wasm",
     "reim_wrap", 
+    "reim_dt_wasm",
     "reim_cli", 
     "reim_codegen", 
     "wrap_schema/tree_sitter_wrap", 

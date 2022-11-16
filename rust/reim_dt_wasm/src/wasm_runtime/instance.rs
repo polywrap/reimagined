@@ -1,6 +1,6 @@
-use std::{sync::{Arc, Mutex}, future::Future, pin::Pin};
+use std::{sync::{Arc, Mutex}};
 
-use reim_dt::OnReceiveFn;
+use reim_dt::{Receiver};
 use wasmtime::{
     AsContextMut, Config, Engine, Extern, Instance, Memory, MemoryType, Module, Store, Val,
 };
@@ -29,7 +29,7 @@ pub struct InvokeState {
 
 pub struct State {
     pub input_buffer: Vec<u8>,
-    pub on_receive: OnReceiveFn,
+    pub receiver: Option<Arc<dyn Receiver>>,
     pub send_result: Vec<u8>,
 }
 
@@ -37,14 +37,14 @@ impl State {
     pub fn new() -> Self {
         Self {
             input_buffer: Vec::new(),
-            on_receive: Box::new(|_| Box::pin(async { Vec::new() })),
+            receiver: None,
             send_result: Vec::new(),
         }
     }
 }
 
 impl WasmInstance {
-    pub async fn new(wasm_module: &WasmModule, shared_state: State) -> Result<Self, WrapperError> {
+    pub async fn new(wasm_module: &WasmModule, shared_state: State) -> Result<WasmInstance, WrapperError> {
         let mut config = Config::new();
         config.async_support(true);
 

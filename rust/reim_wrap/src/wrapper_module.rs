@@ -1,17 +1,21 @@
 
-use std::{sync::{Arc, Mutex}, pin::Pin, future::Future};
+use std::sync::Arc;
 
 use async_trait::async_trait;
-use reim_dt::{DtInstance, OnReceiveFn};
+use reim_dt::{DtInstance, Receiver};
+use tokio::sync::Mutex;
 use crate::{internal_wrap_module::InternalModule, ExternalModule};
 
 pub struct WrapperModule {
-    dt_instance: Box<dyn DtInstance + Send>,
-    internal_module: Box<dyn InternalModule + Send>,
+    dt_instance: Arc<Mutex<dyn DtInstance>>,
+    internal_module: Arc<Mutex<dyn InternalModule>>,
 }
 
 impl WrapperModule {
-    pub fn new(dt_instance: Box<dyn DtInstance + Send>, internal_module: Box<dyn InternalModule + Send>) -> Self {
+    pub fn new(
+        dt_instance: Arc<Mutex<dyn DtInstance>>, 
+        internal_module: Arc<Mutex<dyn InternalModule>>
+    ) -> Self {
         Self {
             internal_module,
             dt_instance,
@@ -19,29 +23,44 @@ impl WrapperModule {
     }
 }
 
+struct ReceiverWithModule {
+    internal_module: Arc<Mutex<dyn InternalModule>>,
+}
+
+impl ReceiverWithModule {
+    pub fn new(internal_module: Arc<Mutex<dyn InternalModule>>) -> Self {
+        Self {
+            internal_module,
+        }
+    }
+}
+
+#[async_trait]
+impl Receiver for ReceiverWithModule {
+    async fn receive(&self, buffer: &[u8]) -> Vec<u8> {
+        let internal_module = self.internal_module.lock().await;
+
+        let resource = u32::from_be_bytes(buffer.try_into().expect("Resource must be 4 bytes"));
+        let data_buffer = &buffer[4..];
+
+        internal_module.invoke_resource(resource, data_buffer).await
+    }
+}
+
 #[async_trait]
 impl ExternalModule for WrapperModule {
-    async fn invoke_resource(&self, resource: u32, buffer: &[u8]) -> Vec<u8> {
-        let buffer2 = buffer.to_vec();
-        let test: OnReceiveFn = Box::new(
-            |buffer: Vec<u8>| Box::pin(async { 
-                let resource = u32::from_be_bytes(buffer.try_into().expect("Resource ID must be 4 bytes"));
-                let data_buffer = buffer;
-                // let internal_module = internal_module.lock().unwrap();
-                let x: Pin<Box<dyn Future<Output = Vec<u8>> + Send>> = self.internal_module.invoke_resource(resource, data_buffer.to_vec());
-                x.await
-            })
-        );
-
-        // let dt_instance = Arc::clone(&self.dt_instance);
-        // let dt_instance = dt_instance.lock().unwrap();
-
-        let x: Vec<u8> = self.dt_instance.send(
-            &[&resource.to_be_bytes(), &buffer2[..]].concat(),
-            test
+    async fn invoke_resource(&mut self, resource: u32, buffer: &[u8]) -> Vec<u8> {
+        let x = self.internal_module.clone();
+        let mut dt_instance = self.dt_instance.lock().await;
+        
+        dt_instance.send(
+            &[&resource.to_be_bytes(), buffer].concat(),
+            Arc::new(
+                ReceiverWithModule::new(
+                    x
+                )
+            )
         )
-        .await;
-
-        vec![]
+        .await
     }
 }

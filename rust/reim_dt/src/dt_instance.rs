@@ -1,8 +1,10 @@
+use std::sync::Arc;
+
 use async_trait::async_trait;
 
-use crate::on_receive_fn::OnReceiveFn;
+use crate::Receiver;
 
 #[async_trait]
-pub trait DtInstance {
-    async fn send(&mut self, buffer: &[u8], on_receive: OnReceiveFn) -> Vec<u8>;
+pub trait DtInstance: Send + Sync {
+    async fn send(&mut self, buffer: &[u8], on_receive: Arc<dyn Receiver>) -> Vec<u8>;
 }
