@@ -1,15 +1,21 @@
-use async_trait::async_trait;
-use reim_dt::DtInstance;
 
-use crate::{InternalWrapModule, ExternalWrapModule};
+use std::sync::Arc;
+
+use async_trait::async_trait;
+use reim_dt::{DtInstance, Receiver};
+use tokio::sync::Mutex;
+use crate::{internal_wrap_module::InternalModule, ExternalModule};
 
 pub struct WrapperModule {
-    internal_module: Arc<dyn InternalWrapModule>,
-    dt_instance: Arc<dyn DtInstance>,
+    dt_instance: Arc<Mutex<dyn DtInstance>>,
+    internal_module: Arc<Mutex<dyn InternalModule>>,
 }
 
 impl WrapperModule {
-    pub fn new(dt_instance: Box<dyn DtInstance>, internal_module: Box<dyn InternalWrapModule>) -> Self {
+    pub fn new(
+        dt_instance: Arc<Mutex<dyn DtInstance>>, 
+        internal_module: Arc<Mutex<dyn InternalModule>>
+    ) -> Self {
         Self {
             internal_module,
             dt_instance,
@@ -17,17 +23,42 @@ impl WrapperModule {
     }
 }
 
+struct ReceiverWithModule {
+    internal_module: Arc<Mutex<dyn InternalModule>>,
+}
+
+impl ReceiverWithModule {
+    pub fn new(internal_module: Arc<Mutex<dyn InternalModule>>) -> Self {
+        Self {
+            internal_module,
+        }
+    }
+}
+
 #[async_trait]
-impl ExternalWrapModule for WrapperModule {
-    async fn invoke_resource(&self, resource: u32, buffer: &[u8]) -> Vec<u8> {
-        self.dt_instance.send(
+impl Receiver for ReceiverWithModule {
+    async fn receive(&self, buffer: &[u8]) -> Vec<u8> {
+        let internal_module = self.internal_module.lock().await;
+
+        let resource = u32::from_be_bytes(buffer.try_into().expect("Resource must be 4 bytes"));
+        let data_buffer = &buffer[4..];
+
+        internal_module.invoke_resource(resource, data_buffer).await
+    }
+}
+
+#[async_trait]
+impl ExternalModule for WrapperModule {
+    async fn invoke_resource(&mut self, resource: u32, buffer: &[u8]) -> Vec<u8> {
+        let x = self.internal_module.clone();
+        let mut dt_instance = self.dt_instance.lock().await;
+        
+        dt_instance.send(
             &[&resource.to_be_bytes(), buffer].concat(),
-            Box::new(
-                |buffer: &[u8]| {
-                    let resource = u32::from_be_bytes(buffer.try_into().expect("Resource ID must be 4 bytes"));
-                    let data_buffer = &buffer[4..];
-                    self.internal_module.invoke_resource(resource, data_buffer, self)
-                }
+            Arc::new(
+                ReceiverWithModule::new(
+                    x
+                )
             )
         )
         .await

@@ -1,8 +1,8 @@
-use std::future::Future;
-use std::pin::Pin;
+use std::sync::Arc;
 
 use async_trait::async_trait;
 use reim_dt::DtInstance;
+use reim_dt::Receiver;
 use wasmtime::AsContextMut;
 use wasmtime::Val;
 
@@ -17,7 +17,7 @@ pub struct DtWasmInstance {
 } 
 
 impl DtWasmInstance {
-    pub async fn new(wasm_module: WasmModule) -> Self {
+    pub async fn new(wasm_module: WasmModule) -> DtWasmInstance {
         let state = State::new();
 
         Self {
@@ -28,16 +28,16 @@ impl DtWasmInstance {
 
 #[async_trait]
 impl DtInstance for DtWasmInstance {
-    async fn send(&mut self, buffer: &[u8], on_receive: Box<dyn Fn(Vec<u8>) -> Pin<Box<dyn Future<Output = Vec<u8>> + Send + Sync>> + Send + Sync>) -> Vec<u8> {
+    async fn send(&mut self, buffer: &[u8], on_receive: Arc<dyn Receiver>) -> Vec<u8>  {
         let buffer_len = buffer.len() as i32;
 
         let params = &[
             Val::I32(buffer_len),
         ];
 
-        let state = self.wasm_instance.store.data_mut();
+        let state = (self.wasm_instance.store).data_mut();
         state.input_buffer = buffer.to_vec();
-        state.on_receive = on_receive;
+        state.receiver = Some(on_receive);
 
         let mut result: [Val; 1] = [Val::I32(0)];
 
@@ -45,7 +45,6 @@ impl DtInstance for DtWasmInstance {
             .call_export("_dt_receive", params, &mut result)
             .await
             .map_err(|e| WrapperError::InvokeError(e.to_string())).unwrap();
-
 
         let len_and_result_ptr = result[0].unwrap_i32();
 
