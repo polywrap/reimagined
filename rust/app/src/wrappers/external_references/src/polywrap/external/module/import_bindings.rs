@@ -1,32 +1,26 @@
 
-use std::sync::Arc;
+use std::{sync::Arc, future::Future};
 
-use create::{ TestObjectGetter };
-
-use crate::polywrap::external::classes::test_external_class::{ TestExternalClassImport };
-use crate::polywrap::external::{ TestExternalClass };
+use crate::polywrap::external::{classes::test_external_class::TestExternalClassImport, global_functions::test_external_global_function::WrappedClosure};
 
 
 
 pub struct ImportBindings {
     pub testExternalGlobalFunction: Arc<dyn FnMut(
       String,
-    ) -> String>,
+    ) -> Box<dyn Future<Output = String>>>,
     pub TestExternalClass: TestExternalClassImport,
     
 }
 
 impl ImportBindings {
     pub fn new(
-        testExternalGlobalFunction: Arc<dyn FnMut(
-            String,
-        ) -> String>,
+        test: WrappedClosure,
         TestExternalClass: TestExternalClassImport,
     ) -> Self {
         Self {
                                                                                                             
-            testExternalGlobalFunction: testExternalGlobalFunction,
-            
+            testExternalGlobalFunction: test.call,     
                                     
             TestExternalClass: TestExternalClass,
             

@@ -1,10 +1,18 @@
 #![feature(async_closure)]
 
 mod polywrap;
-use polywrap::external::*;
+use std::sync::Arc;
 
-pub async fn testReceiveReference(arg: TestExternalClass) -> String {
-    arg.testInstanceMethod("test".to_string()).await
+use polywrap::external::{*, module::{WrapModule, import_bindings::ImportBindings, external_wrap_module}};
+
+pub async fn testReceiveReference(arg: Arc<TestExternalClass>) -> String {
+    let external_module_mut = external_wrap_module.as_ref().unwrap();
+    let module = WrapModule::import(Arc::clone(external_module_mut));
+
+    let ImportBindings { testExternalGlobalFunction, TestExternalClass  } = module; 
+
+    testExternalGlobalFunction("test".to_string()).await
+    // arg.testInstanceMethod("test".to_string()).await
 }
 
 pub async fn testInvokeExternalGlobalFunction(arg: String) -> String {
@@ -34,11 +42,11 @@ impl TestObjectGetter {
         return TestObjectGetter::new(arg);
     }
 
-    pub async fn testStaticReceiveReference(arg: TestExternalClass) -> String {
+    pub async fn testStaticReceiveReference(arg: Arc<TestExternalClass>) -> String {
         return arg.testInstanceMethod("test".to_string()).await;
     }
 
-    pub async fn testInstanceReceiveReference(self, arg: TestExternalClass) -> String {
+    pub async fn testInstanceReceiveReference(&self, arg: Arc<TestExternalClass>) -> String {
         return arg.testInstanceMethod("test".to_string()).await;
     }
 }

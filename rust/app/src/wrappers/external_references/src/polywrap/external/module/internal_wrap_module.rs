@@ -2,9 +2,8 @@ use std::sync::Arc;
 
 use async_trait::async_trait;
 use reim_wrap::{ ExternalModule, InternalModule };
-use crate::polywrap::internal::global_functions::{ invoke as invoke_global_function };
-use crate::polywrap::internal::classes::{ invoke_class_method };
-use crate::polywrap::dt::{ InternalResource };
+use crate::polywrap::internal::{ invoke_global_function, invoke_class_method };
+use crate::polywrap::resources::InternalResource;
 
 pub struct InternalWrapModule {}
 

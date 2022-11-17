@@ -1,9 +1,9 @@
 use std::sync::Arc;
 use std::str;
 
-use reim_wrap::{ ExternalModule };
+use reim_wrap::ExternalModule;
 use serde::{Deserialize, Serialize};
-use crate::polywrap::wrap_manifest::{ WrapManifest };
+use crate::polywrap::wrap_manifest::WrapManifest;
 use crate::{ 
   
   testReceiveReference,
@@ -15,8 +15,8 @@ use crate::{
   testInvokeExternalInstanceMethod,
        
 };
-use crate::polywrap::wrapped::{ TestExternalClassWrapped };
-use crate::polywrap::external::{ TestExternalClass };
+use crate::polywrap::wrapped::{TestExternalClassWrapped, StringWrapped};
+use crate::polywrap::external::TestExternalClass;
 
 
 pub async fn invoke(buffer: &[u8], external_module: Arc<dyn ExternalModule>) -> Vec<u8> {
@@ -51,16 +51,16 @@ async fn invokeTestReceiveReferenceWrapped(buffer: &[u8], external_module: Arc<d
   ).await;
 
   
-  BaseTypeSerialization.serialize<String>(result)
+  StringWrapped::serialize(&result).to_vec()
 }
 
 struct TestReceiveReferenceArgs {
-    pub arg: TestExternalClass,
+    pub arg: Arc<TestExternalClass>,
 }
  
 impl TestReceiveReferenceArgs {
     pub fn new(
-        arg: TestExternalClass,
+        arg: Arc<TestExternalClass>,
     ) -> Self {
         Self {
             arg,
@@ -90,7 +90,7 @@ impl TestReceiveReferenceArgsWrapped {
        
         TestReceiveReferenceArgs::new(
             
-            TestExternalClassWrapped::map_from_serializable(args.arg, external_module),
+            TestExternalClassWrapped::map_from_serializable(&args.arg, external_module),
                         
         )
     }  
@@ -105,7 +105,7 @@ async fn invokeTestInvokeExternalGlobalFunctionWrapped(buffer: &[u8], external_m
   ).await;
 
   
-  BaseTypeSerialization.serialize<String>(result)
+  StringWrapped::serialize(&result).to_vec()
 }
 
 struct TestInvokeExternalGlobalFunctionArgs {
@@ -159,7 +159,7 @@ async fn invokeTestInvokeExternalStaticMethodWrapped(buffer: &[u8], external_mod
   ).await;
 
   
-  BaseTypeSerialization.serialize<String>(result)
+  StringWrapped::serialize(&result).to_vec()
 }
 
 struct TestInvokeExternalStaticMethodArgs {
@@ -213,7 +213,7 @@ async fn invokeTestInvokeExternalInstanceMethodWrapped(buffer: &[u8], external_m
   ).await;
 
   
-  BaseTypeSerialization.serialize<String>(result)
+  StringWrapped::serialize(&result).to_vec()
 }
 
 struct TestInvokeExternalInstanceMethodArgs {

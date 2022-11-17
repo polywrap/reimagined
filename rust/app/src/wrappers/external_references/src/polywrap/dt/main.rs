@@ -7,7 +7,7 @@ use crate::polywrap::external::module::internal_wrap_module::*;
 use crate::polywrap::external::module::host_wrap_module::HostWrapModule;
 use crate::polywrap::dt::malloc::alloc;
 
-pub fn receive(buffer: &[u8]) -> u32 {  
+pub async fn receive(buffer: &[u8]) -> u32 {  
     let external_module = Arc::new(HostWrapModule::new());
     external_wrap_module = Some(external_module);
 
@@ -15,11 +15,12 @@ pub fn receive(buffer: &[u8]) -> u32 {
     let data_buffer = &buffer[4..];
     
     let result = InternalWrapModule::new()
-        .invoke_resource(resource, data_buffer, external_module);
+        .invoke_resource(resource, data_buffer, external_module)
+        .await;
 
     let tmp = [
         &result.len().to_be_bytes(), 
-        &result
+        &result[..]
     ].concat();
 
     return changetype<u32>(tmp);

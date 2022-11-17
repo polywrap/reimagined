@@ -3,10 +3,10 @@ use std::sync::Arc;
 use reim_wrap::{ ExternalModule };
 use serde::{Serialize, Deserialize};
 use serde_json::json;
-use crate::polywrap::wrap_manifest::{ WrapManifest };
-use crate::polywrap::dt::{ ExternalResource };
-use crate::polywrap::external::module::{ WrapModule };
-use crate::polywrap::wrapped::{ TestExternalClassWrapped };
+use crate::polywrap::wrap_manifest::WrapManifest;
+use crate::polywrap::resources::ExternalResource;
+use crate::polywrap::wrapped::TestExternalClassWrapped;
+use crate::polywrap::wrapped::StringWrapped;
 
 use crate::polywrap::external::module::external_wrap_module;
 
@@ -29,7 +29,7 @@ impl TestExternalClassImport {
     pub async fn create(
         &self,
         arg: String,
-    ) -> TestExternalClass {
+    ) -> Arc<TestExternalClass> {
         let args = CreateArgs::new( 
             arg,
              
@@ -65,11 +65,11 @@ impl TestExternalClassImport {
         ].concat();
 
         let external_module = Arc::clone(&self.external_module);
-        let result = self.external_module.invoke_resource(ExternalResource::InvokeClassMethod as u32, &buffer).await;
+        let result = external_module.invoke_resource(ExternalResource::InvokeClassMethod as u32, &buffer).await;
 
         let external_module = Arc::clone(&self.external_module);
         
-        BaseTypeSerialization.deserialize<String>(result)
+        StringWrapped::deserialize(&result)
     }
     
 }
@@ -92,17 +92,17 @@ impl TestExternalClass {
     
     pub async fn create(
         arg: String,
-    ) -> TestExternalClass {
+    ) -> Arc<TestExternalClass> {
         if external_wrap_module.is_none() {
-            panic!("connect() or import() must be called before using this module");
+            panic!("connect() must be called before using this module");
         }
 
         let external_module = Arc::clone(external_wrap_module.as_ref().unwrap());
 
         TestExternalClassImport::new(external_module)
-        .create(
-            arg,
-        ).await
+            .create(
+                arg,
+            ).await
     }
             
     pub async fn testInstanceMethod(
@@ -110,38 +110,36 @@ impl TestExternalClass {
         arg: String,
     ) -> String {
         let args = TestInstanceMethodArgs::new( 
-        arg,
+            arg,
         
         );
 
         let buffer = [
-        &(WrapManifest::External::Class::TestExternalClass as u32).to_be_bytes()[..],
-        &(WrapManifest::External::Classes::TestExternalClassMethod::TestInstanceMethod as u32).to_be_bytes()[..],
-        &self.__referencePtr.to_be_bytes()[..],
-        TestInstanceMethodArgsWrapped::serialize(&args),
+            &(WrapManifest::External::Class::TestExternalClass as u32).to_be_bytes()[..],
+            &(WrapManifest::External::Classes::TestExternalClassMethod::TestInstanceMethod as u32).to_be_bytes()[..],
+            &self.__referencePtr.to_be_bytes()[..],
+            TestInstanceMethodArgsWrapped::serialize(&args),
         ].concat();
 
         let external_module = Arc::clone(&self.__external_module);
         let result = external_module.invoke_resource(ExternalResource::InvokeClassMethod as u32, &buffer).await;
       
-        let external_module = Arc::clone(&self.__external_module);
-        
-        // BaseTypeSerialization.deserialize<String>(result)
-        "test".to_string()
+        StringWrapped::deserialize(&result)
     }
         
     pub async fn testStaticMethod(
         arg: String,
     ) -> String {
         if external_wrap_module.is_none() {
-            panic!("connect() or import() must be called before using this module");
+            panic!("connect() must be called before using this module");
         }
 
         let external_module = Arc::clone(external_wrap_module.as_ref().unwrap());
+
         TestExternalClassImport::new(external_module)
-        .testStaticMethod(
-            arg,
-        ).await
+            .testStaticMethod(
+                arg,
+            ).await
     }
     
 }

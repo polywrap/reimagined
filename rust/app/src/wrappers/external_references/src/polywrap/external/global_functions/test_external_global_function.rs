@@ -1,37 +1,37 @@
-use std::future::Future;
 use std::sync::Arc;
 
-use reim_wrap::{ ExternalModule };
+use reim_wrap::ExternalModule;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
-use crate::polywrap::module::{ WrapManifest };
-use crate::polywrap::dt::{ ExternalResource };
-use crate::polywrap::external::module::{ external_wrap_module };
+use crate::polywrap::wrap_manifest::WrapManifest;
+use crate::polywrap::resources::ExternalResource;
+use crate::polywrap::external::module::external_wrap_module;
+use crate::polywrap::wrapped::StringWrapped;
 
 pub async fn testExternalGlobalFunction(
   arg: String,
 ) -> String {
     if external_wrap_module.is_none() {
-        panic!("connect() or import() must be called before using this module");
+        panic!("connect() must be called before using this module");
     }
 
     let external_module = Arc::clone(external_wrap_module.as_ref().unwrap());
   
-    testExternalGlobalFunctionFromInstance(
+    testExternalGlobalFunction_from_instance(
         external_module,
         arg,
     ).await
 }
 
-pub fn create(instance: Arc<dyn ExternalModule>) -> MockClosure {
-    MockClosure::new(instance)
+pub fn create(instance: Arc<dyn ExternalModule>) -> WrappedClosure {
+    WrappedClosure::new(instance)
 }
 
-struct MockClosure {
+pub struct WrappedClosure {
     instance: Arc<dyn ExternalModule>,
 }
 
-impl MockClosure {
+impl WrappedClosure {
     pub fn new(instance: Arc<dyn ExternalModule>) -> Self {
         Self {
             instance,
@@ -42,14 +42,14 @@ impl MockClosure {
         &self,
         arg: String,
     ) -> String {
-        testExternalGlobalFunctionFromInstance(
+        testExternalGlobalFunction_from_instance(
             Arc::clone(&self.instance),
             arg,
         ).await
     }
 }
 
-pub async fn testExternalGlobalFunctionFromInstance (
+pub async fn testExternalGlobalFunction_from_instance (
   instance: Arc<dyn ExternalModule>, 
   arg: String,
 ) -> String {
@@ -64,7 +64,7 @@ pub async fn testExternalGlobalFunctionFromInstance (
 
   let result = instance.invoke_resource(ExternalResource::InvokeGlobalFunction as u32, &buffer).await;
   
-  BaseTypeSerialization.deserialize<String>(result)
+  StringWrapped::deserialize(&result)
 }
 
 #[derive(Serialize, Deserialize)]
@@ -75,32 +75,37 @@ struct TestExternalGlobalFunctionArgsWrapped {
 impl TestExternalGlobalFunctionArgsWrapped {
     pub fn new(
       arg: String,
-    ) -> TestExternalGlobalFunctionArgsWrapped {
-      TestExternalGlobalFunctionArgsWrapped {
-        arg,
-      }
+    ) -> Self {
+        Self {
+            arg,
+        }
     }
 
     pub fn serialize(value: &TestExternalGlobalFunctionArgs) -> &[u8] {
-        json!(
-            TestExternalGlobalFunctionArgsWrapped::mapToSerializable(value)
-        ).to_string()
-        .as_bytes()
+        Self::serialize_wrapped(
+            &Self::map_to_serializable(value)
+        )
     }
 
-    pub fn mapToSerializable(value: &TestExternalGlobalFunctionArgs) -> TestExternalGlobalFunctionArgsWrapped {
-        TestExternalGlobalFunctionArgsWrapped::new(
+    pub fn map_to_serializable(value: &TestExternalGlobalFunctionArgs) -> Self {
+        Self::new(
                         
             value.arg,
             
         )
+    }
+
+    fn serialize_wrapped(value: &Self) -> &[u8] {
+        json!(
+           value
+        ).to_string()
+        .as_bytes()
     }
 }
 
 struct TestExternalGlobalFunctionArgs {
     pub arg: String,
 }
-
 impl TestExternalGlobalFunctionArgs {
   pub fn new(
     arg: String,

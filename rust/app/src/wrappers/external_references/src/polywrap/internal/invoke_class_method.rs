@@ -1,10 +1,8 @@
 use std::sync::Arc;
 
-use reim_wrap::{ ExternalModule };
-use crate::polywrap::wrap_manifest::{ WrapManifest };
-use crate::polywrap::wrapped::{ TestObjectGetterWrapped };
-
-
+use reim_wrap::ExternalModule;
+use crate::polywrap::wrap_manifest::WrapManifest;
+use crate::polywrap::wrapped::TestObjectGetterWrapped;
 
 pub async fn invoke_class_method(buffer: &[u8], external_module: Arc<dyn ExternalModule>) -> Vec<u8> {
   let class_id = u32::from_be_bytes(buffer.try_into().expect("Class ID must be 4 bytes"));

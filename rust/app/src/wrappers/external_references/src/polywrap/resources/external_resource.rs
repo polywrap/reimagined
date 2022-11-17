@@ -4,4 +4,3 @@ pub enum ExternalResource {
     InvokeGlobalFunction = 2,
     InvokeClassMethod = 3
 }
-  
