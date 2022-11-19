@@ -1,14 +1,9 @@
 
-use std::{sync::Arc, future::Future};
-
 use crate::polywrap::external::{classes::test_external_class::TestExternalClassImport, global_functions::test_external_global_function::WrappedClosure};
 
 
-
 pub struct ImportBindings {
-    pub testExternalGlobalFunction: Arc<dyn FnMut(
-      String,
-    ) -> Box<dyn Future<Output = String>>>,
+    pub testExternalGlobalFunctionWrapped: WrappedClosure,
     pub TestExternalClass: TestExternalClassImport,
     
 }
@@ -20,10 +15,14 @@ impl ImportBindings {
     ) -> Self {
         Self {
                                                                                                             
-            testExternalGlobalFunction: test.call,     
+            testExternalGlobalFunctionWrapped: test,     
                                     
             TestExternalClass: TestExternalClass,
             
         }
+    }
+
+    pub async fn testExternalGlobalFunction(&self, arg: String) -> String {
+        self.testExternalGlobalFunctionWrapped.call(arg).await
     }
 }

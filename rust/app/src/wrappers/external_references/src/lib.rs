@@ -3,16 +3,10 @@
 mod polywrap;
 use std::sync::Arc;
 
-use polywrap::external::{*, module::{WrapModule, import_bindings::ImportBindings, external_wrap_module}};
+use polywrap::external::{testExternalGlobalFunction, TestExternalClass};
 
 pub async fn testReceiveReference(arg: Arc<TestExternalClass>) -> String {
-    let external_module_mut = external_wrap_module.as_ref().unwrap();
-    let module = WrapModule::import(Arc::clone(external_module_mut));
-
-    let ImportBindings { testExternalGlobalFunction, TestExternalClass  } = module; 
-
-    testExternalGlobalFunction("test".to_string()).await
-    // arg.testInstanceMethod("test".to_string()).await
+    arg.testInstanceMethod("test".to_string()).await
 }
 
 pub async fn testInvokeExternalGlobalFunction(arg: String) -> String {

@@ -3,15 +3,15 @@ use std::sync::Arc;
 use reim_wrap::ExternalModule;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
-use crate::polywrap::external::module::wrap_module::get_external_module_or_panic;
 use crate::polywrap::wrap_manifest::WrapManifest;
 use crate::polywrap::resources::ExternalResource;
+use crate::polywrap::external::module::external_wrap_module;
 use crate::polywrap::wrapped::StringWrapped;
 
 pub async fn testExternalGlobalFunction(
   arg: String,
 ) -> String {
-    let external_module = get_external_module_or_panic();
+    let external_module = HostWrapModule::new();
   
     testExternalGlobalFunction_from_instance(
         external_module,
@@ -19,8 +19,8 @@ pub async fn testExternalGlobalFunction(
     ).await
 }
 
-pub fn create(instance: &Arc<dyn ExternalModule>) -> WrappedClosure {
-    WrappedClosure::new(Arc::clone(instance))
+pub fn create(instance: Arc<dyn ExternalModule>) -> WrappedClosure {
+    WrappedClosure::new(instance)
 }
 
 pub struct WrappedClosure {
@@ -55,12 +55,12 @@ pub async fn testExternalGlobalFunction_from_instance (
 
   let buffer = [
     &(WrapManifest::External::GlobalFunction::TestExternalGlobalFunction as u32).to_be_bytes()[..],
-    &TestExternalGlobalFunctionArgsWrapped::serialize(&args),
+    TestExternalGlobalFunctionArgsWrapped::serialize(&args),
   ].concat();
 
   let instance = Arc::clone(&instance);
 
-  let result = instance.invoke_resource(ExternalResource::InvokeGlobalFunction as u32, &buffer).await;
+  let result = dt.invoke_resource(ExternalResource::InvokeGlobalFunction as u32, &buffer).await;
   
   StringWrapped::deserialize(&result)
 }
@@ -79,7 +79,7 @@ impl TestExternalGlobalFunctionArgsWrapped {
         }
     }
 
-    pub fn serialize(value: &TestExternalGlobalFunctionArgs) -> Vec<u8> {
+    pub fn serialize(value: &TestExternalGlobalFunctionArgs) -> &[u8] {
         Self::serialize_wrapped(
             &Self::map_to_serializable(value)
         )
@@ -88,17 +88,16 @@ impl TestExternalGlobalFunctionArgsWrapped {
     pub fn map_to_serializable(value: &TestExternalGlobalFunctionArgs) -> Self {
         Self::new(
                         
-            value.arg.clone(),
+            value.arg,
             
         )
     }
 
-    fn serialize_wrapped(value: &Self) -> Vec<u8> {
+    fn serialize_wrapped(value: &Self) -> &[u8] {
         json!(
            value
         ).to_string()
         .as_bytes()
-        .to_vec()
     }
 }
 

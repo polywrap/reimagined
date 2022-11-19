@@ -86,7 +86,7 @@ async fn invoke_testInstanceReceiveReference_wrapped(buffer: &[u8], external_mod
 
     let args = TestInstanceReceiveReferenceArgsWrapped::deserialize(data_buffer, external_module);
 
-    let object = TestObjectGetterWrapped::dereference(reference_ptr);
+    let object = TestObjectGetterWrapped::dereference_by_external_ptr(reference_ptr);
 
     let result = object.testInstanceReceiveReference(
         args.arg,

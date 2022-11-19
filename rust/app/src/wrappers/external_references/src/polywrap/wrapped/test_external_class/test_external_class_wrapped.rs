@@ -1,4 +1,5 @@
 use std::{sync::{Arc, Mutex}, collections::HashMap};
+use lazy_static::lazy_static;
 use std::str;
 use reim_wrap::ExternalModule;
 use serde::{Deserialize, Serialize};
@@ -28,13 +29,15 @@ pub struct TestExternalClassWrapped {
     pub __reference_ptr: u32,
 }
 
-static reference_map: Arc<
-    Mutex<
-        HashMap<
-            ByAddress<&Arc<TestExternalClass>>, 
-            InstanceWithExternalReferencePtr
-        >
-    >> = Arc::new(Mutex::new(HashMap::new()));
+lazy_static! {
+    static ref reference_map: Arc<
+        Mutex<
+            HashMap<
+                ByAddress<Arc<TestExternalClass>>, 
+                InstanceWithExternalReferencePtr
+            >
+        >> = Arc::new(Mutex::new(HashMap::new()));
+}
 
 impl TestExternalClassWrapped {
     pub fn new(
@@ -46,38 +49,43 @@ impl TestExternalClassWrapped {
     }
 
     pub fn dereference(reference_ptr: Arc<TestExternalClass>) -> Arc<TestExternalClass> {
-        let reference_ptr = &ByAddress(&reference_ptr);
+        let reference_ptr = ByAddress(reference_ptr);
         let reference_map_mut = reference_map.lock().unwrap();
-        let existing_reference = reference_map_mut.get(reference_ptr);
+        let existing_reference = reference_map_mut.get(&reference_ptr);
 
         if existing_reference.is_none() {
             panic!("Could not dereference {}. Not found", CLASS_NAME);
         }
 
-        existing_reference.unwrap().instance
+        Arc::clone(&existing_reference.unwrap().instance)
     }
 
-    pub fn delete_reference(reference_ptr: Arc<TestExternalClass>) {
-        let reference_map_mut = reference_map.lock().unwrap();
-        let success = reference_map_mut.remove(&ByAddress(&reference_ptr));
+    pub fn delete_reference(reference_ptr: &Arc<TestExternalClass>) {
+        let reference_ptr = Arc::clone(reference_ptr);
+
+        let mut reference_map_mut = reference_map.lock().unwrap();
+        let success = reference_map_mut.remove(&ByAddress(reference_ptr));
 
         if success.is_none() {
             panic!("Could not delete reference for {}. Not found", CLASS_NAME);
         }
     }
 
-    pub fn serialize(value: &Arc<TestExternalClass>) -> &[u8] {
+    pub fn serialize(value: &Arc<TestExternalClass>) -> Vec<u8> {
         json!(
             TestExternalClassWrapped::map_to_serializable(value)
         )
         .to_string()
         .as_bytes()
+        .to_vec()
     }
 
     pub fn map_to_serializable(value: &Arc<TestExternalClass>) -> TestExternalClassWrapped {
-        let reference_ptr = &ByAddress(value);
+        let value = Arc::clone(value);
+
+        let reference_ptr = ByAddress(value);
         let reference_map_mut = reference_map.lock().unwrap();
-        let existing_reference = reference_map_mut.get(reference_ptr);
+        let existing_reference = reference_map_mut.get(&reference_ptr);
 
         if existing_reference.is_none() {
             panic!("Could not dereference {}. Not found", CLASS_NAME);
@@ -104,18 +112,6 @@ impl TestExternalClassWrapped {
 
         );
         let object = Arc::new(object);
-
-        let reference_ptr = ByAddress(&object);
-
-        let reference_map_mut = reference_map.lock().unwrap();
-    
-        reference_map_mut.insert(
-            reference_ptr, 
-            InstanceWithExternalReferencePtr::new (
-                value.__reference_ptr, 
-                object
-            )
-        );  
 
         object
     }

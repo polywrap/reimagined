@@ -3,15 +3,14 @@ use std::sync::Arc;
 use reim_wrap::{ ExternalModule };
 use serde::{Serialize, Deserialize};
 use serde_json::json;
+use crate::polywrap::external::module::wrap_module::get_external_module_or_panic;
 use crate::polywrap::wrap_manifest::WrapManifest;
 use crate::polywrap::resources::ExternalResource;
 use crate::polywrap::wrapped::TestExternalClassWrapped;
 use crate::polywrap::wrapped::StringWrapped;
 
-use crate::polywrap::external::module::external_wrap_module;
-
-pub fn create(external_module: Arc<dyn ExternalModule>) -> TestExternalClassImport {
-    TestExternalClassImport::new(external_module)
+pub fn create(external_module: &Arc<dyn ExternalModule>) -> TestExternalClassImport {
+    TestExternalClassImport::new(Arc::clone(external_module))
 }
 
 pub struct TestExternalClassImport {
@@ -38,7 +37,7 @@ impl TestExternalClassImport {
         let buffer = [
             &(WrapManifest::External::Class::TestExternalClass as u32).to_be_bytes()[..],
             &(WrapManifest::External::Classes::TestExternalClassMethod::Create as u32).to_be_bytes()[..],
-            CreateArgsWrapped::serialize(&args),
+            &CreateArgsWrapped::serialize(&args),
         ].concat();
 
         let external_module = Arc::clone(&self.external_module);
@@ -61,7 +60,7 @@ impl TestExternalClassImport {
         let buffer = [
             &(WrapManifest::External::Class::TestExternalClass as u32).to_be_bytes()[..],
             &(WrapManifest::External::Classes::TestExternalClassMethod::TestStaticMethod as u32).to_be_bytes()[..],
-            TestStaticMethodArgsWrapped::serialize(&args),
+            &TestStaticMethodArgsWrapped::serialize(&args),
         ].concat();
 
         let external_module = Arc::clone(&self.external_module);
@@ -75,17 +74,17 @@ impl TestExternalClassImport {
 }
 
 pub struct TestExternalClass {
-    __referencePtr: u32,
-    __external_module: Arc<dyn ExternalModule>,
+    pub __reference_ptr: u32,
+    pub __external_module: Arc<dyn ExternalModule>,
 }
 
 impl TestExternalClass {
     pub fn new(
-        __referencePtr: u32,
+        __reference_ptr: u32,
         __external_module: Arc<dyn ExternalModule>,
     ) -> Self {
         Self {
-            __referencePtr,
+            __reference_ptr,
             __external_module,
         }
     }
@@ -93,11 +92,7 @@ impl TestExternalClass {
     pub async fn create(
         arg: String,
     ) -> Arc<TestExternalClass> {
-        if external_wrap_module.is_none() {
-            panic!("connect() must be called before using this module");
-        }
-
-        let external_module = Arc::clone(external_wrap_module.as_ref().unwrap());
+        let external_module = get_external_module_or_panic();
 
         TestExternalClassImport::new(external_module)
             .create(
@@ -117,8 +112,8 @@ impl TestExternalClass {
         let buffer = [
             &(WrapManifest::External::Class::TestExternalClass as u32).to_be_bytes()[..],
             &(WrapManifest::External::Classes::TestExternalClassMethod::TestInstanceMethod as u32).to_be_bytes()[..],
-            &self.__referencePtr.to_be_bytes()[..],
-            TestInstanceMethodArgsWrapped::serialize(&args),
+            &self.__reference_ptr.to_be_bytes()[..],
+            &TestInstanceMethodArgsWrapped::serialize(&args),
         ].concat();
 
         let external_module = Arc::clone(&self.__external_module);
@@ -130,11 +125,7 @@ impl TestExternalClass {
     pub async fn testStaticMethod(
         arg: String,
     ) -> String {
-        if external_wrap_module.is_none() {
-            panic!("connect() must be called before using this module");
-        }
-
-        let external_module = Arc::clone(external_wrap_module.as_ref().unwrap());
+        let external_module = get_external_module_or_panic();
 
         TestExternalClassImport::new(external_module)
             .testStaticMethod(
@@ -176,17 +167,18 @@ impl CreateArgsWrapped {
     }
   }
 
-  pub fn serialize(value: &CreateArgs) -> &[u8] {
+  pub fn serialize(value: &CreateArgs) -> Vec<u8> {
     json!(
         CreateArgsWrapped::map_to_serializable(value)
     ).to_string()
     .as_bytes()
+    .to_vec()
   }
 
   pub fn map_to_serializable(value: &CreateArgs) -> CreateArgsWrapped {
     CreateArgsWrapped::new(
             
-      value.arg,
+      value.arg.clone(),
       
     )
   }
@@ -224,17 +216,18 @@ impl TestInstanceMethodArgsWrapped {
     }
   }
 
-  pub fn serialize(value: &TestInstanceMethodArgs) -> &[u8] {
+  pub fn serialize(value: &TestInstanceMethodArgs) -> Vec<u8> {
     json!(
         TestInstanceMethodArgsWrapped::map_to_serializable(value)
     ).to_string()
     .as_bytes()
+    .to_vec()
   }
 
   pub fn map_to_serializable(value: &TestInstanceMethodArgs) -> TestInstanceMethodArgsWrapped {
     TestInstanceMethodArgsWrapped::new(
             
-      value.arg,
+      value.arg.clone(),
       
     )
   }
@@ -271,17 +264,18 @@ impl TestStaticMethodArgsWrapped {
     }
   }
 
-  pub fn serialize(value: &TestStaticMethodArgs) -> &[u8] {
+  pub fn serialize(value: &TestStaticMethodArgs) -> Vec<u8> {
     json!(
         TestStaticMethodArgsWrapped::map_to_serializable(value)
     ).to_string()
     .as_bytes()
+    .to_vec()
   }
 
   pub fn map_to_serializable(value: &TestStaticMethodArgs) -> TestStaticMethodArgsWrapped {
     TestStaticMethodArgsWrapped::new(
             
-      value.arg,
+      value.arg.clone(),
       
     )
   }

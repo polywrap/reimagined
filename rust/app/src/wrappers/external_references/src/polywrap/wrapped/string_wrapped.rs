@@ -15,18 +15,19 @@ impl StringWrapped {
         value.clone()
     }
 
-    pub fn serialize(value: &String) -> &[u8] {
+    pub fn serialize(value: &String) -> Vec<u8> {
         Self::serialize_wrapped(
             &Self::map_to_serializable(value)
         )
     }
 
-    pub fn serialize_wrapped(value: &String) -> &[u8] {
+    pub fn serialize_wrapped(value: &String) -> Vec<u8> {
         json!(
             value
         )
         .to_string()
         .as_bytes()
+        .to_vec()
     }
 
     pub fn deserialize(buffer: &[u8]) -> String {
