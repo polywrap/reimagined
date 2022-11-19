@@ -1,4 +1,4 @@
-use reim_wrap::{ ExternalWrapModule };
+use reim_wrap::{ ExternalModule };
 use dt::{ send };
 
 struct HostModule {}
@@ -9,7 +9,7 @@ impl HostModule {
     }
 }
 
-impl ExternalWrapModule for HostModule {
+impl ExternalModule for HostModule {
   pub fn invoke_resource(&self, resource: u32, buffer: &[u8]) -> Vec<u8> {
     send(
         [resource.to_be_bytes(), buffer].concat()

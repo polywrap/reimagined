@@ -1,0 +1,2 @@
+pub mod test_external_global_function;
+pub use test_external_global_function::testExternalGlobalFunction;

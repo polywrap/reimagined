@@ -1,10 +1,13 @@
 [workspace]
 members = [
+    "wrap_schema/tree_sitter_wrap", 
+    "wrap_schema/reim_schema",
     "reim_dt",
     "reim_wrap", 
     "reim_dt_wasm",
-    "reim_cli", 
     "reim_codegen", 
-    "wrap_schema/tree_sitter_wrap", 
-    "wrap_schema/reim_schema"
+    "reim_cli", 
+    "reim_cli", 
+    "app/src/wrappers/external_references",
+    "app"
 ]

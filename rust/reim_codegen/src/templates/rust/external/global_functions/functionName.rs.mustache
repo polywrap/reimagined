@@ -1,4 +1,4 @@
-use reim_wrap::{ ExternalWrapModule };
+use reim_wrap::{ ExternalModule };
 use module::{ WrapManifest };
 use dt::{ ExternalResource };
 use external_module::{ WrapModule };
@@ -29,9 +29,9 @@ pub async fn {{name}}(
     {{model.name}},
     {{/args}}
   )
-};
+}
 
-pub fn create(instance: dyn ExternalWrapModule) {
+pub fn create(instance: dyn ExternalModule) {
   |
     {{#args}}
     {{model.name}}: {{model.typeInfo.nativeTypeName}},
@@ -47,7 +47,7 @@ pub fn create(instance: dyn ExternalWrapModule) {
 }
 
 pub async fn {{name}}FromInstance (
-  instance: Option<ExternalWrapModule>, 
+  instance: Option<ExternalModule>, 
   {{#args}}
   {{model.name}}: {{model.typeInfo.nativeTypeName}},
   {{/args}}
@@ -56,7 +56,7 @@ pub async fn {{name}}FromInstance (
     panic!("connect() or import() must be called before using this module");
   }
 
-  let args = {{namePascalCase}}Args.new(
+  let args = {{namePascalCase}}Args::new(
     {{#args}}
     {{model.name}},
     {{/args}}
@@ -64,7 +64,7 @@ pub async fn {{name}}FromInstance (
 
   let buffer = [
     WrapManifest.External.GlobalFunction.{{namePascalCase}}.to_be_bytes(),
-    {{namePascalCase}}ArgsWrapped.serialize(args),
+    {{namePascalCase}}ArgsWrapped::serialize(args),
   ].concat();
 
   let result = instance.invokeResource(ExternalResource.InvokeGlobalFunction, buffer).await;
@@ -97,12 +97,12 @@ impl {{namePascalCase}}ArgsWrapped {
 
     pub fn serialize(value: {{namePascalCase}}Args) -> Vec<u8> {
         json!(
-            {{namePascalCase}}ArgsWrapped.mapToSerializable(value)
+            {{namePascalCase}}ArgsWrapped::mapToSerializable(value)
         ).as_bytes()
     }
 
     pub fn mapToSerializable(value: {{namePascalCase}}Args) -> {{namePascalCase}}ArgsWrapped {
-        {{namePascalCase}}ArgsWrapped.new(
+        {{namePascalCase}}ArgsWrapped::new(
             {{#args}}
             {{#model.typeInfo.isClass}}
             {{model.typeInfo.nativeTypeNameWrapped}}.mapToSerializable(value.{{model.name}}),
@@ -127,7 +127,7 @@ impl {{namePascalCase}}Args {
     {{model.name}}: {{model.typeInfo.nativeTypeName}},
     {{/args}}
   ) -> {{namePascalCase}}Args {
-    {{namePascalCase}}Args.new (
+    {{namePascalCase}}Args::new (
       {{#args}}
       {{model.name}},
       {{/args}}

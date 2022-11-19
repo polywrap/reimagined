@@ -1,4 +1,4 @@
-use reim_wrap::{ ExternalWrapModule };
+use reim_wrap::{ ExternalModule };
 use module::{ WrapManifest };
 {{#relatedTypes}}
 {{#isClass}}
@@ -15,7 +15,7 @@ use crate::{ {{nativeTypeName}} };
 {{/isStruct}}
 {{/relatedTypes}}
 
-pub async fn invoke(buffer: &[u8], external_module: dyn ExternalWrapModule) -> Vec<u8> {
+pub async fn invoke(buffer: &[u8], external_module: dyn ExternalModule) -> Vec<u8> {
   let func_id = u32::from_be_bytes(buffer.try_into().expect("Method ID must be 4 bytes"));
   let data_buffer = &buffer[4..];
 
@@ -29,7 +29,7 @@ pub async fn invoke(buffer: &[u8], external_module: dyn ExternalWrapModule) -> V
 }
 
 {{#list}}
-async fn invoke{{model.namePascalCase}}Wrapped(buffer: &[u8], external_module: dyn ExternalWrapModule) -> Vec<u8> {
+async fn invoke{{model.namePascalCase}}Wrapped(buffer: &[u8], external_module: dyn ExternalModule) -> Vec<u8> {
     {{#model.isStatic}}
     let args = {{model.namePascalCase}}ArgsWrapped.deserialize(buffer, external_module);
 
@@ -101,7 +101,7 @@ impl {{model.namePascalCase}}ArgsWrapped {
         }
     }
 
-    pub fn deserialize(buffer: Uint8Array, external_module: dyn ExternalWrapModule) -> {{model.namePascalCase}}Args {
+    pub fn deserialize(buffer: Uint8Array, external_module: dyn ExternalModule) -> {{model.namePascalCase}}Args {
         let args = serde_json::from_str(
             str::from_utf8(buffer).expect("Could not convert buffer to string")
         ).expect("JSON was not well-formatted");

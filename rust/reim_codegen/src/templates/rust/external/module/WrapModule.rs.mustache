@@ -1,4 +1,4 @@
-use reim_wrap::{ ExternalWrapModule };
+use reim_wrap::{ ExternalModule };
 use ImportBindings;
 
 {{#globalFunctions.list}}
@@ -15,13 +15,13 @@ use external::classes::{{model.name}}::{ create as create{{model.name}} };
 struct WrapModule {}
 
 impl WrapModule {
-  static wrapInstance: Option<Box<dyn ExternalWrapModule>>;
+  static wrapInstance: Option<Box<dyn ExternalModule>>;
 
-  pub fn connect(instance: dyn ExternalWrapModule) {
+  pub fn connect(instance: dyn ExternalModule) {
     WrapModule.wrapInstance = Box::new(instance);
   }
 
-  pub fn import(instance: dyn ExternalWrapModule) -> ImportBindings {
+  pub fn import(instance: dyn ExternalModule) -> ImportBindings {
     ImportBindings.new(
       {{#globalFunctions.list}}
       {{#model.isExternal}}

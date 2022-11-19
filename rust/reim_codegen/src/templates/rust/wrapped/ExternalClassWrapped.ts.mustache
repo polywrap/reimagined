@@ -1,0 +1,134 @@
+import { IExternalWrapInstance } from "@polywrap/reim-wrap-js";
+import { WrapManifest } from '../../WrapManifest';
+import { WrapModule } from "../../external/module/WrapModule";
+import { {{name}} } from "../../external/classes/{{name}}";
+{{#relatedTypes}}
+{{#isClass}}
+import { {{nativeTypeNameWrapped}} } from "..";
+{{/isClass}}
+{{#isStruct}}
+import { {{nativeTypeName}} } from "../../..";
+{{/isStruct}}
+{{/relatedTypes}}
+
+const CLASS_NAME = "{{name}}";
+
+struct InstanceWithExternalReferencePtr {
+    pub externalReferencePtr: u32,
+    pub instance: {{name}}
+}
+
+impl InstanceWithExternalReferencePtr {
+    pub fn new(externalReferencePtr: u32, instance: {{name}}) -> Self {
+        Self {
+            externalReferencePtr,
+            instance,
+        }
+    }
+}
+
+struct {{name}}Wrapped {
+    pub __referencePtr: number,
+    {{#fields}}
+    pub {{model.name}}: {{model.typeInfo.nativeTypeNameWrapped}},
+    {{/fields}}
+}
+
+impl {{name}}Wrapped {
+    pub fn new(
+        __referencePtr: number,
+        {{#fields}}
+        {{model.name}}: {{model.typeInfo.nativeTypeNameWrapped}},
+        {{/fields}}
+    ) -> Self {
+        Self {
+            __referencePtr,
+            {{#fields}}
+            {{model.name}},
+            {{/fields}}
+        }
+    }
+
+    static reference_map: HashMap<{{name}}, InstanceWithExternalReferencePtr> = HashMap<{{name}}, InstanceWithExternalReferencePtr>.new();
+    static reference_count: u32 = 0;
+
+    static dereference(reference_ptr: {{name}}) -. {{name}} {
+        let object = {{name}}Wrapped.reference_map.get(reference_ptr);
+
+        if object.is_none() {
+        panic!(format!("Could not dereference {}. Not found", CLASS_NAME));
+        }
+
+        object.instance
+    }
+
+    static delete_reference(reference_ptr: {{name}}) {
+        let success = {{name}}Wrapped.reference_map.delete(reference_ptr);
+
+        if success.is_none() {
+        panic!(format!("Could not delete reference for {}. Not found", CLASS_NAME));
+        }
+    }
+
+    static serialize(value: {{name}}) -> Vec<u8> {
+        json!(
+            {{name}}Wrapped.map_from_serializable(value)
+        ).as_bytes()
+    }
+
+    static mapToSerializable(value: {{name}}): {{name}}Wrapped {
+        const reference_ptr = value;
+        const existing_reference = {{name}}Wrapped.reference_map.get(reference_ptr);
+
+        if existing_reference.is_none() {
+            panic!(format!("Could not dereference {}. Not found", CLASS_NAME));
+        }
+    
+        {{name}}Wrapped.new(
+            existing_reference.external_reference_ptr,
+            {{#fields}}
+            {{#model.typeInfo.isClass}}
+            {{model.typeInfo.nativeTypeNameWrapped}}.map_from_serializable(value.{{model.name}}),
+            {{/model.typeInfo.isClass}}
+            {{^model.typeInfo.isClass}}
+            value.{{model.name}},
+            {{/model.typeInfo.isClass}}
+            {{/fields}}
+        )
+    }
+
+    static deserialize(buffer: &[u8], external_module: ExternalModule) -> {{name}} {
+        let object = serde_json::from_str(
+            str::from_utf8(buffer).expect("Could not convert buffer to string")
+        ).expect("JSON was not well-formatted");
+    
+        {{name}}Wrapped.map_from_serializable(object, external_module)
+    }
+
+    static map_from_serializable(value: {{name}}Wrapped, external_module: ExternalModule) -> {{name}} {
+        let object = {{name}}.new(
+            value.__referencePtr,
+            external_module,
+            {{#fields}}
+            {{#model.isClass}}
+            {{model.typeInfo.nativeTypeNameWrapped}}.map_from_serializable(value.{{model.name}}, external_module),
+            {{/model.isClass}}
+            {{^model.isClass}}
+            value.{{model.name}},
+            {{/model.isClass}}
+            {{/fields}}
+        );
+
+        let reference_ptr = object;
+    
+        {{name}}Wrapped.reference_map.set(
+            reference_ptr, 
+            InstanceWithExternalReferencePtr.new (
+                value.__reference_ptr, 
+                object
+            )
+        );  
+
+        object
+    }
+}

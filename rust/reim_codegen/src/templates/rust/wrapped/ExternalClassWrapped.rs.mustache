@@ -1,5 +1,5 @@
 use std::{sync::{Arc, Mutex}};
-use reim_wrap::{ ExternalWrapModule };
+use reim_wrap::{ ExternalModule };
 use module::{ WrapManifest };
 use external_module::{ WrapModule };
 use external::{ {{name}} };
@@ -101,7 +101,7 @@ impl {{name}}Wrapped {
         )
     }
 
-    pub fn deserialize(buffer: &[u8], external_module: &dyn ExternalWrapModule) -> {{name}} {
+    pub fn deserialize(buffer: &[u8], external_module: &dyn ExternalModule) -> {{name}} {
         let object = serde_json::from_str(
             str::from_utf8(buf).expect("Could not convert buffer to string")
         ).expect("JSON was not well-formatted");
@@ -109,7 +109,7 @@ impl {{name}}Wrapped {
         {{name}}Wrapped.map_from_serializable(object, external_module, external_module)
     }
 
-    pub fn map_from_serializable(value: {{name}}Wrapped, external_module: &dyn ExternalWrapModule) -> {{name}} {
+    pub fn map_from_serializable(value: {{name}}Wrapped, external_module: &dyn ExternalModule) -> {{name}} {
         let object = {{name}}.new(
             value.__referencePtr,
             external_module,

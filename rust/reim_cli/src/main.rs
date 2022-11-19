@@ -21,6 +21,7 @@ fn main() -> Result<(), std::io::Error> {
             let language = match args[2].as_str() {
                 "as" => Language::AssemblyScript,
                 "ts" => Language::TypeScript,
+                "rs" => Language::Rust,
                 _ => Language::TypeScript,
             };
 

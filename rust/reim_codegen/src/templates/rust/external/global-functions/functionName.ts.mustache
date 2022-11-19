@@ -1,0 +1,136 @@
+use reim_wrap::{ ExternalModule };
+use module::{ WrapManifest };
+use dt::{ ExternalResource };
+use external_module::{ WrapModule };
+use wrapped::{ {{name}}Wrapped };
+{{#relatedTypes}}
+{{#isClass}}
+use wrapped::{ {{nativeTypeNameWrapped}} };
+{{#isExternal}}
+use external::classes::{ {{nativeTypeNameWrapped}} };
+{{/isExternal}}
+{{^isExternal}}
+use crate::{ {{nativeTypeName}} };
+{{/isExternal}}
+{{/isClass}}
+{{#isStruct}}
+use crate::{ {{nativeTypeName}} };
+{{/isStruct}}
+{{/relatedTypes}}
+
+pub fn async {{name}}(
+  {{#args}}
+  {{model.name}}: {{model.typeInfo.nativeTypeName}},
+  {{/args}}
+) -> {{result.nativeTypeName}} {
+  {{name}}FromInstance(
+    WrapModule.wrapInstance,
+    {{#args}}
+    {{model.name}},
+    {{/args}}
+  )
+};
+
+pub fn create = (instance: dyn ExternalModule) {
+  |
+    {{#args}}
+    {{model.name}}: {{model.typeInfo.nativeTypeName}},
+    {{/args}}
+  | {
+    {{name}}FromInstance(
+      instance, 
+      {{#args}}
+      {{model.name}},
+      {{/args}}
+    )
+  }
+};
+
+pub async fn {{name}}FromInstance (
+  instance: Option<ExternalModule>, 
+  {{#args}}
+  {{model.name}}: {{model.typeInfo.nativeTypeName}},
+  {{/args}}
+) -> {{result.nativeTypeName}} => {
+  if instance.is_none() {
+    panic!("connect() or import() must be called before using this module");
+  }
+
+  let args = {{namePascalCase}}Args.new(
+    {{#args}}
+    {{model.name}},
+    {{/args}}
+  );
+
+  let buffer = [
+    WrapManifest.External.GlobalFunction.{{namePascalCase}}.to_be_bytes(),
+    {{namePascalCase}}ArgsWrapped.serialize(args),
+  ].concat();
+
+  let result = instance.invokeResource(ExternalResource.InvokeGlobalFunction, buffer).await;
+
+  {{#result.isClass}}
+  {{result.nativeTypeNameWrapped}}.deserialize(result, instance)
+  {{/result.isClass}}
+  {{^result.isClass}}
+  BaseTypeSerialization.deserialize<{{result.nativeTypeName}}>(result)
+  {{/result.isClass}}
+}
+
+struct {{namePascalCase}}ArgsWrapped {
+    {{#args}}
+    pub {{model.name}}: {{model.typeInfo.nativeTypeNameWrapped}},
+    {{/args}}
+}
+impl {{namePascalCase}}ArgsWrapped {
+    static new(
+      {{#args}}
+      {{model.name}}: {{model.typeInfo.nativeTypeName}},
+      {{/args}}
+    ) -> {{namePascalCase}}ArgsWrapped {
+      {{namePascalCase}}ArgsWrapped {
+        {{#args}}
+        {{model.name}},
+        {{/args}}
+      }
+    }
+
+    static serialize(value: {{namePascalCase}}Args) -> Vec<u8> {
+        json!(
+            {{namePascalCase}}ArgsWrapped.mapToSerializable(value)
+        ).as_bytes()
+    }
+
+    static mapToSerializable(value: {{namePascalCase}}Args) -> {{namePascalCase}}ArgsWrapped {
+        {{namePascalCase}}ArgsWrapped.new(
+            {{#args}}
+            {{#model.typeInfo.isClass}}
+            {{model.typeInfo.nativeTypeNameWrapped}}.mapToSerializable(value.{{model.name}}),
+            {{/model.typeInfo.isClass}}
+            {{^model.typeInfo.isClass}}
+            value.{{model.name}},
+            {{/model.typeInfo.isClass}}
+            {{/args}}
+        )
+    }
+}
+
+struct {{namePascalCase}}Args {
+    {{#args}}
+    pub {{model.name}}: {{model.typeInfo.nativeTypeName}},
+    {{/args}}
+}
+
+impl {{namePascalCase}}Args {
+  static new(
+    {{#args}}
+    {{model.name}}: {{model.typeInfo.nativeTypeName}},
+    {{/args}}
+  ) -> {{namePascalCase}}Args {
+    {{namePascalCase}}Args {
+      {{#args}}
+      {{model.name}}: {{model.name}},
+      {{/args}}
+    }
+  }
+}

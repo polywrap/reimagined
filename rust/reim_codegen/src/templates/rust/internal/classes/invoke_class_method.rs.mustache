@@ -1,4 +1,4 @@
-use reim_wrap::{ ExternalWrapModule };
+use reim_wrap::{ ExternalModule };
 use module::{ WrapManifest };
 {{#types}}
 {{#model.isClass}}
@@ -8,7 +8,7 @@ use wrapped::{ {{model.name}}Wrapped };
 {{/model.isClass}}
 {{/types}}
 
-pub async fn invoke_class_method(buffer: &[u8], external_module: dyn ExternalWrapModule) -> Vec<u8> {
+pub async fn invoke_class_method(buffer: &[u8], external_module: dyn ExternalModule) -> Vec<u8> {
   let class_id = u32::from_be_bytes(buffer.try_into().expect("Class ID must be 4 bytes"));
   let data_buffer = &buffer[4..];
 

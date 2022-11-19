@@ -1,0 +1,9 @@
+[package]
+name = "reim_app"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+reim_wrap = { path = "../reim_wrap" }
+reim_dt_wasm = { path = "../reim_dt_wasm" }
+reim_codegen = { path = "../reim_codegen" }

@@ -1,4 +1,4 @@
-use reim_wrap::{ ExternalWrapModule };
+use reim_wrap::{ ExternalModule };
 use module::{ WrapManifest };
 use dt::{ ExternalResource };
 use external_module::{ WrapModule };
@@ -18,16 +18,16 @@ use crate::{{nativeTypeName}};
 {{/isStruct}}
 {{/relatedTypes}}
 
-pub fn create(instance: &dyn ExternalWrapModule) -> {{name}}Import {
-    {{name}}Import.new(instance)
+pub fn create(instance: &dyn ExternalModule) -> {{name}}Import {
+    {{name}}Import::new(instance)
 }
 
 pub struct {{name}}Import {
-    instance: Box<dyn ExternalWrapModule>,
+    instance: Box<dyn ExternalModule>,
 }
 
 impl {{name}}Import {
-    pub fn new(instance: &dyn ExternalWrapModule) -> {{name}}Import {
+    pub fn new(instance: &dyn ExternalModule) -> {{name}}Import {
         {{name}}Import {
             instance: instance.clone_box(),
         }
@@ -41,7 +41,7 @@ impl {{name}}Import {
         {{model.name}}: {{model.typeInfo.nativeTypeName}},
         {{/model.args}}
     ) -> {{model.result.nativeTypeName}} {
-        let args = {{model.namePascalCase}}Args.new( 
+        let args = {{model.namePascalCase}}Args::new( 
             {{#model.args}}
             {{model.name}},
             {{/model.args}} 
@@ -50,13 +50,13 @@ impl {{name}}Import {
         let buffer = [
             WrapManifest.External.Class.{{model.className}}.to_be_bytes(),
             WrapManifest.External.Classes.{{model.className}}Method.{{model.namePascalCase}}.to_be_bytes(),
-            {{model.namePascalCase}}ArgsWrapped.serialize(args),
+            {{model.namePascalCase}}ArgsWrapped::serialize(args),
         ].concat();
 
         let result = self.wrapInstance.invokeResource(ExternalResource.InvokeClassMethod, buffer).await;
 
         {{#model.result.isClass}}
-        {{model.result.nativeTypeNameWrapped}}.deserialize(result, this.wrapInstance)
+        {{model.result.nativeTypeNameWrapped}}.deserialize(result, self.wrapInstance)
         {{/model.result.isClass}}
         {{^model.result.isClass}}
         BaseTypeSerialization.deserialize<{{model.result.nativeTypeName}}>(result)
@@ -66,9 +66,9 @@ impl {{name}}Import {
     {{/methods}}
 }
 
-struct {{name}} {
+pub struct {{name}} {
     __referencePtr: u32,
-    __wrapInstance: ExternalWrapModule,
+    __wrapInstance: ExternalModule,
     {{#fields}}
     pub {{model.name}}: {{model.typeInfo.nativeTypeName}},
     {{/fields}}
@@ -86,7 +86,7 @@ impl {{name}} {
       panic!("connect() or import() must be called before using this module");
     }
 
-    {{model.className}}Import.new(WrapModule.wrapInstance.unwrap())
+    {{model.className}}Import::new(WrapModule.wrapInstance.unwrap())
       .{{model.name}}(
         {{#model.args}}
         {{model.name}},
@@ -105,7 +105,7 @@ impl {{name}} {
       panic!("connect() or import() must be called before using this module");
     }
 
-    let args = {{model.namePascalCase}}Args.new( 
+    let args = {{model.namePascalCase}}Args::new( 
       {{#model.args}}
       {{model.name}},
       {{/model.args}} 
@@ -114,8 +114,8 @@ impl {{name}} {
     let buffer = [
       WrapManifest.External.Class.{{model.className}}.to_be_bytes(),
       WrapManifest.External.Classes.{{model.className}}Method.{{model.namePascalCase}}.to_be_bytes(),
-      this.__referencePtr.to_be_bytes(),
-      {{model.namePascalCase}}ArgsWrapped.serialize(args),
+      self.__referencePtr.to_be_bytes(),
+      {{model.namePascalCase}}ArgsWrapped::serialize(args),
     ].concat();
 
     let result = self.__wrapInstance.invokeResource(ExternalResource.InvokeClassMethod, buffer).await;
@@ -173,12 +173,12 @@ impl {{model.namePascalCase}}ArgsWrapped {
 
   pub fn serialize(value: {{model.namePascalCase}}Args) -> Vec<u8> {
     json!(
-        {{model.namePascalCase}}ArgsWrapped.map_to_serializable(value)
+        {{model.namePascalCase}}ArgsWrapped::map_to_serializable(value)
     ).as_bytes()
   }
 
   pub fn map_to_serializable(value: {{model.namePascalCase}}Args) -> {{model.namePascalCase}}ArgsWrapped {
-    {{model.namePascalCase}}ArgsWrapped.new(
+    {{model.namePascalCase}}ArgsWrapped::new(
       {{#model.args}}
       {{#model.typeInfo.isClass}}
       {{model.typeInfo.nativeTypeNameWrapped}}.map_to_serializable(value.{{model.name}}),

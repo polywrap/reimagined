@@ -1,0 +1,22 @@
+use reim_wrap::{ ExternalModule, InternalModule };
+use internal::global_functions::{ invoke as invoke_global_function };
+use internal::classes::{ invoke_class_method };
+use dt::{ InternalResource };
+
+struct InternalModule {}
+
+impl InternalModule {
+    static new() -> Self {
+        InternalModule {}
+    }
+}
+
+impl InternalModule for InternalModule {
+  async invoke_resource(&self, resource: u32, buffer: &[u8], external_module: dyn ExternalModule) -> Vec<u8> {
+    match resource {
+      InternalResource::InvokeGlobalFunction => invoke_global_function(buffer, external_module)
+      InternalResource::InvokeClassMethod => invoke_class_method(buffer, external_module)
+      _ => panic!("Unknown resource: ".to_string() + &resource.to_string()))
+    }
+  }
+}
