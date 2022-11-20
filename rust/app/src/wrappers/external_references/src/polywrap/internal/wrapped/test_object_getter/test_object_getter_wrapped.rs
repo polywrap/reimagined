@@ -9,7 +9,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::json;
 use crate::TestObjectGetter;
 
-use crate::polywrap::wrapped::test_object_getter::invoke::invoke;
+use crate::polywrap::internal::wrapped::test_object_getter::invoke::invoke;
 
 pub const CLASS_NAME: &str = "TestObjectGetter";
 

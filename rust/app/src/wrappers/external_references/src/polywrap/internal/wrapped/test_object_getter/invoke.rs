@@ -7,10 +7,10 @@ use crate::polywrap::wrap_manifest::WrapManifest;
 
 use crate::TestObjectGetter;
 
-use crate::polywrap::wrapped::StringWrapped;
-use crate::polywrap::wrapped::TestObjectGetterWrapped;
-use crate::polywrap::wrapped::TestExternalClassWrapped;
-use crate::polywrap::wrapped::test_object_getter::test_object_getter_wrapped::CLASS_NAME;
+use crate::polywrap::internal::wrapped::StringWrapped;
+use crate::polywrap::internal::wrapped::TestObjectGetterWrapped;
+use crate::polywrap::external::wrapped::TestExternalClassWrapped;
+use crate::polywrap::internal::wrapped::test_object_getter::test_object_getter_wrapped::CLASS_NAME;
 use crate::polywrap::external::classes::TestExternalClass;
 
 pub async fn invoke(buffer: &[u8], external_module: Arc<dyn ExternalModule>) -> Vec<u8> {

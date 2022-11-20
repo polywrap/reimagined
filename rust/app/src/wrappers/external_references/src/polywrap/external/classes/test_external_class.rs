@@ -6,8 +6,8 @@ use serde_json::json;
 use crate::polywrap::external::module::wrap_module::get_external_module_or_panic;
 use crate::polywrap::wrap_manifest::WrapManifest;
 use crate::polywrap::resources::ExternalResource;
-use crate::polywrap::wrapped::TestExternalClassWrapped;
-use crate::polywrap::wrapped::StringWrapped;
+use crate::polywrap::external::wrapped::TestExternalClassWrapped;
+use crate::polywrap::internal::wrapped::StringWrapped;
 
 pub fn create(external_module: Arc<dyn ExternalModule>) -> TestExternalClassImport {
     TestExternalClassImport::new(external_module)

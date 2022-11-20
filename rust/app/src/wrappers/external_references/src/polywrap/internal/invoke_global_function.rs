@@ -15,7 +15,8 @@ use crate::{
   testInvokeExternalInstanceMethod,
        
 };
-use crate::polywrap::wrapped::{TestExternalClassWrapped, StringWrapped};
+use crate::polywrap::external::wrapped::TestExternalClassWrapped;
+use crate::polywrap::internal::wrapped::StringWrapped;
 use crate::polywrap::external::TestExternalClass;
 
 
