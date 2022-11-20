@@ -1,4 +1,3 @@
-pub mod host_wrap_module;
 pub mod internal_wrap_module;
 pub mod import_bindings;
 pub mod wrap_module;

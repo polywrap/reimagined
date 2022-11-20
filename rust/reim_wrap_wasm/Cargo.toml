@@ -7,3 +7,4 @@ edition = "2021"
 futures = "0.3.25"
 reim_dt = { path = "../reim_dt" }
 reim_wrap = { path = "../reim_wrap" }
+async-trait = "0.1.58"

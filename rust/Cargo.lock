@@ -1042,6 +1042,7 @@ dependencies = [
 name = "reim_wrap_wasm"
 version = "0.1.0"
 dependencies = [
+ "async-trait",
  "futures",
  "reim_dt",
  "reim_wrap",

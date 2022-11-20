@@ -3,10 +3,9 @@ use std::sync::Arc;
 use reim_wrap::ExternalModule;
 use reim_wrap_wasm::imports::__dt_fill_input_buffer;
 use reim_wrap_wasm::malloc::alloc;
-use reim_wrap_wasm::{abort::*, receive};
+use reim_wrap_wasm::{abort::*, receive, HostWrapModule};
 
 use super::external::module::external_wrap_module;
-use super::external::module::host_wrap_module::HostWrapModule;
 use super::external::module::internal_wrap_module::InternalWrapModule;
 
 #[no_mangle]
