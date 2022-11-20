@@ -1,10 +1,9 @@
-
-use std::{sync::Arc, collections::HashMap};
+use std::sync::Arc;
 
 use async_trait::async_trait;
 use reim_dt::{DtInstance, Receiver};
 use tokio::sync::Mutex;
-use crate::{internal_wrap_module::InternalModule, ExternalModule};
+use crate::{internal_module::InternalModule, ExternalModule};
 
 pub struct WrapperModule {
     dt_instance: Arc<Mutex<dyn DtInstance>>,

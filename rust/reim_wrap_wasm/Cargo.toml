@@ -1,0 +1,9 @@
+[package]
+name = "reim_wrap_wasm"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+futures = "0.3.25"
+reim_dt = { path = "../reim_dt" }
+reim_wrap = { path = "../reim_wrap" }

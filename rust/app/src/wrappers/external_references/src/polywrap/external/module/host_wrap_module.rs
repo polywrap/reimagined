@@ -1,7 +1,7 @@
 use std::sync::Arc;
 use async_trait::async_trait;
 use reim_wrap::ExternalModule;
-use crate::polywrap::dt::send;
+use reim_wrap_wasm::send;
 
 pub struct HostWrapModule;
 
