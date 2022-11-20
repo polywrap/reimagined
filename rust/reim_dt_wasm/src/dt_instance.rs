@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use async_trait::async_trait;
-use reim_dt::DtInstance;
+use reim_dt::DtModule;
 use reim_dt::Receiver;
 use wasmtime::AsContextMut;
 use wasmtime::Val;
@@ -12,12 +12,12 @@ use crate::wasm_runtime::instance::State;
 use crate::wasm_runtime::instance::WasmInstance;
 use crate::wasm_runtime::instance::WasmModule;
 
-pub struct DtWasmInstance {
+pub struct DtWasmModule {
     wasm_instance: WasmInstance,
 } 
 
-impl DtWasmInstance {
-    pub async fn new(wasm_module: WasmModule) -> DtWasmInstance {
+impl DtWasmModule {
+    pub async fn new(wasm_module: WasmModule) -> DtWasmModule {
         let state = State::new();
 
         Self {
@@ -27,8 +27,8 @@ impl DtWasmInstance {
 }
 
 #[async_trait]
-impl DtInstance for DtWasmInstance {
-    async fn send(&mut self, buffer: &[u8], on_receive: Arc<dyn Receiver>) -> Vec<u8>  {
+impl DtModule for DtWasmModule {
+    async fn send(&mut self, buffer: &[u8], on_receive: &Arc<dyn Receiver>) -> Vec<u8>  {
         let buffer_len = buffer.len() as i32;
 
         let params = &[
@@ -37,7 +37,7 @@ impl DtInstance for DtWasmInstance {
 
         let state = (self.wasm_instance.store).data_mut();
         state.input_buffer = buffer.to_vec();
-        state.receiver = Some(on_receive);
+        state.receiver = Some(Arc::clone(on_receive));
 
         let mut result: [Val; 1] = [Val::I32(0)];
 

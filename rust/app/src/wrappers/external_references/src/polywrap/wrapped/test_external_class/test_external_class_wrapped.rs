@@ -108,7 +108,7 @@ impl TestExternalClassWrapped {
     pub fn map_from_serializable(value: &TestExternalClassWrapped, external_module: Arc<dyn ExternalModule>) -> Arc<TestExternalClass> {
         let object = TestExternalClass::new(
             value.__reference_ptr,
-            external_module,
+            Arc::clone(&external_module),
 
         );
         let object = Arc::new(object);

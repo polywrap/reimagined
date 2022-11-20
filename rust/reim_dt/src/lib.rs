@@ -1,4 +1,4 @@
-pub mod dt_instance;
+pub mod dt_module;
 pub mod receiver;
-pub use dt_instance::*;
+pub use dt_module::*;
 pub use receiver::*;

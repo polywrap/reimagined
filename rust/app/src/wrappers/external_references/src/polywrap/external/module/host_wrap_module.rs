@@ -14,9 +14,7 @@ impl HostWrapModule {
 
 #[async_trait]
 impl ExternalModule for HostWrapModule {
-    async fn invoke_resource(self: Arc<Self>, resource: u32, buffer: &[u8]) -> Vec<u8> {
-        send(
-            &[&resource.to_be_bytes(), buffer].concat()
-        )
+    async fn send(self: Arc<Self>, buffer: &[u8]) -> Vec<u8> {
+        send(buffer)
     }
 }

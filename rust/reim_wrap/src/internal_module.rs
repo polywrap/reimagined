@@ -6,5 +6,5 @@ use crate::ExternalModule;
 
 #[async_trait]
 pub trait InternalModule: Send + Sync {
-    async fn invoke_resource(&self, resource: u32, buffer: &[u8], external_module: Arc<dyn ExternalModule>) -> Vec<u8>;
+    async fn receive(&self, buffer: &[u8], external_module: Arc<dyn ExternalModule>) -> Vec<u8>;
 }

@@ -36,10 +36,10 @@ impl WrapModule {
   pub fn import(instance: Arc<dyn ExternalModule>) -> ImportBindings {
     ImportBindings::new(
                                                       
-      createTestExternalGlobalFunction(&instance),
+      createTestExternalGlobalFunction(Arc::clone(&instance)),
       
                   
-      createTestExternalClass(&instance),
+      createTestExternalClass(Arc::clone(&instance)),
       
     )
   }

@@ -19,8 +19,8 @@ pub async fn testExternalGlobalFunction(
     ).await
 }
 
-pub fn create(instance: &Arc<dyn ExternalModule>) -> WrappedClosure {
-    WrappedClosure::new(Arc::clone(instance))
+pub fn create(instance: Arc<dyn ExternalModule>) -> WrappedClosure {
+    WrappedClosure::new(instance)
 }
 
 pub struct WrappedClosure {
@@ -54,13 +54,14 @@ pub async fn testExternalGlobalFunction_from_instance (
   );
 
   let buffer = [
+    &(ExternalResource::InvokeGlobalFunction as u32).to_be_bytes()[..],
     &(WrapManifest::External::GlobalFunction::TestExternalGlobalFunction as u32).to_be_bytes()[..],
     &TestExternalGlobalFunctionArgsWrapped::serialize(&args),
   ].concat();
 
   let instance = Arc::clone(&instance);
 
-  let result = instance.invoke_resource(ExternalResource::InvokeGlobalFunction as u32, &buffer).await;
+  let result = instance.send(&buffer).await;
   
   StringWrapped::deserialize(&result)
 }
