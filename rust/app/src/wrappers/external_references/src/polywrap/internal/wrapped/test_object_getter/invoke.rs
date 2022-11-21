@@ -3,7 +3,7 @@ use std::str;
 
 use reim_dt::ExternalModule;
 use serde::{Serialize, Deserialize};
-use crate::polywrap::wrap_manifest::WrapManifest;
+use crate::polywrap::wrap::WrapManifest;
 
 use crate::TestObjectGetter;
 
@@ -35,7 +35,7 @@ async fn invoke__create_wrapped(buffer: &[u8], external_module: Arc<dyn External
         args.arg,
     ).await;
     
-    TestObjectGetterWrapped::serialize(&Arc::new(result)).to_vec()
+    TestObjectGetterWrapped::serialize(&Arc::new(result)).await.to_vec()
 }
 
 struct CreateArgs {
@@ -86,7 +86,7 @@ async fn invoke_testInstanceReceiveReference_wrapped(buffer: &[u8], external_mod
 
     let args = TestInstanceReceiveReferenceArgsWrapped::deserialize(data_buffer, external_module);
 
-    let object = TestObjectGetterWrapped::dereference_by_external_ptr(reference_ptr);
+    let object = TestObjectGetterWrapped::dereference_by_external_ptr(reference_ptr).await;
 
     let result = object.testInstanceReceiveReference(
         args.arg,

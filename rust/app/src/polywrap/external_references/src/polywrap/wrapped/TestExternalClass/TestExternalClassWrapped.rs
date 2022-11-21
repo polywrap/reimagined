@@ -22,7 +22,7 @@ impl TestExternalClassWrapped {
     }
 
     pub fn dereference(reference_ptr: u32) -> TestExternalClass {
-        let reference_map = reference_map.lock().unwrap();
+        let reference_map = reference_map.lock().await;
         let object = reference_map.get(reference_ptr);
 
         match object {
@@ -36,7 +36,7 @@ impl TestExternalClassWrapped {
     }
     
     pub fn map_to_serializable(value: TestExternalClass) -> TestExternalClassWrapped {
-        let mut reference_count = reference_count.lock().unwrap();
+        let mut reference_count = reference_count.lock().await;
         let reference_ptr = reference_count;
         *reference_count += 1;
 

@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use reim_dt::ExternalModule;
-use crate::polywrap::wrap_manifest::WrapManifest;
+use crate::polywrap::wrap::WrapManifest;
 use crate::polywrap::internal::wrapped::TestObjectGetterWrapped;
 
 pub async fn invoke_class_method(buffer: &[u8], external_module: Arc<dyn ExternalModule>) -> Vec<u8> {

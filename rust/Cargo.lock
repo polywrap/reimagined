@@ -388,6 +388,7 @@ version = "0.1.0"
 dependencies = [
  "async-trait",
  "by_address",
+ "futures",
  "lazy_static",
  "reim_dt",
  "reim_wrapper_dt_wasm",

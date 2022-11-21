@@ -10,7 +10,7 @@ use super::external::module::external_wrap_module;
 use super::external::module::internal_wrap_module::InternalWrapModule;
 
 #[no_mangle]
-pub extern "C" fn _dt_receive(input_buffer_len: u32) -> u32 {
+pub async extern "C" fn _dt_receive(input_buffer_len: u32) -> u32 {
     wrap_abort_setup();
    
     let input_buffer_ptr = alloc(input_buffer_len as usize);
@@ -21,7 +21,7 @@ pub extern "C" fn _dt_receive(input_buffer_len: u32) -> u32 {
         unsafe { Vec::from_raw_parts(input_buffer_ptr, input_buffer_len as usize, input_buffer_len as usize) };
 
     let external_module: Arc<dyn ExternalModule> = Arc::new(HostModule::new());
-    let mut global_external_module = external_wrap_module.lock().unwrap();
+    let mut global_external_module = external_wrap_module.lock().await;
     *global_external_module = Some(Arc::clone(&external_module));
 
     let internal_module = InternalWrapModule::new();

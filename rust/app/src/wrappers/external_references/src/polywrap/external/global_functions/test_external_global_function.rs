@@ -4,14 +4,13 @@ use reim_dt::ExternalModule;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use crate::polywrap::external::module::wrap_module::get_external_module_or_panic;
-use crate::polywrap::wrap_manifest::WrapManifest;
-use crate::polywrap::resources::ExternalResource;
+use crate::polywrap::wrap::{ExternalResource, WrapManifest};
 use crate::polywrap::internal::wrapped::StringWrapped;
 
 pub async fn testExternalGlobalFunction(
   arg: String,
 ) -> String {
-    let external_module = get_external_module_or_panic();
+    let external_module = get_external_module_or_panic().await;
   
     testExternalGlobalFunction_from_instance(
         external_module,

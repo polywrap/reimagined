@@ -3,7 +3,7 @@ use std::sync::Arc;
 use async_trait::async_trait;
 use reim_dt::{ ExternalModule, InternalModule };
 use crate::polywrap::internal::{ invoke_global_function, invoke_class_method };
-use crate::polywrap::resources::InternalResource;
+use crate::polywrap::wrap::InternalResource;
 
 pub struct InternalWrapModule {}
 

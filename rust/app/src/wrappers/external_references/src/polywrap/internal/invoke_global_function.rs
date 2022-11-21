@@ -3,7 +3,7 @@ use std::str;
 
 use reim_dt::ExternalModule;
 use serde::{Deserialize, Serialize};
-use crate::polywrap::wrap_manifest::WrapManifest;
+use crate::polywrap::wrap::WrapManifest;
 use crate::{ 
   
   testReceiveReference,
