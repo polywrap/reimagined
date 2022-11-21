@@ -1,7 +1,7 @@
 use std::sync::{Arc, Mutex};
 use lazy_static::lazy_static;
 
-use reim_wrap::{ ExternalModule };
+use reim_dt::ExternalModule;
 use crate::polywrap::external::module::import_bindings::{ ImportBindings };
 
 use crate::polywrap::external::global_functions::test_external_global_function::{ create as createTestExternalGlobalFunction };

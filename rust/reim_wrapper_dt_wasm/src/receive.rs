@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use reim_wrap::{ InternalModule, ExternalModule };
+use reim_dt::{InternalModule, ExternalModule};
 
 pub fn receive(buffer: &[u8], internal_module: &dyn InternalModule, external_module: Arc<dyn ExternalModule>) -> u32 {      
     let result = futures::executor::block_on(

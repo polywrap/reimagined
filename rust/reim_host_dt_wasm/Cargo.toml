@@ -1,0 +1,11 @@
+[package]
+name = "reim_host_dt_wasm"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+wasmtime = "1.0.1"
+reim_host_dt = { path = "../reim_host_dt" }
+thiserror = "1.0.37"
+async-trait = "0.1.58"
+futures = "0.3.25"

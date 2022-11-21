@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use reim_wrap::ExternalModule;
+use reim_dt::ExternalModule;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use crate::polywrap::external::module::wrap_module::get_external_module_or_panic;

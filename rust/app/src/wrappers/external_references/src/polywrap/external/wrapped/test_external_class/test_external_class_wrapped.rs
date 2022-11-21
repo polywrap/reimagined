@@ -1,7 +1,7 @@
 use std::{sync::{Arc, Mutex}, collections::HashMap};
 use lazy_static::lazy_static;
 use std::str;
-use reim_wrap::ExternalModule;
+use reim_dt::ExternalModule;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use crate::polywrap::external::TestExternalClass;

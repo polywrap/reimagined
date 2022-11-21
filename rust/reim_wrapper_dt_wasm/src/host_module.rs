@@ -1,12 +1,12 @@
 use std::sync::Arc;
 use async_trait::async_trait;
-use reim_wrap::ExternalModule;
+use reim_dt::ExternalModule;
 
 use crate::send::send;
 
-pub struct HostWrapModule;
+pub struct HostModule;
 
-impl HostWrapModule {
+impl HostModule {
     pub fn new() -> Self {
         Self {
         }
@@ -14,7 +14,7 @@ impl HostWrapModule {
 }
 
 #[async_trait]
-impl ExternalModule for HostWrapModule {
+impl ExternalModule for HostModule {
     async fn send(self: Arc<Self>, buffer: &[u8]) -> Vec<u8> {
         send(buffer)
     }

@@ -4,7 +4,7 @@ use std::str;
 use lazy_static::lazy_static;
 use by_address::ByAddress;
 
-use reim_wrap::ExternalModule;
+use reim_dt::ExternalModule;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use crate::TestObjectGetter;

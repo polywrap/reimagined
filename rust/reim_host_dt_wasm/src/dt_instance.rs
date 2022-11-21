@@ -1,8 +1,8 @@
 use std::sync::Arc;
 
 use async_trait::async_trait;
-use reim_dt::DtModule;
-use reim_dt::Receiver;
+use reim_host_dt::DtModule;
+use reim_host_dt::Receiver;
 use wasmtime::AsContextMut;
 use wasmtime::Val;
 
@@ -48,7 +48,7 @@ impl DtModule for DtWasmModule {
 
         let len_and_result_ptr = result[0].unwrap_i32();
 
-        let memory = self.wasm_instance.memory.lock().unwrap();
+        let memory = self.wasm_instance.memory.lock().await;
         let (memory_buffer, _) = memory.data_and_store_mut(self.wasm_instance.store.as_context_mut());
 
         let len_buffer =

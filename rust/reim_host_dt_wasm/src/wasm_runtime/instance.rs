@@ -1,10 +1,10 @@
-use std::{sync::{Arc, Mutex}};
-
-use reim_dt::{Receiver};
+use std::sync::Arc;
+use futures::lock::Mutex;
 use wasmtime::{
     AsContextMut, Config, Engine, Extern, Instance, Memory, MemoryType, Module, Store, Val,
 };
 
+use reim_host_dt::Receiver;
 use super::imports::create_imports;
 use crate::{utils::index_of_array, error::WrapperError};
 
@@ -68,7 +68,7 @@ impl WasmInstance {
 
         let memory = Arc::new(Mutex::new(memory));
 
-        create_imports(&mut linker, &memory)?;
+        create_imports(&mut linker, &memory).await?;
 
         let instance = linker
             .instantiate_async(store.as_context_mut(), &module)

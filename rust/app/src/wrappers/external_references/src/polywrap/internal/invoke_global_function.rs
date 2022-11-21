@@ -1,7 +1,7 @@
 use std::sync::Arc;
 use std::str;
 
-use reim_wrap::ExternalModule;
+use reim_dt::ExternalModule;
 use serde::{Deserialize, Serialize};
 use crate::polywrap::wrap_manifest::WrapManifest;
 use crate::{ 

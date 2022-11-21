@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use reim_wrap::ExternalModule;
+use reim_dt::ExternalModule;
 use crate::polywrap::wrap_manifest::WrapManifest;
 use crate::polywrap::internal::wrapped::TestObjectGetterWrapped;
 

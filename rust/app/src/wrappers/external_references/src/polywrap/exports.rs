@@ -1,9 +1,10 @@
 use std::sync::Arc;
 
-use reim_wrap::ExternalModule;
-use reim_wrap_wasm::imports::__dt_fill_input_buffer;
-use reim_wrap_wasm::malloc::alloc;
-use reim_wrap_wasm::{abort::*, receive, HostWrapModule};
+use reim_dt::ExternalModule;
+use reim_wrapper_dt_wasm::imports::__dt_fill_input_buffer;
+use reim_wrapper_dt_wasm::malloc::alloc;
+use reim_wrapper_dt_wasm::{receive, HostModule};
+use reim_wrapper_dt_wasm::abort::wrap_abort_setup;
 
 use super::external::module::external_wrap_module;
 use super::external::module::internal_wrap_module::InternalWrapModule;
@@ -19,7 +20,7 @@ pub extern "C" fn _dt_receive(input_buffer_len: u32) -> u32 {
     let input_buffer =
         unsafe { Vec::from_raw_parts(input_buffer_ptr, input_buffer_len as usize, input_buffer_len as usize) };
 
-    let external_module: Arc<dyn ExternalModule> = Arc::new(HostWrapModule::new());
+    let external_module: Arc<dyn ExternalModule> = Arc::new(HostModule::new());
     let mut global_external_module = external_wrap_module.lock().unwrap();
     *global_external_module = Some(Arc::clone(&external_module));
 

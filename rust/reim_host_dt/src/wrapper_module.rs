@@ -1,23 +1,24 @@
 use std::sync::Arc;
 
 use async_trait::async_trait;
-use reim_dt::{DtModule, Receiver};
-use tokio::sync::Mutex;
-use crate::{internal_module::InternalModule, ExternalModule};
+use futures::lock::Mutex;
+use reim_dt::{InternalModule, ExternalModule};
+
+use crate::{DtModule, Receiver};
 
 pub struct WrapperModule {
-    dt_instance: Arc<Mutex<dyn DtModule>>,
+    dt_module: Arc<Mutex<dyn DtModule>>,
     internal_module: Arc<Mutex<dyn InternalModule>>,
 }
 
 impl WrapperModule {
     pub fn new(
-        dt_instance: Arc<Mutex<dyn DtModule>>, 
+        dt_module: Arc<Mutex<dyn DtModule>>, 
         internal_module: Arc<Mutex<dyn InternalModule>>
     ) -> Self {
         Self {
             internal_module,
-            dt_instance,
+            dt_module,
         }
     }
 }
@@ -49,13 +50,13 @@ impl Receiver for ReceiverWithModule {
 impl ExternalModule for WrapperModule {
     async fn send(self: Arc<Self>, buffer: &[u8]) -> Vec<u8> {
         let internal_module = self.internal_module.clone();
-        let mut dt_instance = self.dt_instance.lock().await;
+        let mut dt_module = self.dt_module.lock().await;
         
         let external_module = Arc::clone(&self);
         
         let receiver: Arc<dyn Receiver> = Arc::new(ReceiverWithModule::new(internal_module, external_module));
 
-        dt_instance.send(
+        dt_module.send(
             buffer,
             &receiver
         )
