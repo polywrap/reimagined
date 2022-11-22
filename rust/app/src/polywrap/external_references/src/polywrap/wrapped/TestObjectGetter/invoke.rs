@@ -14,11 +14,11 @@ pub async fn invoke(buffer: &[u8], external_module: dyn ExternalWrapModule) -> V
   let data_buffer = &buffer[4..];
 
   match func_id {
-    WrapManifest::Internal::Classes::TestObjectGetterMethod::Create =>
+    wrap_manifest::internal::classes::TestObjectGetterMethod::Create =>
         invokeCreateWrapped(data_buffer, external_module),
-    WrapManifest::Internal::Classes::TestObjectGetterMethod::TestInstanceReceiveReference =>
+    wrap_manifest::internal::classes::TestObjectGetterMethod::TestInstanceReceiveReference =>
         invokeTestInstanceReceiveReferenceWrapped(data_buffer, external_module),
-    WrapManifest::Internal::Classes::TestObjectGetterMethod::TestStaticReceiveReference =>
+    wrap_manifest::internal::classes::TestObjectGetterMethod::TestStaticReceiveReference =>
         invokeTestStaticReceiveReferenceWrapped(data_buffer, external_module),
     _ => panic!(format!("Unknown method: {} on class {}", func_id.to_string(), model.class_name))
   }

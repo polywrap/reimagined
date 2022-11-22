@@ -4,7 +4,7 @@ use reim_dt::ExternalModule;
 use serde::{Serialize, Deserialize};
 use serde_json::json;
 use crate::polywrap::external::module::wrap_module::get_external_module_or_panic;
-use crate::polywrap::wrap::{ExternalResource, WrapManifest};
+use crate::polywrap::wrap::{ExternalResource, wrap_manifest};
 use crate::polywrap::external::wrapped::TestExternalClassWrapped;
 use crate::polywrap::internal::wrapped::StringWrapped;
 
@@ -35,8 +35,8 @@ impl TestExternalClassImport {
 
         let buffer = [
             &(ExternalResource::InvokeClassMethod as u32).to_be_bytes()[..],
-            &(WrapManifest::External::Class::TestExternalClass as u32).to_be_bytes()[..],
-            &(WrapManifest::External::Classes::TestExternalClassMethod::Create as u32).to_be_bytes()[..],
+            &(wrap_manifest::external::Class::TestExternalClass as u32).to_be_bytes()[..],
+            &(wrap_manifest::external::classes::TestExternalClassMethod::Create as u32).to_be_bytes()[..],
             &CreateArgsWrapped::serialize(&args),
         ].concat();
 
@@ -57,8 +57,8 @@ impl TestExternalClassImport {
 
         let buffer = [
             &(ExternalResource::InvokeClassMethod as u32).to_be_bytes()[..],
-            &(WrapManifest::External::Class::TestExternalClass as u32).to_be_bytes()[..],
-            &(WrapManifest::External::Classes::TestExternalClassMethod::TestStaticMethod as u32).to_be_bytes()[..],
+            &(wrap_manifest::external::Class::TestExternalClass as u32).to_be_bytes()[..],
+            &(wrap_manifest::external::classes::TestExternalClassMethod::TestStaticMethod as u32).to_be_bytes()[..],
             &TestStaticMethodArgsWrapped::serialize(&args),
         ].concat();
 
@@ -108,8 +108,8 @@ impl TestExternalClass {
 
         let buffer = [
             &(ExternalResource::InvokeClassMethod as u32).to_be_bytes()[..],
-            &(WrapManifest::External::Class::TestExternalClass as u32).to_be_bytes()[..],
-            &(WrapManifest::External::Classes::TestExternalClassMethod::TestInstanceMethod as u32).to_be_bytes()[..],
+            &(wrap_manifest::external::Class::TestExternalClass as u32).to_be_bytes()[..],
+            &(wrap_manifest::external::classes::TestExternalClassMethod::TestInstanceMethod as u32).to_be_bytes()[..],
             &self.__reference_ptr.to_be_bytes()[..],
             &TestInstanceMethodArgsWrapped::serialize(&args),
         ].concat();

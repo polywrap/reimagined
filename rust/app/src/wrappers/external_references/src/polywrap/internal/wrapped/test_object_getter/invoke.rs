@@ -3,7 +3,6 @@ use std::str;
 
 use reim_dt::ExternalModule;
 use serde::{Serialize, Deserialize};
-use crate::polywrap::wrap::WrapManifest;
 
 use crate::TestObjectGetter;
 
@@ -12,17 +11,18 @@ use crate::polywrap::internal::wrapped::TestObjectGetterWrapped;
 use crate::polywrap::external::wrapped::TestExternalClassWrapped;
 use crate::polywrap::internal::wrapped::test_object_getter::test_object_getter_wrapped::CLASS_NAME;
 use crate::polywrap::external::classes::TestExternalClass;
+use crate::polywrap::wrap::wrap_manifest;
 
 pub async fn invoke(buffer: &[u8], external_module: Arc<dyn ExternalModule>) -> Vec<u8> {
   let func_id = u32::from_be_bytes(buffer.try_into().expect("Method ID must be 4 bytes"));
   let data_buffer = &buffer[4..];
 
   match func_id {
-    x if x == WrapManifest::Internal::Classes::TestObjectGetterMethod::Create as u32 =>
+    x if x == wrap_manifest::internal::classes::TestObjectGetterMethod::Create as u32 =>
         invoke__create_wrapped(data_buffer, external_module).await,
-    x if x == WrapManifest::Internal::Classes::TestObjectGetterMethod::TestInstanceReceiveReference as u32 =>
+    x if x == wrap_manifest::internal::classes::TestObjectGetterMethod::TestInstanceReceiveReference as u32 =>
         invoke_testInstanceReceiveReference_wrapped(data_buffer, external_module).await,
-    x if x == WrapManifest::Internal::Classes::TestObjectGetterMethod::TestStaticReceiveReference as u32 =>
+    x if x == wrap_manifest::internal::classes::TestObjectGetterMethod::TestStaticReceiveReference as u32 =>
         invoke_testStaticReceiveReference_wrapped(data_buffer, external_module).await,
     _ => panic!("Unknown method: {} on class {}", func_id, CLASS_NAME)
   }

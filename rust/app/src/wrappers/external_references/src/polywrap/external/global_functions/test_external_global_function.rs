@@ -4,7 +4,7 @@ use reim_dt::ExternalModule;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use crate::polywrap::external::module::wrap_module::get_external_module_or_panic;
-use crate::polywrap::wrap::{ExternalResource, WrapManifest};
+use crate::polywrap::wrap::{ExternalResource, wrap_manifest};
 use crate::polywrap::internal::wrapped::StringWrapped;
 
 pub async fn testExternalGlobalFunction(
@@ -54,7 +54,7 @@ pub async fn testExternalGlobalFunction_from_instance (
 
   let buffer = [
     &(ExternalResource::InvokeGlobalFunction as u32).to_be_bytes()[..],
-    &(WrapManifest::External::GlobalFunction::TestExternalGlobalFunction as u32).to_be_bytes()[..],
+    &(wrap_manifest::external::GlobalFunction::TestExternalGlobalFunction as u32).to_be_bytes()[..],
     &TestExternalGlobalFunctionArgsWrapped::serialize(&args),
   ].concat();
 

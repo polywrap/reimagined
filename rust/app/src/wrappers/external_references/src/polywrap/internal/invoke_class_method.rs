@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use reim_dt::ExternalModule;
-use crate::polywrap::wrap::WrapManifest;
+use crate::polywrap::wrap::wrap_manifest;
 use crate::polywrap::internal::wrapped::TestObjectGetterWrapped;
 
 pub async fn invoke_class_method(buffer: &[u8], external_module: Arc<dyn ExternalModule>) -> Vec<u8> {
@@ -10,7 +10,7 @@ pub async fn invoke_class_method(buffer: &[u8], external_module: Arc<dyn Externa
 
   match class_id {
     
-    x if x == WrapManifest::Internal::Class::TestObjectGetter as u32 =>
+    x if x == wrap_manifest::internal::Class::TestObjectGetter as u32 =>
         TestObjectGetterWrapped::invoke_method(data_buffer, external_module).await,
     
     

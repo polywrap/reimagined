@@ -10,11 +10,11 @@ pub async fn invoke(buffer: &[u8], external_module: dyn ExternalModule) -> Vec<u
   let data_buffer = &buffer[4..];
 
   match func_id {
-    WrapManifest::Internal::Classes::TestExternalClassMethod::Create =>
+    wrap_manifest::internal::classes::TestExternalClassMethod::Create =>
         invokeCreateWrapped(data_buffer, external_module),
-    WrapManifest::Internal::Classes::TestExternalClassMethod::TestInstanceMethod =>
+    wrap_manifest::internal::classes::TestExternalClassMethod::TestInstanceMethod =>
         invokeTestInstanceMethodWrapped(data_buffer, external_module),
-    WrapManifest::Internal::Classes::TestExternalClassMethod::TestStaticMethod =>
+    wrap_manifest::internal::classes::TestExternalClassMethod::TestStaticMethod =>
         invokeTestStaticMethodWrapped(data_buffer, external_module),
     _ => panic!(format!("Unknown method: {} on class {}", func_id.to_string(), model.class_name))
   }

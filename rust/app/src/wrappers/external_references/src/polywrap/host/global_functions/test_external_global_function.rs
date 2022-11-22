@@ -54,7 +54,7 @@ pub async fn testExternalGlobalFunction_from_instance (
   );
 
   let buffer = [
-    &(WrapManifest::External::GlobalFunction::TestExternalGlobalFunction as u32).to_be_bytes()[..],
+    &(wrap_manifest::external::GlobalFunction::TestExternalGlobalFunction as u32).to_be_bytes()[..],
     TestExternalGlobalFunctionArgsWrapped::serialize(&args),
   ].concat();
 

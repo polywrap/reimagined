@@ -12,7 +12,7 @@ pub async fn invoke_class_method(buffer: &[u8], external_module: dyn ExternalWra
     
     
     
-    WrapManifest::Internal::Class::TestExternalClass =>
+    wrap_manifest::internal::Class::TestExternalClass =>
         TestExternalClassWrapped.invoke_method(data_buffer, external_module),
     
     _ => panic!("Unknown class ID: ".to_string() + &class_id.to_string()),

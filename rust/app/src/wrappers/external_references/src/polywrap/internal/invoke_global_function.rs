@@ -3,7 +3,7 @@ use std::str;
 
 use reim_dt::ExternalModule;
 use serde::{Deserialize, Serialize};
-use crate::polywrap::wrap::WrapManifest;
+use crate::polywrap::wrap::wrap_manifest;
 use crate::{ 
   
   testReceiveReference,
@@ -26,16 +26,16 @@ pub async fn invoke(buffer: &[u8], external_module: Arc<dyn ExternalModule>) -> 
 
   match func_id {
     
-    x if x == WrapManifest::Internal::GlobalFunction::TestReceiveReference as u32 =>
+    x if x == wrap_manifest::internal::GlobalFunction::TestReceiveReference as u32 =>
         invokeTestReceiveReferenceWrapped(data_buffer, external_module).await,
         
-    x if x == WrapManifest::Internal::GlobalFunction::TestInvokeExternalGlobalFunction as u32 =>
+    x if x == wrap_manifest::internal::GlobalFunction::TestInvokeExternalGlobalFunction as u32 =>
         invokeTestInvokeExternalGlobalFunctionWrapped(data_buffer, external_module).await,
         
-    x if x == WrapManifest::Internal::GlobalFunction::TestInvokeExternalStaticMethod as u32 =>
+    x if x == wrap_manifest::internal::GlobalFunction::TestInvokeExternalStaticMethod as u32 =>
         invokeTestInvokeExternalStaticMethodWrapped(data_buffer, external_module).await,
         
-    x if x == WrapManifest::Internal::GlobalFunction::TestInvokeExternalInstanceMethod as u32 =>
+    x if x == wrap_manifest::internal::GlobalFunction::TestInvokeExternalInstanceMethod as u32 =>
         invokeTestInvokeExternalInstanceMethodWrapped(data_buffer, external_module).await,
             
     _ => panic!("Unknown internal global function ID: {}", func_id.to_string()),
