@@ -1,0 +1,15 @@
+{
+    "name": "@polywrap/dt-example",
+    "private": true,
+    "scripts": {
+        "prebuild": "rimraf ./build && mkdir ./build",
+        "build": "docker container prune -f && docker build -f Dockerfile -t dt-example . && docker run --rm dt-example /bin/bash -c \"ls /project/build\" && docker create -ti --name root-dt-example dt-example && docker cp root-dt-example:/project/build/wrap.wasm build/wrap.wasm",
+        "postbuild": "reim_cli manifest"
+    },
+    "dependencies": {
+    },
+    "devDependencies": {
+        "polywrap": "0.3.0",
+        "rimraf": "3.0.2"
+    }
+}

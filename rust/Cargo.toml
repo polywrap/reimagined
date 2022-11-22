@@ -10,5 +10,6 @@ members = [
     "reim_codegen", 
     "reim_cli", 
     "app/src/wrappers/external_references",
+    "app/tests/dt/dt_example",
     "app"
 ]

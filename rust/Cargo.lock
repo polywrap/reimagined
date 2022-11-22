@@ -343,6 +343,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "dt_example"
+version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "by_address",
+ "futures",
+ "lazy_static",
+ "reim_dt",
+ "reim_wrapper_dt_wasm",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "either"
 version = "1.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
