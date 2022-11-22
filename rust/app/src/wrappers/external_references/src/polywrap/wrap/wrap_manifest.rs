@@ -12,12 +12,12 @@ pub mod internal {
 
     pub mod classes {
         pub enum TestObjectGetterMethod {
-        Create = 0,
-        TestInstanceReceiveReference = 1,
-        TestStaticReceiveReference = 2,
+            Create = 0,
+            TestInstanceReceiveReference = 1,
+            TestStaticReceiveReference = 2,
         }
     }
-    }
+}
 
 pub mod external {
     pub enum GlobalFunction {
