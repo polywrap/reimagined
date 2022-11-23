@@ -5,7 +5,7 @@ use external::classes::{ TestExternalClass };
 
 
 
-pub async fn invoke(buffer: &[u8], external_module: dyn ExternalModule) -> Vec<u8> {
+pub fn invoke(buffer: &[u8], external_module: dyn ExternalModule) -> Vec<u8> {
   let func_id = u32::from_be_bytes(buffer.try_into().expect("Method ID must be 4 bytes"));
   let data_buffer = &buffer[4..];
 
@@ -20,12 +20,12 @@ pub async fn invoke(buffer: &[u8], external_module: dyn ExternalModule) -> Vec<u
   }
 }
 
-async fn invokeCreateWrapped(buffer: &[u8], external_module: dyn ExternalModule) -> Vec<u8> {
+fn invokeCreateWrapped(buffer: &[u8], external_module: dyn ExternalModule) -> Vec<u8> {
     let args = CreateArgsWrapped.deserialize(buffer, external_module);
 
     let result = TestExternalClass.create(
         args.arg,
-    ).await;
+    );
     
     TestExternalClassWrapped.serialize(result)
     };
@@ -69,7 +69,7 @@ impl CreateArgsWrapped {
         )
     }  
 }
-async fn invokeTestInstanceMethodWrapped(buffer: &[u8], external_module: dyn ExternalModule) -> Vec<u8> {
+fn invokeTestInstanceMethodWrapped(buffer: &[u8], external_module: dyn ExternalModule) -> Vec<u8> {
     
     let reference_ptr = u32::from_be_bytes(buffer.try_into().expect("Reference ptr must be 4 bytes"));
     let data_buffer = &buffer[4..];
@@ -80,7 +80,7 @@ async fn invokeTestInstanceMethodWrapped(buffer: &[u8], external_module: dyn Ext
 
     let result = object.testInstanceMethod(
         args.arg,
-    ).await;
+    );
 
     
     BaseTypeSerialization.serialize<String>(result)
@@ -125,12 +125,12 @@ impl TestInstanceMethodArgsWrapped {
         )
     }  
 }
-async fn invokeTestStaticMethodWrapped(buffer: &[u8], external_module: dyn ExternalModule) -> Vec<u8> {
+fn invokeTestStaticMethodWrapped(buffer: &[u8], external_module: dyn ExternalModule) -> Vec<u8> {
     let args = TestStaticMethodArgsWrapped.deserialize(buffer, external_module);
 
     let result = TestExternalClass.testStaticMethod(
         args.arg,
-    ).await;
+    );
     
     
     BaseTypeSerialization.serialize<String>(result)

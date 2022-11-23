@@ -4,10 +4,10 @@ use reim_dt::{InternalModule, ExternalModule};
 
 use crate::imports::__dt_fill_input_buffer;
 use crate::malloc::alloc;
-use crate::{receive};
+use crate::receive;
 use crate::abort::wrap_abort_setup;
 
-pub async fn wasm_receive(input_buffer_len: u32, internal_module: &dyn InternalModule, external_module: Arc<dyn ExternalModule>) -> u32 {      
+pub fn wasm_receive(input_buffer_len: u32, internal_module: &dyn InternalModule, external_module: Arc<dyn ExternalModule>) -> u32 {      
     wrap_abort_setup();
    
     let input_buffer_ptr = alloc(input_buffer_len as usize);

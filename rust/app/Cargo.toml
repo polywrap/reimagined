@@ -5,6 +5,8 @@ edition = "2021"
 
 [dependencies]
 reim_wrap = { path = "../reim_wrap" }
+reim_dt_async = { path = "../reim_dt_async" }
+reim_host_dt = { path = "../reim_host_dt" }
 reim_host_dt_wasm = { path = "../reim_host_dt_wasm" }
 reim_codegen = { path = "../reim_codegen" }
 serde = { version = "1.0", features = ["derive"] }
@@ -12,3 +14,5 @@ serde_json = "1.0.85"
 async-trait = "0.1.58"
 by_address = "1.1.0"
 lazy_static = "1.4.0"
+tokio = { version = "1.22.0", features = ["rt", "macros"] }
+futures = "0.3.25"

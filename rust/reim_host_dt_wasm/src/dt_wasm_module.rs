@@ -40,23 +40,31 @@ impl DtModule for DtWasmModule {
         state.receiver = Some(Arc::clone(on_receive));
 
         let mut result: [Val; 1] = [Val::I32(0)];
-
+        println!("Calling _dt_send");
         self.wasm_instance
             .call_export("_dt_receive", params, &mut result)
             .await
-            .map_err(|e| WrapperError::InvokeError(e.to_string())).unwrap();
+            .map_err(|e| {
+                println!("HELLO: {:?}", e);
+                WrapperError::InvokeError(e.to_string())
+            }).unwrap();
+            println!("Result _dt_send");
 
         let len_and_result_ptr = result[0].unwrap_i32();
 
+        println!("Result _dt_send len_and_result_ptr: {:?}", len_and_result_ptr);
         let memory = self.wasm_instance.memory.lock().await;
         let (memory_buffer, _) = memory.data_and_store_mut(self.wasm_instance.store.as_context_mut());
 
         let len_buffer =
-            read_from_memory(memory_buffer, len_and_result_ptr as usize, buffer_len as usize);
+            read_from_memory(memory_buffer, len_and_result_ptr as usize, 4 as usize);
 
-        let len = u32::from_le_bytes(len_buffer.try_into().unwrap());
+        println!("Result _dt_send Len buffer: {:?}", len_buffer);
+        let len = u32::from_be_bytes(len_buffer[0..4].try_into().unwrap());
+        println!("Result _dt_send Len: {:?}", len);
 
         let result = read_from_memory(memory_buffer, len_and_result_ptr as usize + 4, len as usize);
+        println!("Result _dt_send result buffer: {:?}", result);
 
         result
     }

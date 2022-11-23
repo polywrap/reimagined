@@ -7,15 +7,15 @@ use crate::polywrap::external::module::wrap_module::get_external_module_or_panic
 use crate::polywrap::wrap::{ExternalResource, wrap_manifest};
 use crate::polywrap::internal::wrapped::StringWrapped;
 
-pub async fn testExternalGlobalFunction(
+pub fn testExternalGlobalFunction(
   arg: String,
 ) -> String {
-    let external_module = get_external_module_or_panic().await;
+    let external_module = get_external_module_or_panic();
   
     testExternalGlobalFunction_from_instance(
         external_module,
         arg,
-    ).await
+    )
 }
 
 pub fn create(instance: Arc<dyn ExternalModule>) -> WrappedClosure {
@@ -33,18 +33,18 @@ impl WrappedClosure {
         }
     }
 
-    pub async fn call(
+    pub fn call(
         &self,
         arg: String,
     ) -> String {
         testExternalGlobalFunction_from_instance(
             Arc::clone(&self.instance),
             arg,
-        ).await
+        )
     }
 }
 
-pub async fn testExternalGlobalFunction_from_instance (
+pub fn testExternalGlobalFunction_from_instance (
   instance: Arc<dyn ExternalModule>, 
   arg: String,
 ) -> String {
@@ -60,7 +60,7 @@ pub async fn testExternalGlobalFunction_from_instance (
 
   let instance = Arc::clone(&instance);
 
-  let result = instance.send(&buffer).await;
+  let result = instance.send(&buffer);
   
   StringWrapped::deserialize(&result)
 }

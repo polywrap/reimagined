@@ -3,7 +3,11 @@
     "private": true,
     "scripts": {
         "prebuild": "rimraf ./build && mkdir ./build",
-        "build": "docker container prune -f && docker build -f Dockerfile -t dt-example . && docker run --rm dt-example /bin/bash -c \"ls /project/build\" && docker create -ti --name root-dt-example dt-example && docker cp root-dt-example:/project/build/wrap.wasm build/wrap.wasm",
+        "build": "yarn build:wasm && yarn build:bindgen && yarn build:snip && yarn build:opt",
+        "build:wasm": "RUSTFLAGS=\"-C link-arg=-z -C link-arg=stack-size=65536 -C link-arg=--import-memory\" cargo build --target wasm32-unknown-unknown --release --target-dir ./target",
+        "build:bindgen": "wasm-bindgen ./target/wasm32-unknown-unknown/release/module.wasm --out-dir ./build --out-name bg_module.wasm",
+        "build:snip": "wasm-snip ./build/bg_module.wasm -o ./build/snipped_module.wasm",
+        "build:opt": "wasm-opt --asyncify -Os ./build/snipped_module.wasm -o ./build/wrap.wasm",
         "postbuild": "reim_cli manifest"
     },
     "dependencies": {

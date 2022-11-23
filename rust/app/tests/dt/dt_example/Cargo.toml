@@ -8,16 +8,14 @@ edition = "2021"
 
 [dependencies]
 serde = { version = "1.0", features = ["derive"] }
-futures = "0.3.25"
 serde_json = "1.0.85"
-async-trait = "0.1.58"
 by_address = "1.1.0"
-lazy_static = "1.4.0"
 reim_wrapper_dt_wasm = { path = "../../../../reim_wrapper_dt_wasm" }
 reim_dt = { path = "../../../../reim_dt" }
 
 [lib]
 crate-type = ["cdylib"]
+name = "module"
 
 [profile.release]
 opt-level = 's'

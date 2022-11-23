@@ -346,10 +346,7 @@ dependencies = [
 name = "dt_example"
 version = "0.1.0"
 dependencies = [
- "async-trait",
  "by_address",
- "futures",
- "lazy_static",
  "reim_dt",
  "reim_wrapper_dt_wasm",
  "serde",
@@ -400,9 +397,7 @@ dependencies = [
 name = "external_references_test"
 version = "0.1.0"
 dependencies = [
- "async-trait",
  "by_address",
- "futures",
  "lazy_static",
  "reim_dt",
  "reim_wrapper_dt_wasm",
@@ -936,12 +931,16 @@ version = "0.1.0"
 dependencies = [
  "async-trait",
  "by_address",
+ "futures",
  "lazy_static",
  "reim_codegen",
+ "reim_dt_async",
+ "reim_host_dt",
  "reim_host_dt_wasm",
  "reim_wrap",
  "serde",
  "serde_json",
+ "tokio",
 ]
 
 [[package]]
@@ -966,6 +965,10 @@ dependencies = [
 [[package]]
 name = "reim_dt"
 version = "0.1.0"
+
+[[package]]
+name = "reim_dt_async"
+version = "0.1.0"
 dependencies = [
  "async-trait",
  "futures",
@@ -977,7 +980,7 @@ version = "0.1.0"
 dependencies = [
  "async-trait",
  "futures",
- "reim_dt",
+ "reim_dt_async",
 ]
 
 [[package]]
@@ -1014,8 +1017,6 @@ dependencies = [
 name = "reim_wrapper_dt_wasm"
 version = "0.1.0"
 dependencies = [
- "async-trait",
- "futures",
  "reim_dt",
 ]
 
@@ -1176,6 +1177,28 @@ name = "thiserror-impl"
 version = "1.0.37"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "982d17546b47146b28f7c22e3d08465f6b8903d0ea13c1660d9d84a6e7adcdbb"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
+name = "tokio"
+version = "1.22.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d76ce4a75fb488c605c54bf610f221cea8b0dafb53333c1a67e8ee199dcd2ae3"
+dependencies = [
+ "autocfg",
+ "pin-project-lite",
+ "tokio-macros",
+]
+
+[[package]]
+name = "tokio-macros"
+version = "1.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9724f9a975fb987ef7a3cd9be0350edcbe130698af5b8f7a631e23d42d052484"
 dependencies = [
  "proc-macro2",
  "quote",

@@ -24,7 +24,7 @@ impl TestExternalClassImport {
     }
 
     
-    pub async fn create(
+    pub fn create(
         &self,
         arg: String,
     ) -> Arc<TestExternalClass> {
@@ -41,12 +41,12 @@ impl TestExternalClassImport {
         ].concat();
 
         let external_module = Arc::clone(&self.external_module);
-        let result = external_module.send(&buffer).await;
+        let result = external_module.send(&buffer);
 
         TestExternalClassWrapped::deserialize(&result, Arc::clone(&self.external_module))
     }
                 
-    pub async fn testStaticMethod(
+    pub fn testStaticMethod(
         &self,
         arg: String,
     ) -> String {
@@ -63,7 +63,7 @@ impl TestExternalClassImport {
         ].concat();
 
         let external_module = Arc::clone(&self.external_module);
-        let result = external_module.send(&buffer).await;
+        let result = external_module.send(&buffer);
 
         StringWrapped::deserialize(&result)
     }
@@ -86,18 +86,18 @@ impl TestExternalClass {
         }
     }
     
-    pub async fn create(
+    pub fn create(
         arg: String,
     ) -> Arc<TestExternalClass> {
-        let external_module = get_external_module_or_panic().await;
+        let external_module = get_external_module_or_panic();
 
         TestExternalClassImport::new(external_module)
             .create(
                 arg,
-            ).await
+            )
     }
             
-    pub async fn testInstanceMethod(
+    pub fn testInstanceMethod(
         &self,
         arg: String,
     ) -> String {
@@ -115,20 +115,20 @@ impl TestExternalClass {
         ].concat();
 
         let external_module = Arc::clone(&self.__external_module);
-        let result = external_module.send(&buffer).await;
+        let result = external_module.send(&buffer);
       
         StringWrapped::deserialize(&result)
     }
         
-    pub async fn testStaticMethod(
+    pub fn testStaticMethod(
         arg: String,
     ) -> String {
-        let external_module = get_external_module_or_panic().await;
+        let external_module = get_external_module_or_panic();
 
         TestExternalClassImport::new(external_module)
             .testStaticMethod(
                 arg,
-            ).await
+            )
     }
     
 }

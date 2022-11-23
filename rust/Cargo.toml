@@ -3,6 +3,7 @@ members = [
     "wrap_schema/tree_sitter_wrap", 
     "wrap_schema/reim_schema",
     "reim_dt",
+    "reim_dt_async",
     "reim_host_dt",
     "reim_host_dt_wasm",
     "reim_wrapper_dt_wasm", 

@@ -102,7 +102,8 @@ impl WasmInstance {
             Extern::Func(func) => {
                 func.call_async(self.store.as_context_mut(), params, results)
                     .await
-                    .map_err(|e| WrapperError::WasmRuntimeError(e.to_string()))?;
+                    .map_err(|e| { 
+                        println!("lol {:?}", e); WrapperError::WasmRuntimeError(e.to_string()) })?;
 
                 Ok(())
             }
@@ -127,9 +128,9 @@ impl WasmInstance {
             ));
         }
 
-        let memory_initial_limits =
+        let t =
             module_bytes[sig_idx.unwrap() + ENV_MEMORY_IMPORTS_SIGNATURE.len() + 1];
-        let memory_type = MemoryType::new(memory_initial_limits.into(), Option::None);
+        let memory_type = MemoryType::new(2 as u32, Option::None);
 
         Memory::new(store.as_context_mut(), memory_type)
             .map_err(|e| WrapperError::WasmRuntimeError(e.to_string()))

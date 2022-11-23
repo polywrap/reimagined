@@ -1,5 +1,4 @@
-use std::{sync::Arc, collections::HashMap};
-use futures::lock::Mutex;
+use std::{sync::{Arc, Mutex}, collections::HashMap};
 use lazy_static::lazy_static;
 use std::str;
 use reim_dt::ExternalModule;
@@ -49,9 +48,9 @@ impl TestExternalClassWrapped {
         }
     }
 
-    pub async fn dereference(reference_ptr: Arc<TestExternalClass>) -> Arc<TestExternalClass> {
+    pub fn dereference(reference_ptr: Arc<TestExternalClass>) -> Arc<TestExternalClass> {
         let reference_ptr = ByAddress(reference_ptr);
-        let reference_map_mut = reference_map.lock().await;
+        let reference_map_mut = reference_map.lock();
         let existing_reference = reference_map_mut.get(&reference_ptr);
 
         if existing_reference.is_none() {
@@ -61,10 +60,10 @@ impl TestExternalClassWrapped {
         Arc::clone(&existing_reference.unwrap().instance)
     }
 
-    pub async fn delete_reference(reference_ptr: &Arc<TestExternalClass>) {
+    pub fn delete_reference(reference_ptr: &Arc<TestExternalClass>) {
         let reference_ptr = Arc::clone(reference_ptr);
 
-        let mut reference_map_mut = reference_map.lock().await;
+        let mut reference_map_mut = reference_map.lock();
         let success = reference_map_mut.remove(&ByAddress(reference_ptr));
 
         if success.is_none() {
@@ -72,20 +71,20 @@ impl TestExternalClassWrapped {
         }
     }
 
-    pub async fn serialize(value: &Arc<TestExternalClass>) -> Vec<u8> {
+    pub fn serialize(value: &Arc<TestExternalClass>) -> Vec<u8> {
         json!(
-            TestExternalClassWrapped::map_to_serializable(value).await 
+            TestExternalClassWrapped::map_to_serializable(value) 
         )
         .to_string()
         .as_bytes()
         .to_vec()
     }
 
-    pub async fn map_to_serializable(value: &Arc<TestExternalClass>) -> TestExternalClassWrapped {
+    pub fn map_to_serializable(value: &Arc<TestExternalClass>) -> TestExternalClassWrapped {
         let value = Arc::clone(value);
 
         let reference_ptr = ByAddress(value);
-        let reference_map_mut = reference_map.lock().await;
+        let reference_map_mut = reference_map.lock();
         let existing_reference = reference_map_mut.get(&reference_ptr);
 
         if existing_reference.is_none() {

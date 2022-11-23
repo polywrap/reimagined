@@ -33,13 +33,13 @@ pub async fn create_imports(
                 })
             },
         )
-        .map_err(|e| WrapperError::WasmRuntimeError(e.to_string()))?;
+        .map_err(|e| WrapperError::WasmRuntimeError(e.to_string() + " fill input"))?;
 
     let memory = Arc::clone(&arc_memory);
     linker
         .func_wrap2_async(
             "wrap",
-            "__send",
+            "__dt_send",
             move |mut caller: Caller<'_, State>,
                   buffer_ptr: u32,
                   buffer_len: u32| {
@@ -51,23 +51,24 @@ pub async fn create_imports(
                     let buffer =
                         read_from_memory(memory_buffer, buffer_ptr as usize, buffer_len as usize);
 
-         
                     let receiver = match state.receiver.as_ref() {
                         Some(r) => r,
                         None => panic!("No receiver"),
                     };
 
+                    println!("Received: {:?}", buffer);
                     let result = receiver.receive(&buffer[..]).await;
 
                     let result_len = result.len() as u32;
 
-                    state.send_result = result;
+                    state.send_result = result.to_vec();
+                    println!("Returned: {:?}", result);
 
                     result_len
                 })
             },
         )
-        .map_err(|e| WrapperError::WasmRuntimeError(e.to_string()))?;
+        .map_err(|e| WrapperError::WasmRuntimeError(e.to_string() + " send"))?;
 
     let memory = Arc::clone(&arc_memory);
     linker
@@ -80,16 +81,52 @@ pub async fn create_imports(
                     let memory = memory.lock().await;
                     let (memory_buffer, state) = memory.data_and_store_mut(caller.as_context_mut());
 
+                    println!("Filling send result: {:?} at {}", state.send_result, buffer_ptr);
                     write_to_memory(memory_buffer, buffer_ptr as usize, &state.send_result);
+                })
+            },
+        )
+        .map_err(|e| WrapperError::WasmRuntimeError(e.to_string() + " fill"))?;
+
+    let memory = Arc::clone(&arc_memory);
+    linker
+        .func_wrap6_async(
+            "wrap",
+            "__wrap_abort",
+            move |mut caller: Caller<'_, State>,
+                msg_ptr: u32,
+                msg_len: u32,
+                file_ptr: u32,
+                file_len: u32,
+                line: u32,
+                column: u32| {
+                let memory = Arc::clone(&memory);
+                Box::new(async move {
+                    let memory = memory.lock().await;
+                    let (memory_buffer, _) = memory.data_and_store_mut(caller.as_context_mut());
+                    let msg = read_from_memory(memory_buffer, msg_ptr as usize, msg_len as usize);
+                    let file = read_from_memory(memory_buffer, file_ptr as usize, file_len as usize);
+
+                    let msg_str = String::from_utf8(msg).unwrap();
+                    let file_str = String::from_utf8(file).unwrap();
+
+                    println!(
+                        "__wrap_abort: {msg}\nFile: {file}\nLocation: [{line},{column}]",
+                        msg = msg_str,
+                        file = file_str,
+                        line = line,
+                        column = column
+                    );
                 })
             },
         )
         .map_err(|e| WrapperError::WasmRuntimeError(e.to_string()))?;
 
     let memory = Arc::clone(&arc_memory);
+    let memory = *memory.lock().await;
     linker
-        .define("env", "memory", *memory.lock().await)
-        .map_err(|e| WrapperError::WasmRuntimeError(e.to_string()))?;
+        .define("env", "memory", memory)
+        .map_err(|e| WrapperError::WasmRuntimeError(e.to_string() + " memory"))?;
 
     Ok(())
 }
