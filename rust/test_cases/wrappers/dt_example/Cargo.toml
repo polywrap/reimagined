@@ -10,8 +10,8 @@ edition = "2021"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0.85"
 by_address = "1.1.0"
-reim_wrapper_dt_wasm = { path = "../../../../reim_wrapper_dt_wasm" }
-reim_dt = { path = "../../../../reim_dt" }
+reim_wrapper_dt_wasm = { path = "../../../reim_wrapper_dt_wasm" }
+reim_dt = { path = "../../../reim_dt" }
 async-trait = "0.1.58"
 futures = "0.3.25"
 

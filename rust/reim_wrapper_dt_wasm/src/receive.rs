@@ -14,6 +14,7 @@ pub fn receive(buffer: &[u8], internal_module: &dyn InternalModule, external_mod
     ].concat();
     
     let len_and_result_ptr = len_and_result_buffer.as_ptr();
+    // TODO: is this a memory leak?
     std::mem::forget(len_and_result_buffer);
 
     return len_and_result_ptr as u32;

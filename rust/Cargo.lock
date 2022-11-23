@@ -952,7 +952,6 @@ dependencies = [
  "reim_wrap",
  "serde",
  "serde_json",
- "tokio",
 ]
 
 [[package]]
@@ -1028,6 +1027,9 @@ dependencies = [
  "async-trait",
  "futures",
  "reim_dt",
+ "reim_host_dt",
+ "reim_host_dt_wasm",
+ "tokio",
 ]
 
 [[package]]

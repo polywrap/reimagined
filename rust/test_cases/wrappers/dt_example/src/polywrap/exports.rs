@@ -7,7 +7,7 @@ use crate::polywrap::internal_wrap_module::InternalWrapModule;
 
 #[no_mangle]
 pub extern "C" fn _dt_receive(input_buffer_len: u32) -> u32 {
-    let internal_module = InternalWrapModule::new();
+    let internal_module = InternalWrapModule {};
 
     let external_module: Arc<dyn ExternalModule> = Arc::new(HostModule::new());
 
