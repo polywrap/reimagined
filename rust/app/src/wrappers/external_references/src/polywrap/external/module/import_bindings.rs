@@ -22,7 +22,7 @@ impl ImportBindings {
         }
     }
 
-    pub fn testExternalGlobalFunction(&self, arg: String) -> String {
-        self.testExternalGlobalFunctionWrapped.call(arg)
+    pub async fn testExternalGlobalFunction(&self, arg: String) -> String {
+        self.testExternalGlobalFunctionWrapped.call(arg).await
     }
 }

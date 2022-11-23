@@ -5,7 +5,7 @@ edition = "2021"
 
 [dependencies]
 reim_wrap = { path = "../reim_wrap" }
-reim_dt_async = { path = "../reim_dt_async" }
+reim_dt = { path = "../reim_dt" }
 reim_host_dt = { path = "../reim_host_dt" }
 reim_host_dt_wasm = { path = "../reim_host_dt_wasm" }
 reim_codegen = { path = "../reim_codegen" }

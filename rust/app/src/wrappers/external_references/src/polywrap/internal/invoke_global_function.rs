@@ -20,36 +20,36 @@ use crate::polywrap::internal::wrapped::StringWrapped;
 use crate::polywrap::external::TestExternalClass;
 
 
-pub fn invoke(buffer: &[u8], external_module: Arc<dyn ExternalModule>) -> Vec<u8> {
+pub async fn invoke(buffer: &[u8], external_module: Arc<dyn ExternalModule>) -> Vec<u8> {
   let func_id = u32::from_be_bytes(buffer.try_into().expect("Function ID must be 4 bytes"));
   let data_buffer = &buffer[4..];
 
   match func_id {
     
     x if x == wrap_manifest::internal::GlobalFunction::TestReceiveReference as u32 =>
-        invokeTestReceiveReferenceWrapped(data_buffer, external_module),
+        invokeTestReceiveReferenceWrapped(data_buffer, external_module).await,
         
     x if x == wrap_manifest::internal::GlobalFunction::TestInvokeExternalGlobalFunction as u32 =>
-        invokeTestInvokeExternalGlobalFunctionWrapped(data_buffer, external_module),
+        invokeTestInvokeExternalGlobalFunctionWrapped(data_buffer, external_module).await,
         
     x if x == wrap_manifest::internal::GlobalFunction::TestInvokeExternalStaticMethod as u32 =>
-        invokeTestInvokeExternalStaticMethodWrapped(data_buffer, external_module),
+        invokeTestInvokeExternalStaticMethodWrapped(data_buffer, external_module).await,
         
     x if x == wrap_manifest::internal::GlobalFunction::TestInvokeExternalInstanceMethod as u32 =>
-        invokeTestInvokeExternalInstanceMethodWrapped(data_buffer, external_module),
+        invokeTestInvokeExternalInstanceMethodWrapped(data_buffer, external_module).await,
             
     _ => panic!("Unknown internal global function ID: {}", func_id.to_string()),
   }
 }
 
-fn invokeTestReceiveReferenceWrapped(buffer: &[u8], external_module: Arc<dyn ExternalModule>) -> Vec<u8> {
+async fn invokeTestReceiveReferenceWrapped(buffer: &[u8], external_module: Arc<dyn ExternalModule>) -> Vec<u8> {
   let args_buffer = buffer;
 
   let args = TestReceiveReferenceArgsWrapped::deserialize(args_buffer, external_module);
 
   let result = testReceiveReference(
     args.arg,
-  );
+  ).await;
 
   
   StringWrapped::serialize(&result).to_vec()
@@ -96,14 +96,14 @@ impl TestReceiveReferenceArgsWrapped {
         )
     }  
 }
-fn invokeTestInvokeExternalGlobalFunctionWrapped(buffer: &[u8], external_module: Arc<dyn ExternalModule>) -> Vec<u8> {
+async fn invokeTestInvokeExternalGlobalFunctionWrapped(buffer: &[u8], external_module: Arc<dyn ExternalModule>) -> Vec<u8> {
   let args_buffer = buffer;
 
   let args = TestInvokeExternalGlobalFunctionArgsWrapped::deserialize(args_buffer, external_module);
 
   let result = testInvokeExternalGlobalFunction(
     args.arg,
-  );
+  ).await;
 
   
   StringWrapped::serialize(&result).to_vec()
@@ -150,14 +150,14 @@ impl TestInvokeExternalGlobalFunctionArgsWrapped {
         )
     }  
 }
-fn invokeTestInvokeExternalStaticMethodWrapped(buffer: &[u8], external_module: Arc<dyn ExternalModule>) -> Vec<u8> {
+async fn invokeTestInvokeExternalStaticMethodWrapped(buffer: &[u8], external_module: Arc<dyn ExternalModule>) -> Vec<u8> {
   let args_buffer = buffer;
 
   let args = TestInvokeExternalStaticMethodArgsWrapped::deserialize(args_buffer, external_module);
 
   let result = testInvokeExternalStaticMethod(
     args.arg,
-  );
+  ).await;
 
   
   StringWrapped::serialize(&result).to_vec()
@@ -204,14 +204,14 @@ impl TestInvokeExternalStaticMethodArgsWrapped {
         )
     }  
 }
-fn invokeTestInvokeExternalInstanceMethodWrapped(buffer: &[u8], external_module: Arc<dyn ExternalModule>) -> Vec<u8> {
+async fn invokeTestInvokeExternalInstanceMethodWrapped(buffer: &[u8], external_module: Arc<dyn ExternalModule>) -> Vec<u8> {
   let args_buffer = buffer;
 
   let args = TestInvokeExternalInstanceMethodArgsWrapped::deserialize(args_buffer, external_module);
 
   let result = testInvokeExternalInstanceMethod(
     args.arg,
-  );
+  ).await;
 
   
   StringWrapped::serialize(&result).to_vec()

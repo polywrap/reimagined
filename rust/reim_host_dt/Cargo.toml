@@ -6,4 +6,4 @@ edition = "2021"
 [dependencies]
 async-trait = "0.1.58"
 futures = "0.3.25"
-reim_dt_async = { path = "../reim_dt_async" }
+reim_dt = { path = "../reim_dt" }

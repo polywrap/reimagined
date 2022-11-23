@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use async_trait::async_trait;
 use futures::lock::Mutex;
-use reim_dt_async::{InternalModule, ExternalModule};
+use reim_dt::{InternalModule, ExternalModule};
 
 use crate::{DtModule, Receiver};
 

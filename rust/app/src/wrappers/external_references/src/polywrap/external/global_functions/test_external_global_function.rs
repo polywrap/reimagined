@@ -3,19 +3,19 @@ use std::sync::Arc;
 use reim_dt::ExternalModule;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
-use crate::polywrap::external::module::wrap_module::get_external_module_or_panic;
+use crate::polywrap::external::module::external_wrap_module::get_external_module_or_panic;
 use crate::polywrap::wrap::{ExternalResource, wrap_manifest};
 use crate::polywrap::internal::wrapped::StringWrapped;
 
-pub fn testExternalGlobalFunction(
+pub async fn testExternalGlobalFunction(
   arg: String,
 ) -> String {
-    let external_module = get_external_module_or_panic();
+    let external_module = get_external_module_or_panic().await;
   
     testExternalGlobalFunction_from_instance(
         external_module,
         arg,
-    )
+    ).await
 }
 
 pub fn create(instance: Arc<dyn ExternalModule>) -> WrappedClosure {
@@ -33,18 +33,18 @@ impl WrappedClosure {
         }
     }
 
-    pub fn call(
+    pub async fn call(
         &self,
         arg: String,
     ) -> String {
         testExternalGlobalFunction_from_instance(
             Arc::clone(&self.instance),
             arg,
-        )
+        ).await
     }
 }
 
-pub fn testExternalGlobalFunction_from_instance (
+pub async fn testExternalGlobalFunction_from_instance (
   instance: Arc<dyn ExternalModule>, 
   arg: String,
 ) -> String {
@@ -60,7 +60,7 @@ pub fn testExternalGlobalFunction_from_instance (
 
   let instance = Arc::clone(&instance);
 
-  let result = instance.send(&buffer);
+  let result = instance.send(&buffer).await;
   
   StringWrapped::deserialize(&result)
 }

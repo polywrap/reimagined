@@ -1,4 +1,5 @@
 use std::sync::Arc;
+use async_trait::async_trait;
 use reim_dt::ExternalModule;
 
 use crate::send::send;
@@ -12,8 +13,9 @@ impl HostModule {
     }
 }
 
+#[async_trait]
 impl ExternalModule for HostModule {
-    fn send(self: Arc<Self>, buffer: &[u8]) -> Vec<u8> {
+    async fn send(self: Arc<Self>, buffer: &[u8]) -> Vec<u8> {
         send(buffer)
     }
 }

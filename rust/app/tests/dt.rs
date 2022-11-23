@@ -6,7 +6,7 @@ fn main() {
 mod tests {
     use std::sync::Arc;
 
-    use reim_dt_async::ExternalModule;
+    use reim_dt::ExternalModule;
     use reim_host_dt::{WrapperModule};
     use reim_host_dt_wasm::{wasm_runtime::instance::WasmModule, DtWasmModule};
     use crate::internal_wrap_module::InternalWrapModule;
@@ -27,8 +27,6 @@ mod tests {
         let wrapper = Arc::new(wrapper);
         let result_buffer = wrapper.send(&buffer).await;
 
-        println!("Return Log: {}", String::from_utf8(result_buffer.to_vec()).unwrap());
-
-        panic!("LOL");
+        assert_eq!(String::from_utf8(result_buffer), Ok("Hello, world!".to_string()));
     }
 }

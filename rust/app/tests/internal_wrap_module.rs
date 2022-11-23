@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use async_trait::async_trait;
-use reim_dt_async::{ ExternalModule, InternalModule };
+use reim_dt::{ ExternalModule, InternalModule };
 pub struct InternalWrapModule {}
 
 impl InternalWrapModule {
@@ -18,8 +18,7 @@ impl InternalModule for InternalWrapModule {
 
     match resource {
       x if x == 1337 as u32 => {
-        println!("Log: {}", String::from_utf8(data_buffer.to_vec()).unwrap());
-        "Hello Return!".as_bytes().to_vec()
+        data_buffer.to_vec()
     },
       _ => panic!("Unknown resource: {}", resource.to_string()),
     }

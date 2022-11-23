@@ -1,7 +1,8 @@
 use std::sync::Arc;
 
+use async_trait::async_trait;
 use reim_dt::{ ExternalModule, InternalModule };
-use crate::polywrap::resources::{InternalResource, ExternalResource};
+use crate::{polywrap::resources::{InternalResource, ExternalResource}};
 pub struct InternalWrapModule {}
 
 impl InternalWrapModule {
@@ -10,8 +11,9 @@ impl InternalWrapModule {
     }
 }
 
+#[async_trait]
 impl InternalModule for InternalWrapModule {
-    fn receive(&self, buffer: &[u8], external_module: Arc<dyn ExternalModule>) -> Vec<u8> {
+    async fn receive(&self, buffer: &[u8], external_module: Arc<dyn ExternalModule>) -> Vec<u8> {
         let resource = u32::from_be_bytes(buffer[0..4].try_into().expect("Resource ID must be 4 bytes"));
         let data_buffer = &buffer[4..];
 
@@ -22,7 +24,7 @@ impl InternalModule for InternalWrapModule {
                     &data_buffer,
                 ].concat();
 
-                external_module.send(&buffer)
+                external_module.send(&buffer).await
             },
             _ => panic!("Unknown resource: {}", resource.to_string()),
         }

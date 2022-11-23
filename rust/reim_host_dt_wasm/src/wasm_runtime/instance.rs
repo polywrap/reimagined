@@ -102,8 +102,7 @@ impl WasmInstance {
             Extern::Func(func) => {
                 func.call_async(self.store.as_context_mut(), params, results)
                     .await
-                    .map_err(|e| { 
-                        println!("lol {:?}", e); WrapperError::WasmRuntimeError(e.to_string()) })?;
+                    .map_err(|e| WrapperError::WasmRuntimeError(e.to_string()))?;
 
                 Ok(())
             }

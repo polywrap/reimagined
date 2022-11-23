@@ -1,6 +1,6 @@
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 use lazy_static::lazy_static;
-
+use futures::lock::Mutex;
 use reim_dt::ExternalModule;
 
 lazy_static! {
@@ -8,7 +8,7 @@ lazy_static! {
 }
 
 pub async fn get_external_module_or_panic() -> Arc<dyn ExternalModule> {
-    let external_module = EXTERNAL_WRAP_MODULE.lock().unwrap();
+    let external_module = EXTERNAL_WRAP_MODULE.lock().await;
 
     if external_module.is_none() {
         panic!("connect() must be called before using this module");

@@ -3,7 +3,7 @@ use std::sync::Arc;
 use reim_dt::ExternalModule;
 use serde::{Serialize, Deserialize};
 use serde_json::json;
-use crate::polywrap::external::module::wrap_module::get_external_module_or_panic;
+use crate::polywrap::external::module::external_wrap_module::get_external_module_or_panic;
 use crate::polywrap::wrap::{ExternalResource, wrap_manifest};
 use crate::polywrap::external::wrapped::TestExternalClassWrapped;
 use crate::polywrap::internal::wrapped::StringWrapped;
@@ -24,7 +24,7 @@ impl TestExternalClassImport {
     }
 
     
-    pub fn create(
+    pub async fn create(
         &self,
         arg: String,
     ) -> Arc<TestExternalClass> {
@@ -41,12 +41,12 @@ impl TestExternalClassImport {
         ].concat();
 
         let external_module = Arc::clone(&self.external_module);
-        let result = external_module.send(&buffer);
+        let result = external_module.send(&buffer).await;
 
         TestExternalClassWrapped::deserialize(&result, Arc::clone(&self.external_module))
     }
                 
-    pub fn testStaticMethod(
+    pub async fn testStaticMethod(
         &self,
         arg: String,
     ) -> String {
@@ -63,7 +63,7 @@ impl TestExternalClassImport {
         ].concat();
 
         let external_module = Arc::clone(&self.external_module);
-        let result = external_module.send(&buffer);
+        let result = external_module.send(&buffer).await;
 
         StringWrapped::deserialize(&result)
     }
@@ -86,18 +86,18 @@ impl TestExternalClass {
         }
     }
     
-    pub fn create(
+    pub async fn create(
         arg: String,
     ) -> Arc<TestExternalClass> {
-        let external_module = get_external_module_or_panic();
+        let external_module = get_external_module_or_panic().await;
 
         TestExternalClassImport::new(external_module)
             .create(
                 arg,
-            )
+            ).await
     }
             
-    pub fn testInstanceMethod(
+    pub async fn testInstanceMethod(
         &self,
         arg: String,
     ) -> String {
@@ -115,20 +115,20 @@ impl TestExternalClass {
         ].concat();
 
         let external_module = Arc::clone(&self.__external_module);
-        let result = external_module.send(&buffer);
+        let result = external_module.send(&buffer).await;
       
         StringWrapped::deserialize(&result)
     }
         
-    pub fn testStaticMethod(
+    pub async fn testStaticMethod(
         arg: String,
     ) -> String {
-        let external_module = get_external_module_or_panic();
+        let external_module = get_external_module_or_panic().await;
 
         TestExternalClassImport::new(external_module)
             .testStaticMethod(
                 arg,
-            )
+            ).await
     }
     
 }
