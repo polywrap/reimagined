@@ -7,12 +7,6 @@ use crate::polywrap::wrap::InternalResource;
 
 pub struct InternalWrapModule {}
 
-impl InternalWrapModule {
-    pub fn new() -> Self {
-        Self {}
-    }
-}
-
 #[async_trait]
 impl InternalModule for InternalWrapModule {
     async fn receive(&self, buffer: &[u8], external_module: Arc<dyn ExternalModule>) -> Vec<u8> {
