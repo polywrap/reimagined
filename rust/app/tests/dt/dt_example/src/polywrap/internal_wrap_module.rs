@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use reim_dt::{ ExternalModule, InternalModule };
-use crate::{polywrap::resources::{InternalResource, ExternalResource}, log::log};
+use crate::polywrap::resources::{InternalResource, ExternalResource};
 pub struct InternalWrapModule {}
 
 impl InternalWrapModule {
@@ -22,11 +22,7 @@ impl InternalModule for InternalWrapModule {
                     &data_buffer,
                 ].concat();
 
-                let result = Arc::clone(&external_module).send(&buffer);
-
-                log(&format!("Log result: {:?}", result), external_module);
-
-                result
+                external_module.send(&buffer)
             },
             _ => panic!("Unknown resource: {}", resource.to_string()),
         }
