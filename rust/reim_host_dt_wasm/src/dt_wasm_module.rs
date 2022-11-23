@@ -24,6 +24,10 @@ impl DtWasmModule {
             wasm_instance: WasmInstance::new(&wasm_module, state).await.unwrap()
         }
     }
+
+    pub async fn from_bytes(wasm_module: &[u8]) -> Self {
+        DtWasmModule::new(WasmModule::Bytes(wasm_module.to_vec())).await
+    }
 }
 
 #[async_trait]

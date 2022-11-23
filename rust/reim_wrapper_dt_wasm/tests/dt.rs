@@ -24,7 +24,7 @@ mod tests {
         let message_to_send = "Hello World".to_string();
 
         let bytes = include_bytes!("../../test_cases/wrappers/dt_example/build/wrap.wasm").to_vec();
-        let dt_module = Arc::new(Mutex::new(DtWasmModule::new(WasmModule::Bytes(bytes)).await));
+        let dt_module = Arc::new(Mutex::new(DtWasmModule::from_bytes(&bytes).await));
       
         let internal_module = Arc::new(Mutex::new(InternalWrapModule {}));
 
