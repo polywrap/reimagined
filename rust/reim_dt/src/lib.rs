@@ -1,4 +1,4 @@
-pub mod dt_instance;
-pub mod receiver;
-pub use dt_instance::*;
-pub use receiver::*;
+pub mod external_module;
+pub mod internal_module;
+pub use external_module::ExternalModule;
+pub use internal_module::InternalModule;

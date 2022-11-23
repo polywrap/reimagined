@@ -1,16 +1,15 @@
 use std::sync::Arc;
 
-use reim_wrap::{ ExternalModule };
+use reim_dt::ExternalModule;
 use serde::{Serialize, Deserialize};
 use serde_json::json;
-use crate::polywrap::external::module::wrap_module::get_external_module_or_panic;
-use crate::polywrap::wrap_manifest::WrapManifest;
-use crate::polywrap::resources::ExternalResource;
-use crate::polywrap::wrapped::TestExternalClassWrapped;
-use crate::polywrap::wrapped::StringWrapped;
+use crate::polywrap::external::module::external_wrap_module::get_external_module_or_panic;
+use crate::polywrap::wrap::{ExternalResource, wrap_manifest};
+use crate::polywrap::external::wrapped::TestExternalClassWrapped;
+use crate::polywrap::internal::wrapped::StringWrapped;
 
-pub fn create(external_module: &Arc<dyn ExternalModule>) -> TestExternalClassImport {
-    TestExternalClassImport::new(Arc::clone(external_module))
+pub fn create(external_module: Arc<dyn ExternalModule>) -> TestExternalClassImport {
+    TestExternalClassImport::new(external_module)
 }
 
 pub struct TestExternalClassImport {
@@ -35,17 +34,16 @@ impl TestExternalClassImport {
         );
 
         let buffer = [
-            &(WrapManifest::External::Class::TestExternalClass as u32).to_be_bytes()[..],
-            &(WrapManifest::External::Classes::TestExternalClassMethod::Create as u32).to_be_bytes()[..],
+            &(ExternalResource::InvokeClassMethod as u32).to_be_bytes()[..],
+            &(wrap_manifest::external::Class::TestExternalClass as u32).to_be_bytes()[..],
+            &(wrap_manifest::external::classes::TestExternalClassMethod::Create as u32).to_be_bytes()[..],
             &CreateArgsWrapped::serialize(&args),
         ].concat();
 
         let external_module = Arc::clone(&self.external_module);
-        let result = external_module.invoke_resource(ExternalResource::InvokeClassMethod as u32, &buffer).await;
+        let result = external_module.send(&buffer).await;
 
-        let external_module = Arc::clone(&self.external_module);
-
-        TestExternalClassWrapped::deserialize(&result, external_module)
+        TestExternalClassWrapped::deserialize(&result, Arc::clone(&self.external_module))
     }
                 
     pub async fn testStaticMethod(
@@ -58,16 +56,15 @@ impl TestExternalClassImport {
         );
 
         let buffer = [
-            &(WrapManifest::External::Class::TestExternalClass as u32).to_be_bytes()[..],
-            &(WrapManifest::External::Classes::TestExternalClassMethod::TestStaticMethod as u32).to_be_bytes()[..],
+            &(ExternalResource::InvokeClassMethod as u32).to_be_bytes()[..],
+            &(wrap_manifest::external::Class::TestExternalClass as u32).to_be_bytes()[..],
+            &(wrap_manifest::external::classes::TestExternalClassMethod::TestStaticMethod as u32).to_be_bytes()[..],
             &TestStaticMethodArgsWrapped::serialize(&args),
         ].concat();
 
         let external_module = Arc::clone(&self.external_module);
-        let result = external_module.invoke_resource(ExternalResource::InvokeClassMethod as u32, &buffer).await;
+        let result = external_module.send(&buffer).await;
 
-        let external_module = Arc::clone(&self.external_module);
-        
         StringWrapped::deserialize(&result)
     }
     
@@ -92,7 +89,7 @@ impl TestExternalClass {
     pub async fn create(
         arg: String,
     ) -> Arc<TestExternalClass> {
-        let external_module = get_external_module_or_panic();
+        let external_module = get_external_module_or_panic().await;
 
         TestExternalClassImport::new(external_module)
             .create(
@@ -110,14 +107,15 @@ impl TestExternalClass {
         );
 
         let buffer = [
-            &(WrapManifest::External::Class::TestExternalClass as u32).to_be_bytes()[..],
-            &(WrapManifest::External::Classes::TestExternalClassMethod::TestInstanceMethod as u32).to_be_bytes()[..],
+            &(ExternalResource::InvokeClassMethod as u32).to_be_bytes()[..],
+            &(wrap_manifest::external::Class::TestExternalClass as u32).to_be_bytes()[..],
+            &(wrap_manifest::external::classes::TestExternalClassMethod::TestInstanceMethod as u32).to_be_bytes()[..],
             &self.__reference_ptr.to_be_bytes()[..],
             &TestInstanceMethodArgsWrapped::serialize(&args),
         ].concat();
 
         let external_module = Arc::clone(&self.__external_module);
-        let result = external_module.invoke_resource(ExternalResource::InvokeClassMethod as u32, &buffer).await;
+        let result = external_module.send(&buffer).await;
       
         StringWrapped::deserialize(&result)
     }
@@ -125,7 +123,7 @@ impl TestExternalClass {
     pub async fn testStaticMethod(
         arg: String,
     ) -> String {
-        let external_module = get_external_module_or_panic();
+        let external_module = get_external_module_or_panic().await;
 
         TestExternalClassImport::new(external_module)
             .testStaticMethod(

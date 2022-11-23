@@ -1,0 +1,9 @@
+[package]
+name = "reim_host_dt"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+async-trait = "0.1.58"
+futures = "0.3.25"
+reim_dt = { path = "../reim_dt" }

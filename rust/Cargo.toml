@@ -3,11 +3,13 @@ members = [
     "wrap_schema/tree_sitter_wrap", 
     "wrap_schema/reim_schema",
     "reim_dt",
+    "reim_host_dt",
+    "reim_host_dt_wasm",
+    "reim_wrapper_dt_wasm", 
     "reim_wrap", 
-    "reim_dt_wasm",
     "reim_codegen", 
     "reim_cli", 
-    "reim_cli", 
     "app/src/wrappers/external_references",
+    "test_cases/wrappers/dt_example",
     "app"
 ]

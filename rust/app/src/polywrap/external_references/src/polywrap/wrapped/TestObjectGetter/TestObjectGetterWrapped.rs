@@ -1,9 +1,9 @@
-use std::{sync::{Arc, Mutex}};
-use reim_wrap::{ ExternalWrapModule };
-use module::{ WrapManifest };
-use external_module::{ WrapModule };
-use external::{ TestObjectGetter };
-use wrapped::{ TestExternalClassWrapped };
+use std::sync::Arc;
+use reim_wrap::ExternalWrapModule;
+use module::WrapManifest;
+use external_module::WrapModule;
+use external::TestObjectGetter;
+use wrapped::TestExternalClassWrapped;
 
 
 const CLASS_NAME: str = "TestObjectGetter";
@@ -39,7 +39,7 @@ impl TestObjectGetterWrapped {
     }
 
     pub fn dereference(reference_ptr: TestObjectGetter) -> TestObjectGetter {
-        let reference_map = reference_map.lock().unwrap();
+        let reference_map = reference_map.lock().await;
         let object = reference_map.get(reference_ptr);
 
         if object.is_none() {
@@ -50,7 +50,7 @@ impl TestObjectGetterWrapped {
     }
 
     pub fn delete_reference(reference_ptr: TestObjectGetter) {
-        let reference_map = reference_map.lock().unwrap();
+        let reference_map = reference_map.lock().await;
         let success = reference_map.delete(reference_ptr);
 
         if success.is_none() {
@@ -66,7 +66,7 @@ impl TestObjectGetterWrapped {
 
     pub fn map_to_serializable(value: TestObjectGetter) -> TestObjectGetterWrapped {
         let reference_ptr = value;
-        let reference_map = reference_map.lock().unwrap();
+        let reference_map = reference_map.lock().await;
         let existing_reference = reference_map.get(reference_ptr);
 
         if existing_reference.is_none() {

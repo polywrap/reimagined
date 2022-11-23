@@ -1,0 +1,19 @@
+type Module {
+  testReceiveReference(arg: TestExternalClass): String! @fn
+  testInvokeExternalGlobalFunction(arg: String!): String! @fn
+  testInvokeExternalStaticMethod(arg: String!): String! @fn
+  testInvokeExternalInstanceMethod(arg: String!): String! @fn
+  testExternalGlobalFunction(arg: String): String! @externalFn
+}
+
+type TestObjectGetter @class {
+  create(arg: String!): TestObjectGetter @staticFn
+  testInstanceReceiveReference(arg: TestExternalClass): String! @fn
+  testStaticReceiveReference(arg: TestExternalClass): String! @staticFn
+}
+
+type TestExternalClass @external @class {
+  create(arg: String!): TestExternalClass @staticFn
+  testInstanceMethod(arg: String!): String! @fn
+  testStaticMethod(arg: String!): String! @staticFn
+}

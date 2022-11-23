@@ -8,7 +8,7 @@ use crate::polywrap::resources::ExternalResource;
 use crate::polywrap::external::module::external_wrap_module;
 use crate::polywrap::wrapped::StringWrapped;
 
-pub async fn testExternalGlobalFunction(
+pub fn testExternalGlobalFunction(
   arg: String,
 ) -> String {
     let external_module = HostWrapModule::new();
@@ -16,7 +16,7 @@ pub async fn testExternalGlobalFunction(
     testExternalGlobalFunction_from_instance(
         external_module,
         arg,
-    ).await
+    )
 }
 
 pub fn create(instance: Arc<dyn ExternalModule>) -> WrappedClosure {
@@ -34,18 +34,18 @@ impl WrappedClosure {
         }
     }
 
-    pub async fn call(
+    pub fn call(
         &self,
         arg: String,
     ) -> String {
         testExternalGlobalFunction_from_instance(
             Arc::clone(&self.instance),
             arg,
-        ).await
+        )
     }
 }
 
-pub async fn testExternalGlobalFunction_from_instance (
+pub fn testExternalGlobalFunction_from_instance (
   instance: Arc<dyn ExternalModule>, 
   arg: String,
 ) -> String {
@@ -54,13 +54,13 @@ pub async fn testExternalGlobalFunction_from_instance (
   );
 
   let buffer = [
-    &(WrapManifest::External::GlobalFunction::TestExternalGlobalFunction as u32).to_be_bytes()[..],
+    &(wrap_manifest::external::GlobalFunction::TestExternalGlobalFunction as u32).to_be_bytes()[..],
     TestExternalGlobalFunctionArgsWrapped::serialize(&args),
   ].concat();
 
   let instance = Arc::clone(&instance);
 
-  let result = dt.invoke_resource(ExternalResource::InvokeGlobalFunction as u32, &buffer).await;
+  let result = dt.invoke_resource(ExternalResource::InvokeGlobalFunction as u32, &buffer);
   
   StringWrapped::deserialize(&result)
 }

@@ -17,7 +17,7 @@ async fn invoke(buffer: &[u8], external_module: dyn ExternalWrapModule) -> Vec<u
 
   match func_id {
                                     
-    WrapManifest::Internal::GlobalFunction::TestExternalGlobalFunction =>
+    wrap_manifest::internal::GlobalFunction::TestExternalGlobalFunction =>
         invokeTestExternalGlobalFunctionWrapped(data_buffer, external_module),
     
     _ => panic!("Unknown function/method: ".to_string() + &func_id.to_string()),

@@ -1,0 +1,18 @@
+{
+    "name": "@polywrap/dt-example",
+    "private": true,
+    "scripts": {
+        "prebuild": "rimraf ./build && mkdir ./build",
+        "build": "yarn build:wasm && yarn build:bindgen && yarn build:snip && yarn build:opt",
+        "build:wasm": "RUSTFLAGS=\"-C link-arg=-z -C link-arg=stack-size=65536 -C link-arg=--import-memory\" cargo build --target wasm32-unknown-unknown --release --target-dir ./target",
+        "build:bindgen": "wasm-bindgen ./target/wasm32-unknown-unknown/release/module.wasm --out-dir ./build --out-name bg_module.wasm",
+        "build:snip": "wasm-snip ./build/bg_module.wasm -o ./build/snipped_module.wasm",
+        "build:opt": "wasm-opt --asyncify -Os ./build/snipped_module.wasm -o ./build/wrap.wasm"
+    },
+    "dependencies": {
+    },
+    "devDependencies": {
+        "polywrap": "0.3.0",
+        "rimraf": "3.0.2"
+    }
+}
