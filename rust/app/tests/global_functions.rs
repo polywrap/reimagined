@@ -11,8 +11,8 @@ mod tests {
     use crate::bindings::global_functions::polywrap::external::module::wrap_module::WrapModule;
     use crate::bindings::global_functions::polywrap::external::test_wrapper_global_function;
     
-    async fn load_wrapper(bytes: &[u8]) -> Arc<WrapperModule> {
-        let dt_module = Arc::new(Mutex::new(DtWasmModule::from_bytes(&bytes).await));
+    async fn load_wrapper(buffer: &[u8]) -> Arc<WrapperModule> {
+        let dt_module = Arc::new(Mutex::new(DtWasmModule::from_bytes(&buffer).await));
       
         let internal_module = Arc::new(Mutex::new(InternalWrapModule {}));
 
@@ -23,8 +23,8 @@ mod tests {
     async fn global_functions_static_call() {
         let message_to_send = "Hello World".to_string();
 
-        let bytes = include_bytes!("../../test_cases/wrappers/global_functions/build/wrap.wasm");
-        let wrapper = load_wrapper(bytes).await;
+        let buffer = include_bytes!("../../test_cases/wrappers/global_functions/build/wrap.wasm");
+        let wrapper = load_wrapper(buffer).await;
 
         WrapModule::connect(wrapper).await;
     
@@ -37,8 +37,8 @@ mod tests {
     async fn global_functions_call_from_import() {
         let message_to_send = "Hello World".to_string();
 
-        let bytes = include_bytes!("../../test_cases/wrappers/global_functions/build/wrap.wasm");
-        let wrapper = load_wrapper(bytes).await;
+        let buffer = include_bytes!("../../test_cases/wrappers/global_functions/build/wrap.wasm");
+        let wrapper = load_wrapper(buffer).await;
 
         let imports = WrapModule::import(wrapper);
     
