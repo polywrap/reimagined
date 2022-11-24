@@ -20,7 +20,7 @@ use crate::polywrap::internal::wrapped::StringWrapped;
 use crate::polywrap::external::TestExternalClass;
 
 
-pub async fn invoke(buffer: &[u8], external_module: Arc<dyn ExternalModule>) -> Vec<u8> {
+pub async fn invoke_global_function(buffer: &[u8], external_module: Arc<dyn ExternalModule>) -> Vec<u8> {
   let func_id = u32::from_be_bytes(buffer.try_into().expect("Function ID must be 4 bytes"));
   let data_buffer = &buffer[4..];
 
@@ -76,14 +76,6 @@ struct TestReceiveReferenceArgsWrapped {
 }
 
 impl TestReceiveReferenceArgsWrapped {
-    pub fn new(
-        arg: TestExternalClassWrapped,
-    ) -> Self {
-        Self {
-            arg,
-        }
-    }
-
     pub fn deserialize(buffer: &[u8], external_module: Arc<dyn ExternalModule>) -> TestReceiveReferenceArgs {
         let args: TestReceiveReferenceArgsWrapped = serde_json::from_str(
             str::from_utf8(buffer).expect("Could not convert buffer to string")
@@ -130,14 +122,6 @@ struct TestInvokeExternalGlobalFunctionArgsWrapped {
 }
 
 impl TestInvokeExternalGlobalFunctionArgsWrapped {
-    pub fn new(
-        arg: String,
-    ) -> Self {
-        Self {
-            arg,
-        }
-    }
-
     pub fn deserialize(buffer: &[u8], external_module: Arc<dyn ExternalModule>) -> TestInvokeExternalGlobalFunctionArgs {
         let args: TestInvokeExternalGlobalFunctionArgsWrapped = serde_json::from_str(
             str::from_utf8(buffer).expect("Could not convert buffer to string")
@@ -184,14 +168,6 @@ struct TestInvokeExternalStaticMethodArgsWrapped {
 }
 
 impl TestInvokeExternalStaticMethodArgsWrapped {
-    pub fn new(
-        arg: String,
-    ) -> Self {
-        Self {
-            arg,
-        }
-    }
-
     pub fn deserialize(buffer: &[u8], external_module: Arc<dyn ExternalModule>) -> TestInvokeExternalStaticMethodArgs {
         let args: TestInvokeExternalStaticMethodArgsWrapped = serde_json::from_str(
             str::from_utf8(buffer).expect("Could not convert buffer to string")
@@ -238,14 +214,6 @@ struct TestInvokeExternalInstanceMethodArgsWrapped {
 }
 
 impl TestInvokeExternalInstanceMethodArgsWrapped {
-    pub fn new(
-        arg: String,
-    ) -> Self {
-        Self {
-            arg,
-        }
-    }
-
     pub fn deserialize(buffer: &[u8], external_module: Arc<dyn ExternalModule>) -> TestInvokeExternalInstanceMethodArgs {
         let args: TestInvokeExternalInstanceMethodArgsWrapped = serde_json::from_str(
             str::from_utf8(buffer).expect("Could not convert buffer to string")

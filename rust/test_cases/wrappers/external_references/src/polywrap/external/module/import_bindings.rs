@@ -1,16 +1,16 @@
 
-use crate::polywrap::external::{classes::test_external_class::TestExternalClassImport, global_functions::test_external_global_function::WrappedClosure};
+use crate::polywrap::external::{classes::test_external_class::TestExternalClassImport, global_functions::test_external_global_function};
 
 
 pub struct ImportBindings {
-    pub testExternalGlobalFunctionWrapped: WrappedClosure,
+    pub testExternalGlobalFunctionWrapped: test_external_global_function::WrappedClosure,
     pub TestExternalClass: TestExternalClassImport,
     
 }
 
 impl ImportBindings {
     pub fn new(
-        test: WrappedClosure,
+        test: test_external_global_function::WrappedClosure,
         TestExternalClass: TestExternalClassImport,
     ) -> Self {
         Self {

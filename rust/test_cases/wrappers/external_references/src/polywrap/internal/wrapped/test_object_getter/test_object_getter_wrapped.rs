@@ -14,12 +14,6 @@ use crate::polywrap::internal::wrapped::test_object_getter::invoke::invoke;
 
 pub const CLASS_NAME: &str = "TestObjectGetter";
 
-#[derive(Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct TestObjectGetterWrapped {
-    pub __reference_ptr: u32,
-} 
-
 struct InstanceWithExternalReferencePtr {
     pub external_reference_ptr: u32,
     pub instance: Arc<TestObjectGetter>
@@ -52,6 +46,12 @@ lazy_static! {
 
     static ref reference_counter: Arc<Mutex<u32>> = Arc::new(Mutex::new(0));
 }
+
+#[derive(Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct TestObjectGetterWrapped {
+    pub __reference_ptr: u32,
+} 
 
 impl TestObjectGetterWrapped {
     pub fn new(

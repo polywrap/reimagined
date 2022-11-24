@@ -30,9 +30,9 @@ pub mod external {
 
     pub mod classes {
         pub enum TestExternalClassMethod {
-        Create = 0,
-        TestInstanceMethod = 1,
-        TestStaticMethod = 2,
+            Create = 0,
+            TestInstanceMethod = 1,
+            TestStaticMethod = 2,
         }
     }
 }
