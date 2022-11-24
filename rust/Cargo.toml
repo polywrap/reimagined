@@ -10,6 +10,7 @@ members = [
     "reim_codegen", 
     "reim_cli", 
     "test_cases/wrappers/dt_example",
+    "test_cases/wrappers/global_functions",
     "test_cases/wrappers/external_references",
     "app"
 ]

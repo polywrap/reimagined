@@ -1,0 +1,2 @@
+pub mod test_wrapper_global_function;
+pub use test_wrapper_global_function::test_wrapper_global_function;
