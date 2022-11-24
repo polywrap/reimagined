@@ -21,7 +21,7 @@ use crate::polywrap::external::TestExternalClass;
 
 
 pub async fn invoke_global_function(buffer: &[u8], external_module: Arc<dyn ExternalModule>) -> Vec<u8> {
-  let func_id = u32::from_be_bytes(buffer.try_into().expect("Function ID must be 4 bytes"));
+  let func_id = u32::from_be_bytes(buffer[0..4].try_into().expect("Function ID must be 4 bytes"));
   let data_buffer = &buffer[4..];
 
   match func_id {

@@ -1,0 +1,4 @@
+type Module {
+  testWrapperGlobalFunction(arg: String!): String! @fn
+  testHostGlobalFunction(arg: String!): String! @externalFn
+}
