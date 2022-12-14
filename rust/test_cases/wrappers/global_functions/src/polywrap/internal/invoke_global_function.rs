@@ -20,12 +20,12 @@ pub async fn invoke_global_function(buffer: &[u8], external_module: Arc<dyn Exte
   match func_id {
     
     x if x == wrap_manifest::internal::GlobalFunction::TestWrapperGlobalFunction as u32 =>
-        invokeTestWrapperGlobalFunctionWrapped(data_buffer, external_module).await,
+      invoke_testWrapperGlobalFunction_wrapped(data_buffer, external_module).await,
     _ => panic!("Unknown internal global function ID: {}", func_id.to_string()),
   }
 }
 
-async fn invokeTestWrapperGlobalFunctionWrapped(buffer: &[u8], external_module: Arc<dyn ExternalModule>) -> Vec<u8> {
+async fn invoke_testWrapperGlobalFunction_wrapped(buffer: &[u8], external_module: Arc<dyn ExternalModule>) -> Vec<u8> {
   let args_buffer = buffer;
 
   let args = TestWrapperGlobalFunctionArgsWrapped::deserialize(args_buffer, Arc::clone(&external_module));

@@ -12,7 +12,7 @@ pub async fn test_host_global_function(
 ) -> String {
     let external_module = get_external_module_or_panic().await;
   
-    testHostGlobalFunction_from_instance(
+    invoke_testHostGlobalFunction_from_instance(
         external_module,
         arg,
     ).await
@@ -37,14 +37,14 @@ impl WrappedClosure {
         &self,
         arg: String,
     ) -> String {
-        testHostGlobalFunction_from_instance(
+        invoke_testHostGlobalFunction_from_instance(
             Arc::clone(&self.instance),
             arg,
         ).await
     }
 }
 
-pub async fn testHostGlobalFunction_from_instance (
+pub async fn invoke_testHostGlobalFunction_from_instance (
   instance: Arc<dyn ExternalModule>, 
   arg: String,
 ) -> String {

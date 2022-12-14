@@ -6,7 +6,7 @@ mod tests {
     use futures::lock::Mutex;
 
     use reim_host_dt::WrapperModule;
-    use reim_host_dt_wasm::{DtWasmModule};
+    use reim_host_dt_wasm::DtWasmModule;
     use crate::bindings::global_functions::polywrap::internal::internal_wrap_module::InternalWrapModule;
     use crate::bindings::global_functions::polywrap::external::module::wrap_module::WrapModule;
     use crate::bindings::global_functions::polywrap::external::test_wrapper_global_function;
