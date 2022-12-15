@@ -6,7 +6,7 @@ mod tests {
 
     use reim_dt::ExternalModule;
     use reim_host_dt::WrapperModule;
-    use reim_host_dt_wasm::{wasm_runtime::instance::WasmModule, DtWasmModule};
+    use reim_host_dt_wasm::DtWasmModule;
 
     use reim_dt::InternalModule;
     

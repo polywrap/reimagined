@@ -4,8 +4,8 @@ use reim_dt::ExternalModule;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use crate::bindings::global_functions::polywrap::external::module::external_wrap_module::get_external_module_or_panic;
-use crate::bindings::global_functions::polywrap::wrap::{ExternalResource, wrap_manifest};
 use crate::bindings::global_functions::polywrap::internal::wrapped::StringWrapped;
+use super::super::super::utils;
 
 pub async fn test_wrapper_global_function(
   arg: String,
@@ -52,11 +52,7 @@ pub async fn testInternalGlobalFunction_from_instance (
         arg,
     );
 
-    let buffer = [
-      &(ExternalResource::InvokeGlobalFunction as u32).to_be_bytes()[..],
-      &(wrap_manifest::external::GlobalFunction::TestInternalGlobalFunction as u32).to_be_bytes()[..],
-      &TestInternalGlobalFunctionArgsWrapped::serialize(&args),
-    ].concat();
+    let buffer = utils::serialize_invocation_buffer("testWrapperGlobalFunction", &TestInternalGlobalFunctionArgsWrapped::serialize(&args));
   
     println!("buffer: {:?}", buffer);
     let instance = Arc::clone(&instance);
