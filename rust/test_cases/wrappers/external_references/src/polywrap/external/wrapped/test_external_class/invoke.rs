@@ -1,12 +1,11 @@
-use reim_wrap::{ ExternalWrapModule };
+use reim_wrap::{ ExternalModule };
 use module::{ WrapManifest };
 use internal::classes::{ TestExternalClassWrapped };
-
-use crate::{ TestExternalClass };
-
+use external::classes::{ TestExternalClass };
 
 
-pub async fn invoke(buffer: &[u8], external_module: dyn ExternalWrapModule) -> Vec<u8> {
+
+pub fn invoke(buffer: &[u8], external_module: dyn ExternalModule) -> Vec<u8> {
   let func_id = u32::from_be_bytes(buffer[0..4].try_into().expect("Method ID must be 4 bytes"));
   let data_buffer = &buffer[4..];
 
@@ -21,23 +20,23 @@ pub async fn invoke(buffer: &[u8], external_module: dyn ExternalWrapModule) -> V
   }
 }
 
-async fn invokeCreateWrapped(buffer: &[u8], external_module: dyn ExternalWrapModule) -> Vec<u8> {
+fn invokeCreateWrapped(buffer: &[u8], external_module: dyn ExternalModule) -> Vec<u8> {
     let args = CreateArgsWrapped.deserialize(buffer, external_module);
 
     let result = TestExternalClass.create(
         args.arg,
-    ).await;
+    );
     
     TestExternalClassWrapped.serialize(result)
     };
 
 struct CreateArgs {
-    pub arg: string,
+    pub arg: String,
 }
 
 impl CreateArgs {
     pub fn new(
-        arg: string,
+        arg: String,
     ) -> Self {
         Self {
             arg,
@@ -46,19 +45,19 @@ impl CreateArgs {
 }
 
 struct CreateArgsWrapped {
-    pub arg: string,
+    pub arg: String,
 }
 
 impl CreateArgsWrapped {
     pub fn new(
-        arg: string,
+        arg: String,
     ) {
         Self {
         arg,
         }
     }
 
-    pub fn deserialize(buffer: Uint8Array, external_module: dyn ExternalWrapModule) -> CreateArgs {
+    pub fn deserialize(buffer: Uint8Array, external_module: dyn ExternalModule) -> CreateArgs {
         let args = serde_json::from_str(
             str::from_utf8(buffer).expect("Could not convert buffer to string")
         ).expect("JSON was not well-formatted");
@@ -70,7 +69,7 @@ impl CreateArgsWrapped {
         )
     }  
 }
-async fn invokeTestInstanceMethodWrapped(buffer: &[u8], external_module: dyn ExternalWrapModule) -> Vec<u8> {
+fn invokeTestInstanceMethodWrapped(buffer: &[u8], external_module: dyn ExternalModule) -> Vec<u8> {
     
     let reference_ptr = u32::from_be_bytes(buffer[0..4].try_into().expect("Reference ptr must be 4 bytes"));
     let data_buffer = &buffer[4..];
@@ -81,19 +80,19 @@ async fn invokeTestInstanceMethodWrapped(buffer: &[u8], external_module: dyn Ext
 
     let result = object.testInstanceMethod(
         args.arg,
-    ).await;
+    );
 
     
-    BaseTypeSerialization.serialize<string>(result)
+    BaseTypeSerialization.serialize<String>(result)
 };
 
 struct TestInstanceMethodArgs {
-    pub arg: string,
+    pub arg: String,
 }
 
 impl TestInstanceMethodArgs {
     pub fn new(
-        arg: string,
+        arg: String,
     ) -> Self {
         Self {
             arg,
@@ -102,19 +101,19 @@ impl TestInstanceMethodArgs {
 }
 
 struct TestInstanceMethodArgsWrapped {
-    pub arg: string,
+    pub arg: String,
 }
 
 impl TestInstanceMethodArgsWrapped {
     pub fn new(
-        arg: string,
+        arg: String,
     ) {
         Self {
         arg,
         }
     }
 
-    pub fn deserialize(buffer: Uint8Array, external_module: dyn ExternalWrapModule) -> TestInstanceMethodArgs {
+    pub fn deserialize(buffer: Uint8Array, external_module: dyn ExternalModule) -> TestInstanceMethodArgs {
         let args = serde_json::from_str(
             str::from_utf8(buffer).expect("Could not convert buffer to string")
         ).expect("JSON was not well-formatted");
@@ -126,24 +125,24 @@ impl TestInstanceMethodArgsWrapped {
         )
     }  
 }
-async fn invokeTestStaticMethodWrapped(buffer: &[u8], external_module: dyn ExternalWrapModule) -> Vec<u8> {
+fn invokeTestStaticMethodWrapped(buffer: &[u8], external_module: dyn ExternalModule) -> Vec<u8> {
     let args = TestStaticMethodArgsWrapped.deserialize(buffer, external_module);
 
     let result = TestExternalClass.testStaticMethod(
         args.arg,
-    ).await;
+    );
     
     
-    BaseTypeSerialization.serialize<string>(result)
+    BaseTypeSerialization.serialize<String>(result)
 };
 
 struct TestStaticMethodArgs {
-    pub arg: string,
+    pub arg: String,
 }
 
 impl TestStaticMethodArgs {
     pub fn new(
-        arg: string,
+        arg: String,
     ) -> Self {
         Self {
             arg,
@@ -152,19 +151,19 @@ impl TestStaticMethodArgs {
 }
 
 struct TestStaticMethodArgsWrapped {
-    pub arg: string,
+    pub arg: String,
 }
 
 impl TestStaticMethodArgsWrapped {
     pub fn new(
-        arg: string,
+        arg: String,
     ) {
         Self {
         arg,
         }
     }
 
-    pub fn deserialize(buffer: Uint8Array, external_module: dyn ExternalWrapModule) -> TestStaticMethodArgs {
+    pub fn deserialize(buffer: Uint8Array, external_module: dyn ExternalModule) -> TestStaticMethodArgs {
         let args = serde_json::from_str(
             str::from_utf8(buffer).expect("Could not convert buffer to string")
         ).expect("JSON was not well-formatted");

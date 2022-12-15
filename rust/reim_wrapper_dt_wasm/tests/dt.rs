@@ -19,16 +19,20 @@ mod tests {
       }
     }
 
+    async fn load_wrapper(buffer: &[u8]) -> Arc<WrapperModule> {
+        let dt_module = Arc::new(Mutex::new(DtWasmModule::from_bytes(&buffer).await));
+      
+        let internal_module = Arc::new(Mutex::new(InternalWrapModule {}));
+
+        Arc::new(WrapperModule::new(dt_module, internal_module))
+    }
+
     #[tokio::test]
     async fn dt_example() {
         let message_to_send = "Hello World".to_string();
 
-        let bytes = include_bytes!("../../test_cases/wrappers/dt_example/build/wrap.wasm").to_vec();
-        let dt_module = Arc::new(Mutex::new(DtWasmModule::new(WasmModule::Bytes(bytes)).await));
-      
-        let internal_module = Arc::new(Mutex::new(InternalWrapModule {}));
-
-        let wrapper = Arc::new(WrapperModule::new(dt_module, internal_module));
+        let buffer = include_bytes!("../../test_cases/wrappers/dt_example/build/wrap.wasm");
+        let wrapper = load_wrapper(buffer).await;
     
         let result_buffer = wrapper.send(message_to_send.as_bytes()).await;
 

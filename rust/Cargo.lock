@@ -556,6 +556,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "global_functions_test"
+version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "by_address",
+ "futures",
+ "lazy_static",
+ "reim_dt",
+ "reim_wrapper_dt_wasm",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "hashbrown"
 version = "0.12.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -952,6 +966,7 @@ dependencies = [
  "reim_wrap",
  "serde",
  "serde_json",
+ "tokio",
 ]
 
 [[package]]

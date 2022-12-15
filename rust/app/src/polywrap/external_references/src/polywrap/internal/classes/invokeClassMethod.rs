@@ -5,7 +5,7 @@ use wrapped::{ TestExternalClassWrapped };
 
 
 pub async fn invoke_class_method(buffer: &[u8], external_module: dyn ExternalWrapModule) -> Vec<u8> {
-  let class_id = u32::from_be_bytes(buffer.try_into().expect("Class ID must be 4 bytes"));
+  let class_id = u32::from_be_bytes(buffer[0..4].try_into().expect("Class ID must be 4 bytes"));
   let data_buffer = &buffer[4..];
 
   match class_id {
