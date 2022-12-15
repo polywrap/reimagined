@@ -3,7 +3,6 @@ use std::str;
 
 use reim_dt::ExternalModule;
 use serde::{Deserialize, Serialize};
-use crate::polywrap::wrap::wrap_manifest;
 use crate::{ 
     test_wrapper_global_function,
 };
@@ -11,17 +10,14 @@ use crate::polywrap::internal::wrapped::StringWrapped;
 
 use super::log::log;
 
-pub async fn invoke_global_function(buffer: &[u8], external_module: Arc<dyn ExternalModule>) -> Vec<u8> {
-  let func_id = u32::from_be_bytes(buffer[0..4].try_into().expect("Function ID must be 4 bytes"));
-  let data_buffer = &buffer[4..];
+pub async fn invoke_global_function(function_name: &str, buffer: &[u8], external_module: Arc<dyn ExternalModule>) -> Vec<u8> {
+  log(&format!("Function {:?} => {:?}", function_name, buffer), Arc::clone(&external_module)).await;
 
-  log(&format!("Function {:?} => {:?}", func_id, data_buffer), Arc::clone(&external_module)).await;
-
-  match func_id {
+  match function_name {
     
-    x if x == wrap_manifest::internal::GlobalFunction::TestWrapperGlobalFunction as u32 =>
-      invoke_testWrapperGlobalFunction_wrapped(data_buffer, external_module).await,
-    _ => panic!("Unknown internal global function ID: {}", func_id.to_string()),
+    x if x == "testWrapperGlobalFunction" =>
+      invoke_testWrapperGlobalFunction_wrapped(buffer, external_module).await,
+    _ => panic!("Unknown function: {}", function_name.to_string()),
   }
 }
 

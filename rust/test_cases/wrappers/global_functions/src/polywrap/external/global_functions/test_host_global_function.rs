@@ -4,6 +4,7 @@ use reim_dt::ExternalModule;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use crate::polywrap::external::module::external_wrap_module::get_external_module_or_panic;
+use crate::polywrap::utils;
 use crate::polywrap::wrap::{ExternalResource, wrap_manifest};
 use crate::polywrap::internal::wrapped::StringWrapped;
 
@@ -52,11 +53,7 @@ pub async fn invoke_testHostGlobalFunction_from_instance (
     arg,
   );
 
-  let buffer = [
-    &(ExternalResource::InvokeGlobalFunction as u32).to_be_bytes()[..],
-    &(wrap_manifest::external::GlobalFunction::TestHostGlobalFunction as u32).to_be_bytes()[..],
-    &TestHostGlobalFunctionArgsWrapped::serialize(&args),
-  ].concat();
+  let buffer = utils::serialize_invocation_buffer("testHostGlobalFunction", &TestHostGlobalFunctionArgsWrapped::serialize(&args));
 
   let instance = Arc::clone(&instance);
 
